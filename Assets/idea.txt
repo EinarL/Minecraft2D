@@ -1,0 +1,330 @@
+2D placing/breaking block mechanics:
+Breaking blocks:
+* hold down left click to break blocks, doesn´t matter which layer theyre on
+* you will only be able to break background blocks that are not a part of the world generation (except maybe villages if we create those)
+Placing blocks:
+* right click in order to place blocks on the foreground layer
+* hold right click in order to place blocks on the background layer
+
+
+chunks are 10-wide blocks that will spawn in depending on the position of the player/camera
+chunks will be saved 
+x position in world will have a boolean:
+* whether it has been rendered before, if not then it will render something new, else render what is saved
+
+
+initially we load the chunks that are in the cameras view,
+then we render and delete the chunks as we go.
+
+how to save:
+we will have a chunk Class which will contain information on what blocks are spawned
+the info will be a 2d array of numbers from 0,1,... which are the ID of the blocks (0 being no block)
+we will have a new file for each chunk
+
+when you render a line there will be a hashtable that has the oreID and the blockIndes/yPos for the ore.
+the next line to be rendered then always checks whether that y value had an ore in the previous line
+and if so then it calls a function which generates the same ore with a 50/50 chance, otherwise a regular stone.
+also if a line creates an ore, then there is a 50/50 chance that the same ore will spawn again in the block below.
+
+how to update chunk after breaking/placing a block:
+after breaking/placing a block, a function will be run which edits the blockID in the chunkData class in the correct index in the array
+when the chunk gets unrendered, then we re-save the chunk.
+
+
+update will check always if different amount of chunks need to be rendered. there will be two if statements:
+* if amountOfChunksToRender < rcScript.getAmountOfChunksToRender
+* else if amountOfChunksToRender > rcScript.getAmountOfChunksToRender
+if amountOfChunksToRender is less, then we need to spawn in more chunks:
+* we get the absolute value of the difference between amountOfChunksToRender and rcScript: the amount of extra chunks to spawn in.
+* divide the value by 2 to get the amount of chunks to spawn in on each side
+* for(int i = 1; i <= diff/2; i++) spawn in rendered - (chunkSize*i) and spawn in rendered + (chunkSize*(amountOfChunksToRender-1)*i)
+
+
+
+i will have two scripts, BlockScript.cs which will extend MonoBehaviour and then another script called Block.cs
+which will have a constructor which we can pass in the SoundBehaviour, DropBehaviour and MineBehaviour.
+BlockScript will create Block.cs at runtime and pass in the corresponding things depending on which block it is.
+
+i will have interface DigBehaviour.cs and other scripts: DigDirt, DigStone, etc. will implement DigBehaviour.
+BlockScript.cs will have DigBehaviour as an instance variable and will initialize it in the Start() method.
+i will have static script called BlockBehaviourData which will have a function getDigBehaviour.
+getDigBehaviour(string nameOfBlock) gets the name of the block and seaches in a hashtable for that name and returns the value in the hashtable.
+the value in the hashtable will be one of the scripts: DigDirt, DigStone, etc.
+
+
+for checking if block is reachable from player:
+* if player is on the left lower side of the block: there must not be a block on both the left side and the lower side of the block
+* if player is on the left upper side of the block: there must not be a block on both the left side and the upper side of the block
+
+* if player is on the right lower side of the block: there must not be a block on both the right side and the lower side of the block
+* if player is on the right upper side of the block: there must not be a block on both the right side and the upper side of the block
+
+* if player height is within the upper y bounds and lower y bounds of the block
+	* if player is on the right side of the block: there must not be a block on the right side of the block
+	* if player is on the left side of the block: there must not be a block on the left side of the block
+
+for checking if block is placeable:
+First we create the block in the position of where the roundedMousePos is. but we have it inactive.
+We call the function is isBlockReachable() to make sure its possible to reach that position, also we call isBlockWithinRange() to make sure its within placing range.
+if both return true then we need to check if the following is true as well:
+* if mousePos doesnt already have a block in this position (and)
+
+* if player is on the same y level as the mousePosition: 
+	* if the player is on the right side of the mouse: there has to be a block on either left, up or bottom side of the mousePosition
+	* if the player is on the left side of the mouse: there has to be a block on either right, up or bottom side of the mousePosition
+* if player is below the mouseYpos:
+	* if player is on the right side of the mouse: there has to be a block on either the top side or left side of the mousePos
+	* if player is on the left side of the mouse: there has to be a block on either the top side or right side of the mousePos
+	* else there has to be a block on either top, left, or right side
+if player is above the mouseYpos:
+	* if player on right side: has to be block on either the bottom or left side of mousePos
+	* if player on left side:  has to be block on either the bottom or right side of mousePos
+	* else: has to be block on either bottom, left or right side of mousePos
+
+Player inventory:
+i will have a static class called Inventory which will have an instance variable called inventory: it's a 2D array in the form of [[itemName, amount], [itemName, amount], ...]
+every item in the array will be initialized with ["", 0]. The first 9 items correspond to the players hotbar. maximum amount is 64.
+i will have a function addToInventory(string item) which will add the item to the inventory. it first does a linear search for the same itemName in the inventory
+while noticing where the first null spot is. if it finds the same item in the inventory and it doesnt have an amount >= 64, then it adds it to that spot by incrementing amount.
+if it doesnt find GameObject then it puts the item in the first null spot.
+
+i will have another script called playerInventory that is responsible for:
+* detecting items to pickup
+* opening/closing inventory
+* mouse clicks within the inventory
+* which item is selected in the hotbar
+* changing what the player is holding
+
+i will have a hotbar script attached to the hotbar image on the canvas. that script will be responsible for:
+* showing the items that are on the hotbar
+* changing which slot is selected on the hotbar
+
+player will press e to open/close inventory.
+i will have an OpenInventoryScript which is responsible for:
+* opening/closing the inventory when user presses e
+* updating the inventory visually
+* displaying a hoverTexture when the user has his mouse over a slot.
+* picking up items from a slot in the inventory
+* crafting in the inventory (we will have a differennt crafting script, but this script will call a function in the crafting script)
+
+i will have InventorySlotScript which will be responsible for:
+* displaying hover texture when the mouse hovers over it
+* displaying the item image and number
+* check if the user clicks on it to pick up the item
+
+
+
+to drop the item:
+player will press q to drop 1 item in the selected slot. dropItem() will put velocity on the item towards where the mouse is.
+the item will not be able to be picked up until after some x time.
+
+
+how to differentiate between food, tools and blocks:
+food:
+* stackable
+* can eat them
+
+tools:
+* not stackable
+* has a durability
+* each tool has a different effect on the blocks/mobs its used on
+
+blocks:
+* stackable
+* can place them
+
+new inventory system:
+we will have a 36 long list of InventorySlot[] 
+* it will have a reference to the Item that is in the slot
+* if the Item is stackable, then it will have a count of how many of the items are in the slot
+
+* Item will contain info about the durability of the tool (if it is a tool),
+
+how durability works:
+BlockScript will call InventoryScript which will check if the player has a tool in his hand, if so:
+InventoryScript will call reduceDurability on InventorySlot which will call reduceDurabilty on Item
+
+DroppedItem, InventoryItem, maybe HandItem
+
+the dropped item will be as usual, when we pick up the item we get the correct Item based on the image name on the dropped item.
+then we call a function in the static InventoryScript with the parameters (Item item) to add the item to the inventory,
+it searches first all slots if there is an InventorySlot with the same Item in it already with it being stackable and amount < 64.
+if it doent find an InventorySlot with the same item, then it adds the item to the first slot which has item = null. 
+it changes the item to being equal to the item that is being added and it puts the amount to 1.
+
+
+we will have 4 layers
+
+Default/foreground: steve can touch these blocks
+FrontBackground: steve cannot touch these blocks, but can mine them. in this layer trees, flowers, cactus, grass, etc. spawns. this is also the layer where certain blocks go
+				 (doesnt matter if right click or hold right click). saplings, flowers, torches, cactuses, signs, sugar cane etc. will be in this layer. this is so the player can
+				 for example have a house with torches on the walls.
+BackBackground: steve cannot touch these blocks, but can mine and place them in this layer (hold right click to place in this layer).
+BackgroundVisual: steve cannot touch these blocks and cannot mine them or place blocks in this layer, however, the player can place blocks on the background off of these blocks
+				  for example: this layer will be used for backgrounds underground, so the player can place torches or blocks on the walls, the torches will then be on the FrontBackground layer,
+				  but the normal blocks (which are not the blocks listed on FrontBackground) go on BackBackground
+
+how BackBackground will work:
+hold right click to place block in this layer. you can place the block in this layer if:
+ * there is a Default block that is next to the futureBlockPos (just the same rule as normal)
+ * there is a BackBackground block that is next to the futureBlockPos (just the same rule as normal)
+ * there is a BackgroundVisual block in the futureBlockPos
+
+new rules for placing in the Default layer, can place also in default layer if:
+ * there is a block on the BackBackground layer at futureBlockPos
+ * there is a block in the BackgroundVisual layer at futureBlockPos
+
+Order in Layer
+Default: 0
+FrontBackground: -3
+BackBackground: -4
+BackgroundVisual: -5
+
+how crafting works:
+each crafting slot will have a Vector2 which tells its position in the crafting menu
+bottom left slot will be (0,0), top right slot will be (2,2), so the Vector2 for each slot will look like this:
+[(0,2), (1,2), (2,2)]
+[(0,1), (1,1), (2,1)]
+[(0,0), (1,0), (2,0)]
+and in the inventory:
+[(0,1), (1,1)]
+[(0,0), (1,0)]
+
+so if we want to check if we can craft a stick (two wooden planks on top of eachother)
+then for each item in the crafting table:
+	if this item is a wooden plank:
+		and there is a wooden plank in the position: new Vector2(this.vector2.x, this.vector2.y + 1):
+			and all the other slots are empty:
+				then we can craft sticks
+				break.
+
+
+crafting recipes will have an item and will have a list of all other items that are a part of
+the crafting recipe [string itemName, Vector2 distFromItem], the item that is being calculated the distance from
+will always be the left-bottom most item
+
+to craft a stick would be:
+
+[wooden plank, [wooden plank, new Vector2(0, 1)]] // this means that when we find the left-bottom most wooden plank, there should be a wooden plank above to craft stick
+of course all other slots will need to be empty
+
+
+
+
+tool durability bar:
+whenever we update a slot we want to check if there is a tool in the slot, if so, then put the durability bar to active if the
+durability of the tool is < STARTING_DURABILITY, (do this for both InventorySlotScript and HotbarScript). then when we use that tool, we call updateDurabilityBar on InventorySlotScript
+and HotbarSlotScript which updates the durability bar visually based on the durability of the tool (Tool calls InventoryScript which calls InvnentorySlotScript and HotbarSlotScript)
+
+
+
+for spawning other biomes:
+spawnChunkScript will count the amount of chunks that have been rendered, we will have some variable "spawnNewBiomeAfter" which
+will have a random value between 10 and 100 which and a counter chunksSpawnedCount which will initially be 0 and be added
+after each chunk has spawned, then when it reaches spawnNewBiomeAfter then we will spawn another random chunk
+
+
+
+for spawning in different layers:
+for spawning in trees in the frontBackground layer, we will find the ID, and if its an id that goes on the frontBackground
+then add it to the frontBackgroundBlocks in the ChunkData.
+to spawn it we will call a function: spawnFrontBackgroundBlocks() which goes through the list and spawns all blocks in the list.
+
+
+
+how block lighting will work:
+after spawning in a chunk we will check for each block in the chunk if it is exposed to air, if so it will have stage 0, which is full lighting/color
+if it has stage 0, it will call a function getLighting(1) for all blocks that are touching it.
+getLighting(1) checks if the block is exposed to air, then it gets stage 0 otherwise stage 1, then it calls getLighting for all blocks around it with
+parameter (this.stage + 1)
+
+we will have stages 0 to 4, 0 being bright, and 4 being completely black
+all block will initially have stage 4
+
+
+void getLighting(int stage)
+{
+	if(visited) return;
+	visited = true;
+	if(exposed to air){
+		this.stage = 0
+	}
+	else
+	{
+		this.stage = Math.Min(4, stage);
+	}
+	if(this.stage != 4)
+	{
+		foreach(block that is touching this block)
+		{
+			if(block.stage == 4)
+				block.getLighting(this.stage + 1);
+		}
+	}
+
+
+}
+
+when we spawn a chunk we go through every block in the chunk and if the block is exposed to air, then we run the lighting algorithm on it
+the algorithm uses BFS to initially give the block that is exposed to air, the stage 0, and then its neighbors stage 1 and
+the neightbors neighbors stage 2 and so on. we stop when we give a block stage 4, i.e. we dont go to the neighbors of a stage 4 block.
+
+this is the function that gets called when we find a block that is exposed to air:
+def putLightingOnBlock(GameObject block)
+{
+
+	HashSet visitedHashSet = new HashSet(); // if a gameObject.instanceID is in this, then it is visited
+
+	LinkedList<object[]> queue = new LinkedList<object[]>(); // {[BlockLighting, int stage], [BlockLighting, int stage], ...}
+
+	// Mark the current block as visited and enqueue it
+    visitedHashSet.Add(block.getInstanceID());
+    queue.AddLast(new object[]{ block.GetComponent<BlockLighting>(), 0});
+
+	while(queue.Any())
+	{
+		// Dequeue a vertex
+		object[] s = queue.First();
+		queue.RemoveFirst();
+
+		if(s[0].getStage() > s[1]) // only change its stage if its darker than s[1]
+		{
+			s[0].setStage(s[1]);
+		}
+
+
+		// only go on neighbors if their value is supposed to be 3 or less
+		if (s[1] < 3 && s[0].getStage() > s[1])
+		{
+			// Get all adjacent vertices of the
+			// dequeued vertex s.
+			// If an adjacent has not been visited,
+			// then mark it visited and enqueue it
+
+			List<BlockLighting> neighbors = getNeighbors(s[0].gameObject);
+		
+			foreach(BlockLighting n in neighbors)
+			{
+				if(!visitedHashSet[n.gameObject.GetInstanceID()]) // if not visited
+				{
+					visitedHashSet.Add(n.gameObject.GetInstanceID());
+					queue.AddLast(new object[]{ n, s[1] + 1});
+				}
+			}
+		}
+	
+	}
+
+}
+
+
+how furnaces work:
+OpenFurnaceScript will have a list of all furnaces in the world "List<FurnaceLogic> furnaces;" 
+when the player opens a furnace the OpenFurnaceScript will put the items from the FurnaceLogic script to the slots to make them visible.
+how OpenFurnaceScript knows which furnace was opened is by checking the mouse position and rounding it to the closes blockPos
+then checking for all furnaces in the list, which has the same world position as the mouse.
+
+when we open the furnace we need to add the items to the furnace slots
+
+
+x*10 = 76.8
