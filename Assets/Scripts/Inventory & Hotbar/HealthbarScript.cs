@@ -19,6 +19,7 @@ public class HealthbarScript : MonoBehaviour
 	private Sprite whiteBackground; // background for the hearts
 
     private GameObject steve;
+    private HungerbarScript hungerbarScript;
  
 
     // Start is called before the first frame update
@@ -38,12 +39,16 @@ public class HealthbarScript : MonoBehaviour
 		whiteBackground = getSpriteWithName(heartImages, "icons_3");
 
         steve = GameObject.Find("SteveContainer").transform.Find("Steve").gameObject;
+		hungerbarScript = GameObject.Find("Canvas").transform.Find("Hungerbar").GetComponent<HungerbarScript>();
+
 
 		for (int i = 0; i < hitSounds.Length; i++)
 		{
 			hitSounds[i] = Resources.Load<AudioClip>($"Sounds/Damage/hit{i + 1}");
 		}
         audioSource = gameObject.GetComponent<AudioSource>();
+
+        StartCoroutine(healUp());
 	}
 
 	public void takeDamage(int damage)
@@ -53,7 +58,8 @@ public class HealthbarScript : MonoBehaviour
         playDamageSound();
         displayTint();
         StartCoroutine(removeRedTint());
-    }
+        if (health > 0) StartCoroutine(flashingAnimationCoroutine());
+	}
 
     // updates the heart images to display how much health the player has left
     private void updateHeartImages()
@@ -80,12 +86,8 @@ public class HealthbarScript : MonoBehaviour
             Debug.Log("Health is less or equal to zero, you died!");
             // TODO: implement death
         }
-        else
-        {
-            StartCoroutine(flashingAnimationCoroutine());
-        }
     }
-    // Coroutine that flashes the hearts to be white
+    // Coroutine that flashes the hearts to be white when taking damage
     private IEnumerator flashingAnimationCoroutine()
     {
         bool turnWhite = true;
@@ -98,9 +100,27 @@ public class HealthbarScript : MonoBehaviour
             turnWhite = !turnWhite;
 			if (i != 5) yield return new WaitForSeconds(.2f);
 		}
-
-        
     }
+
+    // different kind od flash animation when the player is healing
+    private IEnumerator flashAnimationHealing()
+    {
+        int howManyHearts = health % 2 == 0 ? health/2 : (health + 1)/2;
+        Debug.Log(howManyHearts);
+		bool turnWhite = true;
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < howManyHearts; j++)
+			{
+                Debug.Log(j);
+				heartBackgrounds[j].sprite = turnWhite ? whiteBackground : normalBackground;
+			}
+			turnWhite = !turnWhite;
+			if (i != 3) yield return new WaitForSeconds(.1f);
+		}
+	}
+
+
     // take damage because of hunger
     public IEnumerator takeHungerDamage()
     {
@@ -109,6 +129,24 @@ public class HealthbarScript : MonoBehaviour
             if (health > 1) takeDamage(1);
             yield return new WaitForSeconds(2);
         }
+    }
+    // checks if the player should heal
+    private IEnumerator healUp()
+    {
+        while (true){
+            yield return new WaitForSeconds(6);
+			if (health < 20 && hungerbarScript.getHunger() > 17)
+            {
+                heal(1);
+            }
+        }
+    }
+
+    private void heal(int healAddition)
+    {
+        health = Mathf.Min(20, health + healAddition);
+        updateHeartImages();
+        StartCoroutine(flashAnimationHealing());
     }
 
     public void setIsTakingHungerDamage(bool isTakingHungerDamage)

@@ -114,4 +114,9 @@ public class HungerbarScript : MonoBehaviour
 	{
 		return hunger > 6;
 	}
+
+	public float getHunger()
+	{
+		return hunger;
+	}
 }
