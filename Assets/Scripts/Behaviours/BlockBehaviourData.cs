@@ -33,7 +33,7 @@ public static class BlockBehaviourData
 		{ "LeavesOak", new LeafItemDrop() },
 		{ "Stone", new StoneItemDrop() },
 		{ "IronOre", new StonePickOrBetter() },
-		{ "DiamondOre", new IronPickOrBetter()},
+		{ "DiamondOre", new DiamondItemDrop()},
 		{ "DeadBush", new DeadBushItemDrop() },
 		{ "Grass", new DropNothing() },
 		{ "Furnace", new PickaxeDrop() },

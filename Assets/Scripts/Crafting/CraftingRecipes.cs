@@ -98,6 +98,80 @@ public static class CraftingRecipes
 		}, new InventorySlot( new ToolInstance(getToolScriptable("StoneSword")), "StoneSword")
 		},
 
+		// iron tools
+		new object[]{ "Stick", new object[] {
+			new object[] { "Stick", new Vector2(0, 1) },
+			new object[] { "IronIngot", new Vector2(0, 2) }
+		}, new InventorySlot( new ToolInstance(getToolScriptable("IronShovel")), "IronShovel")
+		},
+
+		new object[]{ "Stick", new object[] {
+			new object[] { "Stick", new Vector2(0, 1) },
+			new object[] { "IronIngot", new Vector2(1, 1) },
+			new object[] { "IronIngot", new Vector2(0, 2) },
+			new object[] { "IronIngot", new Vector2(1, 2) }
+		}, new InventorySlot( new ToolInstance(getToolScriptable("IronAxe")), "IronAxe")
+		},
+
+		new object[]{ "Stick", new object[] {
+			new object[] { "IronIngot", new Vector2(-1, 1) },
+			new object[] { "Stick", new Vector2(0, 1) },
+			new object[] { "IronIngot", new Vector2(-1, 2) },
+			new object[] { "IronIngot", new Vector2(0, 2) }
+		}, new InventorySlot( new ToolInstance(getToolScriptable("IronAxe")), "IronAxe")
+		},
+
+		new object[]{ "Stick", new object[] {
+			new object[] { "Stick", new Vector2(0, 1) },
+			new object[] { "IronIngot", new Vector2(-1, 2) },
+			new object[] { "IronIngot", new Vector2(0, 2) },
+			new object[] { "IronIngot", new Vector2(1, 2) }
+		}, new InventorySlot( new ToolInstance(getToolScriptable("IronPickaxe")), "IronPickaxe")
+		},
+
+		new object[]{ "Stick", new object[] {
+			new object[] { "IronIngot", new Vector2(0, 1) },
+			new object[] { "IronIngot", new Vector2(0, 2) }
+		}, new InventorySlot( new ToolInstance(getToolScriptable("IronSword")), "IronSword")
+		},
+
+		// diamond tools
+		new object[]{ "Stick", new object[] {
+			new object[] { "Stick", new Vector2(0, 1) },
+			new object[] { "Diamond", new Vector2(0, 2) }
+		}, new InventorySlot( new ToolInstance(getToolScriptable("DiamondShovel")), "DiamondShovel")
+		},
+
+		new object[]{ "Stick", new object[] {
+			new object[] { "Stick", new Vector2(0, 1) },
+			new object[] { "Diamond", new Vector2(1, 1) },
+			new object[] { "Diamond", new Vector2(0, 2) },
+			new object[] { "Diamond", new Vector2(1, 2) }
+		}, new InventorySlot( new ToolInstance(getToolScriptable("DiamondAxe")), "DiamondAxe")
+		},
+
+		new object[]{ "Stick", new object[] {
+			new object[] { "Diamond", new Vector2(-1, 1) },
+			new object[] { "Stick", new Vector2(0, 1) },
+			new object[] { "Diamond", new Vector2(-1, 2) },
+			new object[] { "Diamond", new Vector2(0, 2) }
+		}, new InventorySlot( new ToolInstance(getToolScriptable("DiamondAxe")), "DiamondAxe")
+		},
+
+		new object[]{ "Stick", new object[] {
+			new object[] { "Stick", new Vector2(0, 1) },
+			new object[] { "Diamond", new Vector2(-1, 2) },
+			new object[] { "Diamond", new Vector2(0, 2) },
+			new object[] { "Diamond", new Vector2(1, 2) }
+		}, new InventorySlot( new ToolInstance(getToolScriptable("DiamondPickaxe")), "DiamondPickaxe")
+		},
+
+		new object[]{ "Stick", new object[] {
+			new object[] { "Diamond", new Vector2(0, 1) },
+			new object[] { "Diamond", new Vector2(0, 2) }
+		}, new InventorySlot( new ToolInstance(getToolScriptable("DiamondSword")), "DiamondSword")
+		},
+
 		new object[]{ "Cobblestone", new object[] {
 			new object[] { "Cobblestone", new Vector2(1, 0) },
 			new object[] { "Cobblestone", new Vector2(2, 0) },

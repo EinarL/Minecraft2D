@@ -18,7 +18,7 @@ have the correct sound for breaking grass
 
 change how ores spawn
 
-
+furnaces sometimes cant be accessed due to FrontBacgroundBlocks being on the same block
 
 change it so that all blocks are tiles initially in a chunk and when the chunk next to the spawns, i.e. the chunk has chunks on both sides of it,
 then change the tiles that are exposed to air to gameObjects
