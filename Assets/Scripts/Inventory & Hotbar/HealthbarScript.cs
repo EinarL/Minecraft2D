@@ -20,12 +20,13 @@ public class HealthbarScript : MonoBehaviour
 
     private GameObject steve;
     private HungerbarScript hungerbarScript;
- 
 
-    // Start is called before the first frame update
-    void Start()
+	private static IDataService dataService = new JsonDataService();
+
+
+	// Start is called before the first frame update
+	void Start()
     {
-        // TODO: load health save if it exists
         for (int i = 0; i < heartBackgrounds.Length; i++)
         {
             heartBackgrounds[i] = transform.Find("Heart" + i).GetComponent<Image>();
@@ -48,7 +49,14 @@ public class HealthbarScript : MonoBehaviour
 		}
         audioSource = gameObject.GetComponent<AudioSource>();
 
-        StartCoroutine(healUp());
+        // if a saved health file exist, then put the health as the value in the file
+		if (dataService.exists("health-and-hunger-bar.json"))
+		{
+			health = (int)dataService.loadData<float[]>("health-and-hunger-bar.json")[0];
+            updateHeartImages();
+		}
+
+		StartCoroutine(healUp());
 	}
 
 	public void takeDamage(int damage)
@@ -106,13 +114,11 @@ public class HealthbarScript : MonoBehaviour
     private IEnumerator flashAnimationHealing()
     {
         int howManyHearts = health % 2 == 0 ? health/2 : (health + 1)/2;
-        Debug.Log(howManyHearts);
 		bool turnWhite = true;
 		for (int i = 0; i < 4; i++)
 		{
 			for (int j = 0; j < howManyHearts; j++)
 			{
-                Debug.Log(j);
 				heartBackgrounds[j].sprite = turnWhite ? whiteBackground : normalBackground;
 			}
 			turnWhite = !turnWhite;
@@ -197,4 +203,9 @@ public class HealthbarScript : MonoBehaviour
 		audioSource.clip = randClip;
 		audioSource.Play();
 	}
+
+    public int getHealth()
+    {
+        return health;
+    }
 }

@@ -117,4 +117,18 @@ public static class BlockHashtable
 	{
 		return (int)blockToID[blockName];
 	}
+
+	// gets the block id that will be behind the mined block
+	public static int getBackBackgroundBlock(string blockName)
+	{
+		switch (blockName)
+		{
+			case "Dirt":
+				return 1; // dirt
+			case "Sand":
+				return 14; // sand 
+			default:
+				return 3; // stone
+		}
+	}
 }

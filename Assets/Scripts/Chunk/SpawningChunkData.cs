@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
+using UnityEditor.PackageManager;
 using UnityEngine;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 /**
  * this static class holds data that is neccessary to know when spawning in chunks
@@ -156,6 +158,37 @@ public static class SpawningChunkData
 			}
 		}
 		return null;
+	}
+	// returns true if it added the block
+	public static bool addBackgroundVisualBlock(float x, float y, int blockID)
+	{
+		foreach (ChunkData chunk in renderedChunks)
+		{
+			if (chunk.getChunkPosition() < x && chunk.getChunkPosition() + blocksInChunk > x) // we found the chunk that the block is in
+			{
+				return chunk.addBackgroundVisualBlock(x, y, blockID);
+			}
+		}
+		Debug.LogError("Unable to find the chunk to place the background visual block in");
+		return false;
+	}
+
+	/**
+	 * Given an x position for a block, this function returns the vertical line height,
+	 * i.e. the height of the grass block at the top.
+	 * this is neccesary to determine when we mine a block whether to display a background block behind the block or not
+	 */
+	public static float getVerticalLineHeight(float x)
+	{
+		foreach (ChunkData chunk in renderedChunks)
+		{
+			if (chunk.getChunkPosition() < x && chunk.getChunkPosition() + blocksInChunk > x) // we found the chunk that the block is in
+			{
+				return chunk.getVerticalLineHeight(Mathf.Abs((int)x) % 10);
+			}
+		}
+
+		return -1;
 	}
 
 	public static int getLeftMostChunkEdge()

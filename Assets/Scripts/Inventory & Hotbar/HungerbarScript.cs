@@ -21,6 +21,8 @@ public class HungerbarScript : MonoBehaviour
 	private bool isTakingHungerDamage = false; // TODO: need to save this to json file also
 	private IEnumerator hungerDamageCoroutine = null;
 
+	private static IDataService dataService = new JsonDataService();
+
 	void Start()
     {
         for (int i = 0; i < foodBackgrounds.Length; i++)
@@ -35,6 +37,13 @@ public class HungerbarScript : MonoBehaviour
 		healthbarScript = GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>();
 		hungerDamageCoroutine = healthbarScript.takeHungerDamage();
 
+		// if a saved hunger file exist, then put the hunger as the value in the file
+		if (dataService.exists("health-and-hunger-bar.json"))
+		{
+			hunger = dataService.loadData<float[]>("health-and-hunger-bar.json")[1];
+			updateFoodImages();
+		}
+
 		StartCoroutine(decreaseHunger());
 	}
 
@@ -43,7 +52,7 @@ public class HungerbarScript : MonoBehaviour
 	{
 		hunger = Mathf.Min(20, hunger + hungerGain);
 		updateFoodImages();
-		lastUpdatedHunger = Mathf.RoundToInt(hunger);
+		
 
 		if (isTakingHungerDamage)
 		{
@@ -63,14 +72,13 @@ public class HungerbarScript : MonoBehaviour
 			if (isRunning) hunger = Mathf.Max(0, hunger - hungerLossWhenRunning);
 			else hunger = Mathf.Max(0, hunger - hungerLossWhenWalking);
 
-			updateFoodImages();
+			float difference = Mathf.Abs(hunger - lastUpdatedHunger);
+			if (difference >= 1f) updateFoodImages();  // we dont need to update hunger if difference < 1 because the food images would not change
 		}
 	}
 
     private void updateFoodImages()
     {
-        float difference = Mathf.Abs(hunger - lastUpdatedHunger);
-		if (difference < 1f) return; // we dont need to update hunger because it is the same
         lastUpdatedHunger = Mathf.RoundToInt(hunger);
 		hunger = Mathf.Round(hunger);
 

@@ -8,16 +8,22 @@ public class ChunkData
 	private int[,] chunkData;
 	private List<float[]> frontBackgroundBlocks = new List<float[]>(); // list of type {[x,y, blockID]}
 	private List<float[]> backBackgroundBlocks = new List<float[]>(); // list of type {[x,y, blockID]}
+	private List<float[]> backgroundVisualBlocks = new List<float[]>(); // list of type {[x,y, blockID]}
 	private int chunkPosition;
 	private float startHeight; // height of the chunk (height of grass block)
 	// need to also have here the variables dontGoUpRight, dontGoUpLeft, etc.
 	private List<object[]> entities; // list of entities in this chunk // of type {[x, y, entityName], [x, y, entityName], ...}
 
+	// heights of the vertical lines (i.e. the height of the grass blocks)
+	// if this is a right chunk, then the leftmost vertical line height would be at index 0
+	// but with a left chunk the leftmost vertical line is at index 9
+	private float[] verticalLineHeights; 
+
 
 	// keeps track of where ores spawned, this is needed for a smooth transition for ores in the next chunk
 	private Hashtable prevOreSpawns = new Hashtable(); // (y, blockID) 
 
-	public ChunkData(int chunkPosition, int[,] chunkData, float startHeight, Hashtable prevOreSpawns, List<float[]> frontBackgroundBlocks, List<object[]> entities)
+	public ChunkData(int chunkPosition, int[,] chunkData, float startHeight, Hashtable prevOreSpawns, List<float[]> frontBackgroundBlocks, List<object[]> entities, float[] vLineHeights)
 	{
 		this.chunkData = chunkData;
 		this.chunkPosition = chunkPosition;
@@ -25,6 +31,7 @@ public class ChunkData
 		this.prevOreSpawns = prevOreSpawns;
 		this.frontBackgroundBlocks = frontBackgroundBlocks;
 		this.entities = entities;
+		verticalLineHeights = vLineHeights;
 	}
 
 	public void changeBlock(float x, float y, int newBlockID, string layer = "Default")
@@ -78,6 +85,26 @@ public class ChunkData
 		}
 		Debug.LogError("Did not find a block in FrontBackground layer to remove at: " + x + ", " + y);
 	}
+	// returns true if it added the block
+	public bool addBackgroundVisualBlock(float x, float y, int blockID)
+	{
+		foreach (float[] block in backgroundVisualBlocks)
+		{
+			if (block[0] == x && block[1] == y) return false; // if there already is a background visual block at this position, then dont add a new one
+		}
+		backgroundVisualBlocks.Add(new float[] {x,y,blockID});
+		return true;
+	}
+
+	public float getVerticalLineHeight(int index)
+	{
+		Debug.Log("chunk height: ");
+		foreach (float v in verticalLineHeights)
+		{
+			Debug.Log(v);
+		}
+		return verticalLineHeights[index];
+	}
 
 	public List<object[]> getEntities()
 	{
@@ -97,6 +124,11 @@ public class ChunkData
 	public List<float[]> getBackBackgroundBlocks()
 	{
 		return backBackgroundBlocks;
+	}
+
+	public List<float[]> getBackgroundVisualBlocks()
+	{
+		return backgroundVisualBlocks;
 	}
 
 	public int[,] getChunkData()

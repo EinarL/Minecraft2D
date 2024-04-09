@@ -38,14 +38,12 @@ public class EatScript : MonoBehaviour
         // if clicking right click and the player is holding food
         if (Input.GetMouseButtonDown(1) && InventoryScript.isHoldingFood()) // TODO: check if full, then you cant eat
         {
-            Debug.Log("Start eating");
             StartCoroutine(finishEating());
             selectedSlotWhenStartedEating = InventoryScript.getSelectedSlot();
         }
 		// if the player is eating && (he is not holding down right click || switched selected slots in hotbar)
 		else if (isEating && (!Input.GetMouseButton(1) || selectedSlotWhenStartedEating != InventoryScript.getSelectedSlot())) 
         {
-            Debug.Log("Stopped eating");
             StopAllCoroutines(); // stop eating
             isEating = false;
             anim.SetBool("isEating", false);
@@ -68,7 +66,7 @@ public class EatScript : MonoBehaviour
 		int foodAddition = FoodHashtable.getFoodAddition(InventoryScript.getHeldItemName());
         Assert.IsTrue(foodAddition >= 0);
 		InventoryScript.decrementSlot(InventoryScript.getSelectedSlot()); // remove food
-        Debug.Log("FINISHED EATING");
+
         hungerbarScript.eatFood(foodAddition); // restore hunger
         if (InventoryScript.isHoldingFood()) // TODO: check if full, then you cant eat again
         {

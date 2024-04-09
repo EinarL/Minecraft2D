@@ -24,7 +24,8 @@ public static class BlockBehaviourData
 		{ "Dandelion", new BreakInstantly() },
 		{ "Wool", new BreakCloth() },
 		{ "Furnace", new BreakStone() },
-		{ "Glass", new BreakGlass()}
+		{ "Glass", new BreakGlass() },
+		{ "Bedrock", new BreakBedrock() }
 
 	};
 
@@ -61,7 +62,8 @@ public static class BlockBehaviourData
 		{ "Sand", new object[]{ "sand", 5} },
 		{ "Wool", new object[] { "cloth", 4} },
 		{ "Furnace", new object[]{ "stone", 6 } },
-		{ "Glass", new object[]{ "stone", 6 } }
+		{ "Glass", new object[]{ "stone", 6 } },
+		{ "Bedrock", new object[]{ "stone", 6 } }
 
 	};
 

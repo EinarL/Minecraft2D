@@ -57,7 +57,6 @@ public abstract class Entity : MonoBehaviour
 	public virtual void takeDamage(float damage, float playerXPos)
 	{
 		if (anim.GetBool("isDead")) return;
-		Debug.Log("Taking " + damage + " damage");
 		health -= damage;
 		displayTint();
 		takeKnockBack(playerXPos);

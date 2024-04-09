@@ -35,6 +35,8 @@ public abstract class Biome
 		int[] vLine;
 		float height = SpawningChunkData.getLeftMostY();
 		Hashtable prevSpawnedOresLeft = SpawningChunkData.getPrevSpawnedOresLeft();
+		float[] verticalLineHeights = new float[10];
+		int vLineHeightIndex = 0;
 		int chunkIndex = chunkSize - 1;
 		for (float i = chunkEnd - blockSize; i >= chunkStart; i -= blockSize)
 		{
@@ -51,10 +53,12 @@ public abstract class Biome
 			addVerticalLineToChunk(chunk, chunkIndex, vLine);
 
 			chunkIndex--;
+			verticalLineHeights[vLineHeightIndex] = height;
+			vLineHeightIndex++;
 			height = getNewHeight(height, false);
 		}
 
-		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresLeft, frontBackgroundBlocks, entities);
+		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresLeft, frontBackgroundBlocks, entities, verticalLineHeights);
 		SaveChunk.save(chunkData);
 
 		return chunkData;
@@ -70,6 +74,8 @@ public abstract class Biome
 		float chunkEnd = chunkStart + chunkSize;
 		int[] vLine;
 		float height = SpawningChunkData.getRightMostY();
+		float[] verticalLineHeights = new float[10];
+		int vLineHeightIndex = 0;
 		Hashtable prevSpawnedOresRight = SpawningChunkData.getPrevSpawnedOresRight();
 		int chunkIndex = 0;
 		for (float i = chunkStart + blockSize / 2; i < chunkEnd; i += blockSize)
@@ -87,10 +93,12 @@ public abstract class Biome
 			addVerticalLineToChunk(chunk, chunkIndex, vLine);
 
 			chunkIndex++;
+			verticalLineHeights[vLineHeightIndex] = height;
+			vLineHeightIndex++;
 			height = getNewHeight(height, true);
 		}
 
-		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresRight, frontBackgroundBlocks, entities);
+		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresRight, frontBackgroundBlocks, entities, verticalLineHeights);
 		SaveChunk.save(chunkData);
 
 		return chunkData;

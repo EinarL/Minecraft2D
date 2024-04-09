@@ -152,6 +152,24 @@ public class BlockScript : MonoBehaviour
 
 		// if this block was a furnace, then we need to drop the items that were in the furnace
 		if (gameObject.name.Equals("Furnace")) openFurnaceScript.removeFurnace(transform.position);
+
+		createBackgroundVisualBlock();
+	}
+
+	/**
+	 * creates a background visual block at this blocks position if there doesnt already exist one
+	 */
+	public void createBackgroundVisualBlock()
+	{
+		Debug.Log(SpawningChunkData.getVerticalLineHeight(transform.position.x) + " >= " + transform.position.y);
+		// check if this block is below the surface level, then we need to display a background block
+		if (SpawningChunkData.getVerticalLineHeight(transform.position.x) >= transform.position.y)
+		{
+			// TODO: if this block is a dirt block && it is at the top block position, then display a grass block as a background block
+			int backgroundBlockID = BlockHashtable.getBackBackgroundBlock(gameObject.name);
+			bool added = SpawningChunkData.addBackgroundVisualBlock(transform.position.x, transform.position.y, backgroundBlockID); // add the background block to the data
+			if (added) scScript.instantiateTile(backgroundBlockID, transform.position.x, transform.position.y, true); // instantiate the tile
+		}
 	}
 	/**
 	 * Turns tiles that are next to this block into gameObjects

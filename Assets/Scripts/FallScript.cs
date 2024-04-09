@@ -9,11 +9,13 @@ public class FallScript : MonoBehaviour
     private bool isFalling = false;
     private Vector3 velocity = new Vector3(0, -1, 0);
     private Transform groundCheck;
+	private BlockScript blockScript;
 
     // Start is called before the first frame update
     void Start()
     {
         groundCheck = transform.Find("GroundCheck");
+		blockScript = GetComponent<BlockScript>();
     }
 
 	void Update()
@@ -34,9 +36,9 @@ public class FallScript : MonoBehaviour
      */
 	public void fall()
 	{
-		Debug.Log("fall");
 		SpawningChunkData.updateChunkData(transform.position.x, transform.position.y, 0, LayerMask.LayerToName(gameObject.layer)); // remove block from data
         isFalling = true;
+		blockScript.createBackgroundVisualBlock(); // create a background visual block 
 		checkIfAboveBlockIsFallType(); // check if above block needs to fall also
 		checkIfAboveIsNoFloatType(); // check if above block needs to get destroyed because some blocks are not allowed to float
 	}

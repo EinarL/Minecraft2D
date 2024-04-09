@@ -22,6 +22,7 @@ public class spawnChunkScript : MonoBehaviour
     public Sprite grassTexture;
 	private Camera cam;
     public Tilemap tilemap;
+    public Tilemap backgroundVisualTiles;
 
 
     private int lowestBlockPos = -60;
@@ -230,7 +231,7 @@ public class spawnChunkScript : MonoBehaviour
 
         SpawningChunkData.overwriteEntities(chunkPos, entities); // save entities
 
-        // TODO: implement so it saves dropped item also
+        // TODO: implement so it saves dropped item also (maybe not tho?)
         SpawningChunkData.removeAndSaveChunkByChunkPosition(chunkPos); // save
 
         // remove tiles
@@ -259,6 +260,7 @@ public class spawnChunkScript : MonoBehaviour
         int[,] chunk = chunkData.getChunkData(); //  2d array of the contents of the chunk, each integer represents a block ID (0 = no block)
         List<float[]> frontBackgroundBlocks = chunkData.getFrontBackgroundBlocks(); // list of type {[x,y, blockID]}, blocks that go on the FrontBackground layer
 		List<float[]> backBackgroundBlocks = chunkData.getBackBackgroundBlocks(); // list of type {[x,y, blockID]}, blocks that go on the BackBackground layer
+        List<float[]> backgroundVisualBlocks = chunkData.getBackgroundVisualBlocks();
 		int chunkPos = chunkData.getChunkPosition(); // position of the chunk (left side of the chunk)
 		float height = chunkData.getStartHeight();  // height of where blocks started spawning in this chunk, (basically means: y position of grass block)
         Hashtable prevOreSpawns = chunkData.getPrevOreSpawns();
@@ -286,8 +288,12 @@ public class spawnChunkScript : MonoBehaviour
 		{
 			instantiateBlock((int)block[2], block[0], block[1], "BackBackground");
 		}
+        foreach (float[] block in backgroundVisualBlocks)
+        {
+			instantiateTile((int)block[2], block[0], block[1], true);
+		}
 
-		if (goingRight)
+        if (goingRight)
         {
             SpawningChunkData.setRightMostY(height);
 			SpawningChunkData.setPrevSpawnedOresRight(prevOreSpawns);
@@ -348,15 +354,27 @@ public class spawnChunkScript : MonoBehaviour
 
 	}
 	// returns the position of the tile, if the tile was set, otherwise Vector3Int(-100, -100)
-	private Vector3Int instantiateTile(int blockID, float xPos, float yPos)
+	public Vector3Int instantiateTile(int blockID, float xPos, float yPos, bool isBackgroundVisualTile = false)
     {
         Vector3Int tilePos = new Vector3Int(-100, -100);
 
 		if (blockID == 0) return tilePos;
-        tilePos = tilemap.WorldToCell(new Vector2(xPos, yPos));
-        
-        Tile tile = BlockHashtable.getTileByID(blockID);
-        tilemap.SetTile(tilePos, tile);
+        if(isBackgroundVisualTile)
+        {
+			tilePos = backgroundVisualTiles.WorldToCell(new Vector2(xPos, yPos));
+
+			Tile tile = BlockHashtable.getTileByID(blockID);
+			backgroundVisualTiles.SetTile(tilePos, tile);
+		}
+        else
+        {
+			tilePos = tilemap.WorldToCell(new Vector2(xPos, yPos));
+
+			Tile tile = BlockHashtable.getTileByID(blockID);
+			tilemap.SetTile(tilePos, tile);
+		}
+
+
         return tilePos;
     }
 
@@ -420,7 +438,8 @@ public class spawnChunkScript : MonoBehaviour
             for(int j = 0; j <=  SpawningChunkData.maxBuildHeight + Math.Abs(lowestBlockPos); j++)
             {
                 if (tilemap.HasTile(tilePos)) tilemap.SetTile(tilePos, null); // if tile exists, then remove tile
-                tilePos.y--;
+				if (backgroundVisualTiles.HasTile(tilePos)) backgroundVisualTiles.SetTile(tilePos, null); // the same, but for background visual tiles
+				tilePos.y--;
             }
             tilePos.y = SpawningChunkData.maxBuildHeight;
             tilePos.x++;
