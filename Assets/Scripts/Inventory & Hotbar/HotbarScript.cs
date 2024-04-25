@@ -152,6 +152,8 @@ public class HotbarScript : MonoBehaviour
 
 	private void checkIfSelectedSlotChange()
     {
+		if (InventoryScript.getIsInUI()) return;
+
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
 			changeSelectedSlot(0);

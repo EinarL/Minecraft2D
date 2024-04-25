@@ -10,6 +10,7 @@ public class BreakBlockScript : MonoBehaviour
 
     private Camera cam;
     public GameObject hoverTexture; // hovering over block texture
+    private PlayerControllerScript playerControllerScript;
     private Transform stevePosition; // get distance from this transform to the blockPos to check if the distance in within range of mining/placing blocks
     private Transform headPosition;
     private Animator anim;
@@ -29,6 +30,7 @@ public class BreakBlockScript : MonoBehaviour
         stevePosition = transform.Find("MiningPlacingRange");
         headPosition = transform.Find("Head");
         anim = GetComponent<Animator>();
+        playerControllerScript = GameObject.Find("SteveContainer").transform.GetComponent<PlayerControllerScript>();
 
         foreach(AnimationClip clip in anim.runtimeAnimatorController.animationClips)
         {
@@ -71,7 +73,6 @@ public class BreakBlockScript : MonoBehaviour
 			return;
 		}
         if (ReferenceEquals(highlightedBlock, hoveringOverBlock)) return; // if they are the same object
-        
         Destroy(hoverGrid);
 
         Vector3 highlightPos = new Vector3(highlightedBlock.transform.position.x + 0.205f, highlightedBlock.transform.position.y + 0.33f, highlightedBlock.transform.position.z - 1);

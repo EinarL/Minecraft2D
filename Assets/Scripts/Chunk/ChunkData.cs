@@ -98,11 +98,6 @@ public class ChunkData
 
 	public float getVerticalLineHeight(int index)
 	{
-		Debug.Log("chunk height: ");
-		foreach (float v in verticalLineHeights)
-		{
-			Debug.Log(v);
-		}
 		return verticalLineHeights[index];
 	}
 

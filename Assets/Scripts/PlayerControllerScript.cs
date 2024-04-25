@@ -204,21 +204,27 @@ public class PlayerControllerScript : MonoBehaviour
         {
 			Vector3 rotationVector = transform.rotation.eulerAngles;
 			rotationVector.y = 180;
-            steve.transform.rotation = Quaternion.Euler(rotationVector);
+            gameObject.transform.rotation = Quaternion.Euler(rotationVector);
             facingRight = false;
+            Transform temp = blockNextToPlayerLeft;
+            blockNextToPlayerLeft = blockNextToPlayerRight;
+            blockNextToPlayerRight = temp;
 			putHoldingItemToOtherHand(false);
 		}
         else if (worldMousePos.x > transform.position.x && !facingRight) // rotate character right
         {
 			Vector3 rotationVector = transform.rotation.eulerAngles;
 			rotationVector.y = 0;
-			steve.transform.rotation = Quaternion.Euler(rotationVector);
+			gameObject.transform.rotation = Quaternion.Euler(rotationVector);
 			facingRight = true;
-            putHoldingItemToOtherHand(true);
+			Transform temp = blockNextToPlayerLeft;
+			blockNextToPlayerLeft = blockNextToPlayerRight;
+			blockNextToPlayerRight = temp;
+			putHoldingItemToOtherHand(true);
 		}
 
-        // now rotate head to look towards mouse position
-        Transform head = steve.Find("Head"); // find player's head
+		// now rotate head to look towards mouse position
+		Transform head = steve.Find("Head"); // find player's head
 
 		Vector3 diff = worldMousePos - head.position;
 		diff.Normalize();
@@ -260,7 +266,23 @@ public class PlayerControllerScript : MonoBehaviour
         fellFrom = float.NegativeInfinity;
     }
 
-    private bool goingRight()
+    public void teleportToSpawn()
+    {
+        gameObject.transform.position = new Vector2(0,0);
+    }
+
+
+	public void die()
+    {
+        anim.SetBool("isDead", true);
+    }
+
+	public void removeDeathAnimation()
+	{
+		anim.SetBool("isDead", false);
+	}
+
+	private bool goingRight()
     {
         return horizontalMove > 0;
     }
@@ -279,5 +301,4 @@ public class PlayerControllerScript : MonoBehaviour
     {
         return isRunning;
     }
-
 }

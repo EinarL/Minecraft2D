@@ -172,7 +172,7 @@ public class spawnChunkScript : MonoBehaviour
      *            needs to be true when rendering the leftmost chunk, and false when
      *            rendering the rightmost chunk
      */
-	void renderChunk(int chunkStart)
+	public void renderChunk(int chunkStart)
     {
         ChunkData chunkData;
 
@@ -208,7 +208,7 @@ public class spawnChunkScript : MonoBehaviour
      * Deletes/unrenderes all objects in the given chunk
      * chunkPos: position of the chunk (left side of the chunk)
      */
-    void unrenderChunk(int chunkPos)
+    public void unrenderChunk(int chunkPos)
     {
 		// Create a collision filter to only include colliders in these layers
 		ContactFilter2D filter = new ContactFilter2D();
@@ -562,5 +562,15 @@ public class spawnChunkScript : MonoBehaviour
 
 
 		return false;
+    }
+
+    public int getLeftmostChunkPos()
+    {
+        return rendered;
+    }
+
+    public int getAmountOfChunksRendered()
+    {
+        return amountOfChunksToRender;
     }
 }

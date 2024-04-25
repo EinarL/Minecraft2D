@@ -19,7 +19,9 @@ public class HealthbarScript : MonoBehaviour
 	private Sprite whiteBackground; // background for the hearts
 
     private GameObject steve;
+    private PlayerControllerScript playerControllerScript;
     private HungerbarScript hungerbarScript;
+    private CanvasScript canvasScript;
 
 	private static IDataService dataService = new JsonDataService();
 
@@ -39,8 +41,11 @@ public class HealthbarScript : MonoBehaviour
         normalBackground = getSpriteWithName(heartImages, "icons_0");
 		whiteBackground = getSpriteWithName(heartImages, "icons_3");
 
-        steve = GameObject.Find("SteveContainer").transform.Find("Steve").gameObject;
+        GameObject steveContainer = GameObject.Find("SteveContainer");
+		steve = steveContainer.transform.Find("Steve").gameObject;
+		playerControllerScript = steveContainer.gameObject.GetComponent<PlayerControllerScript>();
 		hungerbarScript = GameObject.Find("Canvas").transform.Find("Hungerbar").GetComponent<HungerbarScript>();
+        canvasScript = GameObject.Find("Canvas").transform.GetComponent<CanvasScript>();
 
 
 		for (int i = 0; i < hitSounds.Length; i++)
@@ -91,10 +96,19 @@ public class HealthbarScript : MonoBehaviour
 
         if(health <= 0)
         {
-            Debug.Log("Health is less or equal to zero, you died!");
-            // TODO: implement death
-        }
+            die();
+		}
     }
+
+    private void die()
+    {
+		playerControllerScript.die(); // so that the death animation occurs
+		canvasScript.showDeathScreen();
+		StopAllCoroutines(); // stop healing and other stuff
+		InventoryScript.setIsInUI(true);
+        health = 0;
+	}
+
     // Coroutine that flashes the hearts to be white when taking damage
     private IEnumerator flashingAnimationCoroutine()
     {

@@ -122,7 +122,11 @@ public static class SpawningChunkData
 				renderedChunks.RemoveAt(i);
 
 				// we know that the chunk being removed is either the rightmost or leftmost, so its position is either lower or higher than all the other chunks
-				if(chunkPos < renderedChunks[0].getChunkPosition()) // if we removed the leftmost chunk
+				if (renderedChunks.Count == 0) // if this happens, then we are in the process of unrendering all chunks
+				{
+					leftMostChunkEdge = -20;
+				}
+				else if(chunkPos < renderedChunks[0].getChunkPosition()) // if we removed the leftmost chunk
 				{
 					leftMostChunkEdge = chunkPos + blocksInChunk;
 				}
@@ -136,7 +140,9 @@ public static class SpawningChunkData
 		}
 		Debug.LogError("Did not find a chunk with chunkPosition: " + chunkPos);
 	}
-
+	/**
+	 * Saves the entites in the chunk, and overwrites the old saved entities
+	 */
 	public static void overwriteEntities(int chunkPos, List<object[]> entities)
 	{
 		ChunkData correspondingChunk = getChunkByChunkPos(chunkPos);
@@ -189,6 +195,11 @@ public static class SpawningChunkData
 		}
 
 		return -1;
+	}
+
+	public static List<ChunkData> getRenderedChunks()
+	{
+		return renderedChunks;
 	}
 
 	public static int getLeftMostChunkEdge()

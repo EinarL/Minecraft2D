@@ -24,7 +24,7 @@ public class PunchScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-		if (Input.GetMouseButtonDown(0)) // if left click
+		if (Input.GetMouseButtonDown(0) && !InventoryScript.getIsInUI()) // if left click && not in UI
 		{
 			punch();
 		}
