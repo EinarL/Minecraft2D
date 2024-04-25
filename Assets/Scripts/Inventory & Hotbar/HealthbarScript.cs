@@ -105,8 +105,12 @@ public class HealthbarScript : MonoBehaviour
 		playerControllerScript.die(); // so that the death animation occurs
 		canvasScript.showDeathScreen();
 		StopAllCoroutines(); // stop healing and other stuff
+        hungerbarScript.stopAllCoroutines();
 		InventoryScript.setIsInUI(true);
-        health = 0;
+		for (int i = 0; i < 10; i++) // no fill image for the hearts
+		{
+			heartBackgrounds[i].transform.GetChild(0).GetComponent<Image>().color = new Color(1, 1, 1, 0); // make it invisible
+		}
 	}
 
     // Coroutine that flashes the hearts to be white when taking damage
@@ -151,7 +155,7 @@ public class HealthbarScript : MonoBehaviour
         }
     }
     // checks if the player should heal
-    private IEnumerator healUp()
+    public IEnumerator healUp()
     {
         while (true){
             yield return new WaitForSeconds(6);
@@ -159,7 +163,7 @@ public class HealthbarScript : MonoBehaviour
             {
                 heal(1);
             }
-        }
+		}
     }
 
     private void heal(int healAddition)
@@ -221,5 +225,16 @@ public class HealthbarScript : MonoBehaviour
     public int getHealth()
     {
         return health;
+    }
+
+    public void setFullHealth()
+    {
+        health = 20;
+        updateHeartImages();
+    }
+
+    public void startHealCoroutine()
+    {
+        StartCoroutine(healUp());
     }
 }

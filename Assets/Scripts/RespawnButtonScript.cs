@@ -7,8 +7,11 @@ public class RespawnButtonScript : MonoBehaviour
 
 	private CanvasScript canvasScript;
 	private PlayerControllerScript playerControllerScript;
-    private spawnChunkScript scScript;
+	private HealthbarScript healthbarScript;
+	private HungerbarScript hungerbarScript;
 
+	private spawnChunkScript scScript;
+	private GameObject mainCam;
 
 
 	// Start is called before the first frame update
@@ -17,7 +20,10 @@ public class RespawnButtonScript : MonoBehaviour
 		canvasScript = GameObject.Find("Canvas").transform.GetComponent<CanvasScript>();
 		GameObject steveContainer = GameObject.Find("SteveContainer");
 		playerControllerScript = steveContainer.gameObject.GetComponent<PlayerControllerScript>();
-        scScript = GameObject.Find("Main Camera").transform.GetComponent<spawnChunkScript>();
+		healthbarScript = GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>();
+		hungerbarScript = GameObject.Find("Canvas").transform.Find("Hungerbar").GetComponent<HungerbarScript>();
+		scScript = GameObject.Find("Main Camera").transform.GetComponent<spawnChunkScript>();
+		mainCam = GameObject.Find("Main Camera");
 	}
 
     // Update is called once per frame
@@ -29,7 +35,6 @@ public class RespawnButtonScript : MonoBehaviour
     public void respawn()
     {
 		InventoryScript.setIsInUI(false);
-        canvasScript.closeDeathScreen(); // remove death screen
         playerControllerScript.removeDeathAnimation(); //  remove death animation
         // TODO: save inventory at the place of death
         // unrender chunks
@@ -37,15 +42,27 @@ public class RespawnButtonScript : MonoBehaviour
         {
 			scScript.unrenderChunk(i);
 		}
+		// send steve to spawnpoint
+		playerControllerScript.teleportToSpawn();
+		scScript.setAmountOfChunksToRender(4);
+		scScript.setLeftmostChunkPos(-20);
+		mainCam.transform.position = new Vector2(0, mainCam.transform.position.y);
 		// render chunks at spawnpoint
 		// TODO: save spawnpoint, because it will be different when beds are implemented
 		scScript.renderChunk(0);
 		scScript.renderChunk(-10);
 		scScript.renderChunk(-20);
 		scScript.renderChunk(10);
-		// send steve to spawnpoint
-		playerControllerScript.teleportToSpawn();
 
-		// reset health and hunger and inventory
+
+		// reset health and hunger
+		healthbarScript.setFullHealth();
+		healthbarScript.startHealCoroutine();
+		hungerbarScript.setFullHunger();
+		hungerbarScript.startHungerCoroutine();
+
+		// reset inventory
+
+		canvasScript.closeDeathScreen(); // remove death screen
 	}
 }

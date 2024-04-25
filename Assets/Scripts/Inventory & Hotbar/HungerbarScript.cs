@@ -127,4 +127,20 @@ public class HungerbarScript : MonoBehaviour
 	{
 		return hunger;
 	}
+
+	public void setFullHunger()
+	{
+		hunger = 20;
+		updateFoodImages();
+	}
+
+	public void stopAllCoroutines()
+	{
+		StopAllCoroutines();
+	}
+
+	public void startHungerCoroutine()
+	{
+		StartCoroutine(decreaseHunger());
+	}
 }

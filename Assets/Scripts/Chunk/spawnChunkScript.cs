@@ -105,7 +105,7 @@ public class spawnChunkScript : MonoBehaviour
             }
             else
             {
-                Debug.LogError("ERROR! leftMostChunkToRender isn't a chunk away from rendered; rendered = " + rendered + ", leftMostChunkToRender = " + leftMostChunkToRender);
+                Debug.LogWarning("Warning! leftMostChunkToRender isn't a chunk away from rendered; rendered = " + rendered + ", leftMostChunkToRender = " + leftMostChunkToRender);
             }
             rendered = leftMostChunkToRender;
         }
@@ -228,7 +228,6 @@ public class spawnChunkScript : MonoBehaviour
             }
             Destroy(collider.gameObject);
         }
-
         SpawningChunkData.overwriteEntities(chunkPos, entities); // save entities
 
         // TODO: implement so it saves dropped item also (maybe not tho?)
@@ -569,8 +568,18 @@ public class spawnChunkScript : MonoBehaviour
         return rendered;
     }
 
-    public int getAmountOfChunksRendered()
+	public void setLeftmostChunkPos(int leftChunkPos)
+	{
+		rendered = leftChunkPos;
+	}
+
+	public int getAmountOfChunksRendered()
     {
         return amountOfChunksToRender;
+    }
+
+    public void setAmountOfChunksToRender(int num)
+    {
+        amountOfChunksToRender = num;
     }
 }
