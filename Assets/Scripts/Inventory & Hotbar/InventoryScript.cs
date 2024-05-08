@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEditor;
@@ -38,7 +39,7 @@ public static class InventoryScript
 			inventorySlotScripts[i] = invPanel.Find("InventorySlots").Find("InventorySlot" + i).GetComponent<InventorySlotScript>();
 		}
 
-		// check if player has inventory data and then load that
+		// check if player has inventory data, then load that
 		if (dataService.exists("inventory.json"))
 		{
 			inventory = dataService.loadData<InventorySlot[]>("inventory.json");
@@ -54,6 +55,16 @@ public static class InventoryScript
 			{
 				inventory[i] = new InventorySlot();
 			}
+		}
+	}
+
+	public static void setEmptyInventory()
+	{
+		inventory = new InventorySlot[inventorySlots];
+		for (int i = 0; i < inventory.Length; i++)
+		{
+			inventory[i] = new InventorySlot();
+			updateSlotVisually(i);
 		}
 	}
 
@@ -90,6 +101,32 @@ public static class InventoryScript
 		if (didAddToInventory) updateSlotVisually(changedSlot);
 
 		return didAddToInventory;
+	}
+	/**
+	 * adds the items into the players inventory but doesnt override items that are already in the inventory
+	 * returns the items that don't fit into the inventory.
+	 */
+	public static InventorySlot[] addItemsToInventory(InventorySlot[] items)
+	{
+		int itemIndex = 0;
+		for(int i = 0; i < inventory.Length; i++)
+		{
+			while(itemIndex < items.Length && items[itemIndex].isEmpty())
+			{
+				itemIndex++;
+			}
+			if (itemIndex == items.Length) return null; // we have gone through all items, so return null
+			if (!inventory[i].isEmpty()) continue;
+
+			inventory[i] = items[itemIndex];
+			updateSlotVisually(i);
+			itemIndex++;
+		}
+		// Convert the array to a list
+		List<InventorySlot> itemList = items.ToList();
+
+		// return the sublist from itemIndex to the end of the list
+		return itemList.Skip(itemIndex).ToArray();
 	}
 
 	/**
@@ -355,5 +392,10 @@ public static class InventoryScript
 		inventory[slotNumber].removeFromSlot(1);
 
 		updateSlotVisually(slotNumber);
+	}
+
+	public static InventorySlot[] getInventory()
+	{
+		return inventory;
 	}
 }

@@ -35,11 +35,13 @@ public class spawnChunkScript : MonoBehaviour
     // it hits 0, then a new random chunk gets generated
 	private int biomeLength; 
 
-
+    private OpenFurnaceScript openFurnaceScript;
 
 	// Start is called before the first frame update
 	void Start()
     {
+		openFurnaceScript = GameObject.Find("Canvas").transform.Find("InventoryParent").GetComponent<OpenFurnaceScript>();
+
 		BlockHashtable.initializeBlockHashtable();
         spawnChunkStrategy = decideBiome(); // dont do this if the biome is already decided, we need to save which biome was rendering when we quit the game
 
@@ -229,9 +231,10 @@ public class spawnChunkScript : MonoBehaviour
             Destroy(collider.gameObject);
         }
         SpawningChunkData.overwriteEntities(chunkPos, entities); // save entities
+		openFurnaceScript.saveFurnaces(); // save furnaces
 
-        // TODO: implement so it saves dropped item also (maybe not tho?)
-        SpawningChunkData.removeAndSaveChunkByChunkPosition(chunkPos); // save
+		// TODO: implement so it saves dropped item also (maybe not tho?)
+		SpawningChunkData.removeAndSaveChunkByChunkPosition(chunkPos); // save
 
         // remove tiles
         removeTilesInChunk(chunkPos);

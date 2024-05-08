@@ -1,0 +1,5 @@
+on very rare occasions the vertical chunks renders higher/lower than its supposed to.
+
+when you get the items from the tombstone back it is possible that the amount of some items will be one too many if the player doesnt have the inventory for all of the stuff that the tombstone was storing.
+
+sometimes there will spawn a block on visual background layer for the underground despite it being above ground.

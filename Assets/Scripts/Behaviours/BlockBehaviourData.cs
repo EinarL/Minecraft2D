@@ -25,7 +25,8 @@ public static class BlockBehaviourData
 		{ "Wool", new BreakCloth() },
 		{ "Furnace", new BreakStone() },
 		{ "Glass", new BreakGlass() },
-		{ "Bedrock", new BreakBedrock() }
+		{ "Bedrock", new BreakBedrock() },
+		{ "Tombstone", new BreakTombstone() }
 
 	};
 
@@ -39,7 +40,8 @@ public static class BlockBehaviourData
 		{ "Grass", new DropNothing() },
 		{ "Furnace", new PickaxeDrop() },
 		{ "CoalOre", new PickaxeDrop() },
-		{ "Glass", new DropNothing() }
+		{ "Glass", new DropNothing() },
+		{ "Tombstone", "Tombstone" }
 	};
 
 	private static Hashtable rightClickBehaviours = new Hashtable()
@@ -92,12 +94,14 @@ public static class BlockBehaviourData
 		return digBehaviours[blockName] as BreakBehaviour;
 	}
 
-	public static ItemDropBehaviour getItemDropBehaviour(string blockName) 
+	public static ItemDropBehaviour getItemDropBehaviour(string blockName, Vector2 blockPos) 
 	{
-		ItemDropBehaviour dropBehaviour = itemDropBehaviours[blockName] as ItemDropBehaviour;
+		object dropBehaviour = itemDropBehaviours[blockName];
 
 		if (dropBehaviour == null) return new ItemDropBehaviour();
-		return dropBehaviour;
+		// blocks like tombstones and chests need their block positions passed in so we need to do a special case here
+		if (dropBehaviour.Equals("Tombstone")) return new TombstoneDrop(blockPos);
+		return dropBehaviour as ItemDropBehaviour;
 	}
 
 	public static RightClickBlockBehaviour getRightClickBehaviour(string blockName)

@@ -35,7 +35,7 @@ public class BlockScript : MonoBehaviour
 		breakAnimationObject = Resources.Load("Prefabs\\BreakBlockAnimation") as GameObject;
         // initialize break behaviour
         breakBehaviour = BlockBehaviourData.getBreakBehaviour(gameObject.name);
-		itemDropBehaviour = BlockBehaviourData.getItemDropBehaviour(gameObject.name);
+		itemDropBehaviour = BlockBehaviourData.getItemDropBehaviour(gameObject.name, transform.position);
 		rightClickBehaviour = BlockBehaviourData.getRightClickBehaviour(gameObject.name);
 
 		Transform audioParent = GameObject.Find("Audio").transform;
@@ -125,8 +125,15 @@ public class BlockScript : MonoBehaviour
 	 */
 	public void breakBlock()
 	{
-		GameObject itemToDrop = itemDropBehaviour.dropItem(gameObject.name, toolBreakingWith); // get item to drop
-		if(itemToDrop != null) Instantiate(itemToDrop, transform.position, transform.rotation); // spawn item
+		List<GameObject> itemsToDrop = itemDropBehaviour.dropItem(gameObject.name, toolBreakingWith); // get items to drop
+		if (itemsToDrop != null)
+		{
+			foreach (GameObject item in itemsToDrop)
+			{
+				Instantiate(item, transform.position, transform.rotation); // spawn item
+			}
+			
+		}
 
 		SpawningChunkData.updateChunkData(transform.position.x, transform.position.y, 0, LayerMask.LayerToName(gameObject.layer));
 
@@ -161,7 +168,6 @@ public class BlockScript : MonoBehaviour
 	 */
 	public void createBackgroundVisualBlock()
 	{
-		Debug.Log(SpawningChunkData.getVerticalLineHeight(transform.position.x) + " >= " + transform.position.y);
 		// check if this block is below the surface level, then we need to display a background block
 		if (SpawningChunkData.getVerticalLineHeight(transform.position.x) >= transform.position.y)
 		{

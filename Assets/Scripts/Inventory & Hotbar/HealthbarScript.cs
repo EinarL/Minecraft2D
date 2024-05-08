@@ -111,6 +111,10 @@ public class HealthbarScript : MonoBehaviour
 		{
 			heartBackgrounds[i].transform.GetChild(0).GetComponent<Image>().color = new Color(1, 1, 1, 0); // make it invisible
 		}
+		for (int j = 0; j < heartBackgrounds.Length; j++) // make sure that the background image is normal, it might be white if we stop the flashing coroutine at a specific time 
+		{
+			heartBackgrounds[j].sprite = normalBackground;
+		}
 	}
 
     // Coroutine that flashes the hearts to be white when taking damage

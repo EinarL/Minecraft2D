@@ -10,7 +10,7 @@ public class PickaxeDrop : ItemDropBehaviour
 
 	}
 	// only drops the item if its mined with a pickaxe
-	public override GameObject dropItem(string gameObjectName, ToolInstance usingTool)
+	public override List<GameObject> dropItem(string gameObjectName, ToolInstance usingTool)
 	{
 		if (usingTool == null) return null;
 

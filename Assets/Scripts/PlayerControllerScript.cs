@@ -271,7 +271,6 @@ public class PlayerControllerScript : MonoBehaviour
         gameObject.transform.position = new Vector2(0,0);
     }
 
-
 	public void die()
     {
         anim.SetBool("isDead", true);

@@ -42,6 +42,85 @@ public class JsonDataService : IDataService
 		}
 	}
 
+	/**
+	 * this currently can only add to tombstone data which looks like [[xPos, yPos, inv], [xPos,yPos, inv], ...]
+	 * if i need this implementation for other things then i should probably change this to an abstract class and have this function be virtual.
+	 * so that i can make different implementations for this function.
+	 */
+	public bool appendToData(string filename, object[] data)
+	{
+		string path = Application.persistentDataPath + folderPath + filename;
+		// if directory doesnt exist, the create it
+		if (!Directory.Exists(Application.persistentDataPath + folderPath))
+		{
+			Directory.CreateDirectory(Application.persistentDataPath + folderPath);
+		}
+		try
+		{
+			if (File.Exists(path))
+			{
+				List<object[]> dataContent = loadData<List<object[]>>(filename);
+
+				dataContent.Add(data);
+
+				File.WriteAllText(path, JsonConvert.SerializeObject(dataContent));
+			}
+			else
+			{
+				using FileStream stream = File.Create(path);
+				stream.Close();
+				File.WriteAllText(path, JsonConvert.SerializeObject(new object[] { data }));
+			}
+
+			return true;
+		}
+		catch (Exception e)
+		{
+			Debug.LogError($"Unable to save data due to: {e.Message} {e.StackTrace}");
+			return false;
+		}
+	}
+
+	/**
+	 * i should create a subclass for these tombstone functions.
+	 */
+	public void removeTombstoneData(float xPos, float yPos)
+	{
+		string path = Application.persistentDataPath + folderPath + "tombstone.json";
+		// if directory doesnt exist, the create it
+		if (!Directory.Exists(Application.persistentDataPath + folderPath))
+		{
+			Directory.CreateDirectory(Application.persistentDataPath + folderPath);
+		}
+		try
+		{
+			if (File.Exists(path))
+			{
+				List<object[]> dataContent = loadData<List<object[]>>("tombstone.json");
+
+				List<object[]> replacementData = new List<object[]>();
+				foreach (object[] tombstone in dataContent)
+				{
+					if (!((Double)tombstone[0] == xPos && (Double)tombstone[1] == yPos)) // if this is not the tombstone we want to remove
+					{
+						replacementData.Add(tombstone);
+					}
+				}
+
+				File.WriteAllText(path, JsonConvert.SerializeObject(replacementData));
+			}
+			else
+			{
+				Debug.LogError("tombstone.json file doesnt exist!");
+			}
+
+		}
+		catch (Exception e)
+		{
+			Debug.LogError($"Unable to edit data due to: {e.Message} {e.StackTrace}");
+		}
+	}
+
 	public T loadData<T>(string filename)
 	{
 		string path = Application.persistentDataPath + folderPath + filename;
@@ -66,5 +145,6 @@ public class JsonDataService : IDataService
 	{
 		return File.Exists(Application.persistentDataPath + folderPath + filename);
 	}
+
 
 }

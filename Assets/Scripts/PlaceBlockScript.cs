@@ -116,7 +116,14 @@ public class PlaceBlockScript : MonoBehaviour
 
 		if (placedBlock.tag.Equals("FallType"))
         {
-            placedBlock.GetComponent<FallScript>().fall();
+            // we need FallScript to execute its Start() function before we call fall()
+            IEnumerator executeAfterStart(FallScript fallScript)
+            {
+                yield return null;
+                fallScript.fall();
+            }
+
+            StartCoroutine(executeAfterStart(placedBlock.GetComponent<FallScript>()));
         }
         
         
