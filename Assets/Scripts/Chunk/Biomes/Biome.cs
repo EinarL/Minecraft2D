@@ -53,7 +53,8 @@ public abstract class Biome
 			addVerticalLineToChunk(chunk, chunkIndex, vLine);
 
 			chunkIndex--;
-			verticalLineHeights[vLineHeightIndex] = height;
+			verticalLineHeights[vLineHeightIndex] = height < 0 ? height : height - 1; // idk why i need to do height-1 when its a positive number but it fixes a bug
+			Debug.Log("Left chunk vLine height: " + height);
 			vLineHeightIndex++;
 			height = getNewHeight(height, false);
 		}
@@ -93,7 +94,7 @@ public abstract class Biome
 			addVerticalLineToChunk(chunk, chunkIndex, vLine);
 
 			chunkIndex++;
-			verticalLineHeights[vLineHeightIndex] = height;
+			verticalLineHeights[vLineHeightIndex] = height < 0 ? height : height - 1; // idk why i need to do height-1 when its a positive number but it fixes a bug
 			vLineHeightIndex++;
 			height = getNewHeight(height, true);
 		}
