@@ -10,7 +10,7 @@ public class ChunkData
 	private List<float[]> backBackgroundBlocks = new List<float[]>(); // list of type {[x,y, blockID]}
 	private List<float[]> backgroundVisualBlocks = new List<float[]>(); // list of type {[x,y, blockID]}
 	private int chunkPosition;
-	private float startHeight; // height of the chunk (height of grass block)
+	private float startHeight = -2.5f; // height of the chunk (height of grass block)
 	// need to also have here the variables dontGoUpRight, dontGoUpLeft, etc.
 	private List<object[]> entities; // list of entities in this chunk // of type {[x, y, entityName], [x, y, entityName], ...}
 
@@ -23,7 +23,7 @@ public class ChunkData
 	// keeps track of where ores spawned, this is needed for a smooth transition for ores in the next chunk
 	private Hashtable prevOreSpawns = new Hashtable(); // (y, blockID) 
 
-	public ChunkData(int chunkPosition, int[,] chunkData, float startHeight, Hashtable prevOreSpawns, List<float[]> frontBackgroundBlocks, List<object[]> entities, float[] vLineHeights)
+	public ChunkData(int chunkPosition, int[,] chunkData, float startHeight, Hashtable prevOreSpawns, List<float[]> frontBackgroundBlocks, List<object[]> entities, float[] vLineHeights, List<float[]> backgroundVisualBlocks)
 	{
 		this.chunkData = chunkData;
 		this.chunkPosition = chunkPosition;
@@ -32,6 +32,7 @@ public class ChunkData
 		this.frontBackgroundBlocks = frontBackgroundBlocks;
 		this.entities = entities;
 		verticalLineHeights = vLineHeights;
+		this.backgroundVisualBlocks = backgroundVisualBlocks;
 	}
 
 	public void changeBlock(float x, float y, int newBlockID, string layer = "Default")

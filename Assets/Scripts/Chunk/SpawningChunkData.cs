@@ -17,6 +17,8 @@ public static class SpawningChunkData
 	private static float rightMostY;// height of the right most vertical line on the right most chunk
 	private static Hashtable prevSpawnedOresRight = new Hashtable();
 	private static Hashtable prevSpawnedOresLeft = new Hashtable(); // ores in the previously spawned vLine. (vLineIndex, blockID)
+	public static int[] prevVerticalLineRight; // the previous vertical line that was rendered on a right chunk, represented with block ID's
+	public static int[] prevVerticalLineLeft;
 	private static int dontGoDownLeft = 0; // 0 represents that it can go down, but some number n means that it cant go down for the next n blocks
 	private static int dontGoDownRight = 0;
 	private static int dontGoUpLeft = 0;

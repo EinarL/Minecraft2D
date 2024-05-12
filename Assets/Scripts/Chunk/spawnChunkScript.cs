@@ -185,7 +185,9 @@ public class spawnChunkScript : MonoBehaviour
 		if (SaveChunk.exists(chunkStart))
         {
 			chunkData = SaveChunk.load(chunkStart);
-        }
+            if (fromRight) SpawningChunkData.prevVerticalLineLeft = getPrevVerticalLineFromChunk(false, chunkData.getChunkData());
+            else SpawningChunkData.prevVerticalLineRight = getPrevVerticalLineFromChunk(true, chunkData.getChunkData());
+		}
         else
         {
             if (fromRight) // spawning from right to left
@@ -205,6 +207,20 @@ public class spawnChunkScript : MonoBehaviour
         SpawningChunkData.addRenderedChunk(chunkData);
 		renderSavedChunk(chunkData, !fromRight);
 	}
+
+    /**
+     * gets the most recent vertical line that was rendered in a right/left chunk
+     * 
+     */
+    private int[] getPrevVerticalLineFromChunk(bool rightChunk, int[,] chunkData)
+    {
+        int[] vLine = new int[Math.Abs(lowestBlockPos) + 80]; // maxBuildHeight is 80
+        for (int i = 0; i < chunkData.GetLength(1); i++)
+        {
+            vLine[i] = chunkData[rightChunk ? 0 : 9, i];
+        }
+        return vLine;
+    }
 
     /**
      * Deletes/unrenderes all objects in the given chunk

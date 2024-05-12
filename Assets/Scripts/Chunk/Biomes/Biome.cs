@@ -16,7 +16,7 @@ public abstract class Biome
 	public int chunkSize;
 	public int highestStartSpawnY = 20;
 	public int lowestStartSpawnY = -15;
-	public int[] biomeLength = new int[] {3,30}; // min and max biome length, in chunks; (both inclusive)
+	public int[] biomeLength = new int[] {5,30}; // min and max biome length, in chunks; (both inclusive)
 
 	public Biome()
 	{
@@ -29,24 +29,31 @@ public abstract class Biome
 		int[,] chunk = new int[blocksInChunk, maxAmountOfBlocksInLine]; // 2d array representing the blocks with the ID's of the blocks
 
 		List<float[]> frontBackgroundBlocks = new List<float[]>();
+		List<float[]> backgroundVisualBlocks = new List<float[]>();
+
 		List<object[]> entities = new List<object[]>();
 
 		float chunkEnd = chunkStart + chunkSize;
-		int[] vLine;
+		int[] vLine = SpawningChunkData.prevVerticalLineLeft;
 		float height = SpawningChunkData.getLeftMostY();
+		float prevLineHeight = height;
 		Hashtable prevSpawnedOresLeft = SpawningChunkData.getPrevSpawnedOresLeft();
 		float[] verticalLineHeights = new float[10];
 		int vLineHeightIndex = 0;
 		int chunkIndex = chunkSize - 1;
 		for (float i = chunkEnd - blockSize; i >= chunkStart; i -= blockSize)
 		{
-			// returns {vLine, blocksToAddToFrontBackgroundLayer {{[x,y], blockID}, {[x,y], blockID}, ...}, entity }
-			object[] returnValue = renderLine(height, i + blockSize / 2, chunkIndex, chunkStart, prevSpawnedOresLeft);
+			// returns {vLine, blocksToAddToFrontBackgroundLayer, entity, backgroundVisualBlocks }
+			object[] returnValue = renderLine(height, i + blockSize / 2, chunkIndex, chunkStart, prevSpawnedOresLeft, prevLineHeight, vLine);
 			vLine = (int[])returnValue[0];
 			prevSpawnedOresLeft = getOreSpawnsFromVerticalLine(vLine);
 			foreach (float[] value in (List<float[]>)returnValue[1]) // for each value in frontBackgroundBlocksToAdd
 			{
 				frontBackgroundBlocks.Add(value); // add block info to the list
+			}
+			foreach (float[] value in (List<float[]>)returnValue[3]) // for each value in backgroundVisualBlocks
+			{
+				backgroundVisualBlocks.Add(value); // add block info to the list
 			}
 			if (returnValue[2] != null) entities.Add((object[])returnValue[2]); // add entity to list
 
@@ -54,12 +61,13 @@ public abstract class Biome
 
 			chunkIndex--;
 			verticalLineHeights[vLineHeightIndex] = height < 0 ? height : height - 1; // idk why i need to do height-1 when its a positive number but it fixes a bug
-			Debug.Log("Left chunk vLine height: " + height);
 			vLineHeightIndex++;
+			prevLineHeight = height;
 			height = getNewHeight(height, false);
 		}
 
-		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresLeft, frontBackgroundBlocks, entities, verticalLineHeights);
+		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresLeft, frontBackgroundBlocks, entities, verticalLineHeights, backgroundVisualBlocks);
+		SpawningChunkData.prevVerticalLineLeft = vLine;
 		SaveChunk.save(chunkData);
 
 		return chunkData;
@@ -70,24 +78,30 @@ public abstract class Biome
 		int[,] chunk = new int[blocksInChunk, maxAmountOfBlocksInLine]; // 2d array representing the blocks with the ID's of the blocks
 
 		List<float[]> frontBackgroundBlocks = new List<float[]>();
+		List<float[]> backgroundVisualBlocks = new List<float[]>();
 		List<object[]> entities = new List<object[]>();
 
 		float chunkEnd = chunkStart + chunkSize;
-		int[] vLine;
+		int[] vLine = SpawningChunkData.prevVerticalLineRight;
 		float height = SpawningChunkData.getRightMostY();
+		float prevLineHeight = height;
 		float[] verticalLineHeights = new float[10];
 		int vLineHeightIndex = 0;
 		Hashtable prevSpawnedOresRight = SpawningChunkData.getPrevSpawnedOresRight();
 		int chunkIndex = 0;
 		for (float i = chunkStart + blockSize / 2; i < chunkEnd; i += blockSize)
 		{
-			// returns {vLine, blocksToAddToFrontBackgroundLayer {{[x,y], blockID}, {[x,y], blockID}, ...}, entity }
-			object[] returnValue = renderLine(height, i, chunkIndex, chunkStart, prevSpawnedOresRight);
+			// returns {vLine, blocksToAddToFrontBackgroundLayer, entity, backgroundVisualBlocks }
+			object[] returnValue = renderLine(height, i, chunkIndex, chunkStart, prevSpawnedOresRight, prevLineHeight, vLine);
 			vLine = (int[])returnValue[0];
 			prevSpawnedOresRight = getOreSpawnsFromVerticalLine(vLine);
 			foreach (float[] value in (List<float[]>)returnValue[1]) // for each value in frontBackgroundBlocksToAdd
 			{
 				frontBackgroundBlocks.Add(value); // add block info to the list
+			}
+			foreach (float[] value in (List<float[]>)returnValue[3]) // for each value in backgroundVisualBlocks
+			{
+				backgroundVisualBlocks.Add(value); // add block info to the list
 			}
 			if (returnValue[2] != null) entities.Add((object[])returnValue[2]); // add entity to list
 
@@ -96,10 +110,12 @@ public abstract class Biome
 			chunkIndex++;
 			verticalLineHeights[vLineHeightIndex] = height < 0 ? height : height - 1; // idk why i need to do height-1 when its a positive number but it fixes a bug
 			vLineHeightIndex++;
+			prevLineHeight = height;
 			height = getNewHeight(height, true);
 		}
 
-		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresRight, frontBackgroundBlocks, entities, verticalLineHeights);
+		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresRight, frontBackgroundBlocks, entities, verticalLineHeights, backgroundVisualBlocks);
+		SpawningChunkData.prevVerticalLineRight = vLine;
 		SaveChunk.save(chunkData);
 
 		return chunkData;
@@ -206,12 +222,177 @@ public abstract class Biome
 	 *			List<object[]> a list of blocks that go in the frontBackground layer
 	 *			the list is of type: {{[x,y], blockID}, {[x,y], blockID}, ...}
 	 */
-	public abstract object[] renderLine(float startHeight, float xPos, int xIndex, int chunkPos, Hashtable prevLineOreSpawns);
+	public abstract object[] renderLine(float startHeight, float xPos, int xIndex, int chunkPos, Hashtable prevLineOreSpawns, float prevLineHeight, int[] prevVerticalLine);
+
+	/**
+	 * gets in the ID of the top block and the ID of the next 3 blocks, i.e. for plains biome it would be grass block and dirt block.
+	 * 
+	 * int topBlockID - id of the top block, i.e. grass block ID
+	 * int secondBlockID - id of the next 3 blocks, i.e. dirt block ID
+	 * int startBlockIndex - this will define how high the vertical line in the chunk will be
+	 * Hashtable prevLineOreSpawns - the key is the height of the block and the value is the ID of the ore if there is an ore in this position, otherwise null
+	 *								 this is to know if there should spawn more of the same ore in this vertical line or not.
+	 * float prevLineHeight - height of the previous vertical line, this is used to help the spawning of caves
+	 * 
+	 * returns a list of block ID's where each id represents a block in that vertical line, also returns background visual blocks for the background in the cave
+	 * 
+	 */
+	protected virtual object[] createVerticalLine(int topBlockID, int secondBlockID, int startBlockIndex, Hashtable prevLineOreSpawns, float prevLineHeight, int[] prevVerticalLine, float xPos)
+	{
+		if (prevLineHeight > 0) prevLineHeight -= 1; // this is to fix some bug, idk why i need to -1 when its a positive number
+		List<float[]> backgroundVisualBlocks = new List<float[]>(); // list of type {[x,y, blockID], ...}, these are the blocks that are in the background of a cave
+
+		int[] verticalLine = new int[maxAmountOfBlocksInLine]; // represents the blocks in the line with the blocks ID's // on the Default layer
+		int spawnCaveIn = -1; // if this is a positive number, then we should start spawning a cave in spawnCaveIn blocks.
+		int[] caveSpawnInfo = new int[] { };
+
+		int i;
+		for (i = 0; i < 4; i++) // first, spawn in four blocks of dirt/sand
+		{
+			if (spawnCaveIn == -1)
+			{
+				caveSpawnInfo = decideIfSpawnCave(prevVerticalLine, startBlockIndex, prevLineHeight, i == 0); // returns int[]{-1 if we shouldn't spawn a cave, caveOffset, caveHeight}
+				if (caveSpawnInfo[0] != -1)
+				{
+					spawnCaveIn = caveSpawnInfo[1];
+					if (spawnCaveIn == 0)
+					{	
+						spawnCaveIn = -1;
+
+						for(int _ = 0; _ < caveSpawnInfo[2]; _++)
+						{
+							if (i == 0) backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(startBlockIndex), topBlockID }); // e.g. grass block/sand
+							else if (i < 4) backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(startBlockIndex), secondBlockID }); // dirt/sand
+							else backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(startBlockIndex), 3 }); // stone
+							i++;
+							startBlockIndex++;
+						}
+						if (i >= 4) break;
+					}
+					spawnCaveIn--;
+				}
+			}
+			else if (spawnCaveIn > 0) spawnCaveIn--;
+			else
+			{	// spawn cave
+				spawnCaveIn = -1;
+
+				for (int _ = 0; _ < caveSpawnInfo[2]; _++)
+				{
+					if (i == 0) backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(startBlockIndex), topBlockID }); // e.g. grass block/sand
+					else if (i < 4) backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(startBlockIndex), secondBlockID }); // dirt/sand
+					else backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(startBlockIndex), 3 }); // stone
+					i++;
+					startBlockIndex++;
+				}
+				if (i >= 4) break;
+			}
+
+
+			if (i == 0)
+			{
+				verticalLine[startBlockIndex] = topBlockID;
+			}
+			else verticalLine[startBlockIndex] = secondBlockID;
+			startBlockIndex++;
+		}
+
+
+		// now spawn in the rest, i.e. stone, ores and etc.
+		while (startBlockIndex < verticalLine.Length - 1) // place stone, ores, etc. up until the last block
+		{
+			if (spawnCaveIn == -1)
+			{
+				caveSpawnInfo = decideIfSpawnCave(prevVerticalLine, startBlockIndex, prevLineHeight, false);
+				
+				if (caveSpawnInfo[0] != -1)
+				{
+					//Debug.Log("spawning cave with height: " + caveSpawnInfo[2]);
+					spawnCaveIn = caveSpawnInfo[1];
+					if (spawnCaveIn == 0)
+					{
+						for(int j = startBlockIndex; j < startBlockIndex + caveSpawnInfo[2]; j++)
+						{
+							backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(j), 3 }); // add background visual blocks for the cave
+						}
+						startBlockIndex += caveSpawnInfo[2]; // spawn cave
+						spawnCaveIn = -1;
+						continue;
+					}
+					// else
+					spawnCaveIn--;
+				}
+			}
+			else if (spawnCaveIn > 0) spawnCaveIn--;
+			else
+			{
+				// here we should spawn in a cave
+				for (int j = startBlockIndex; j < startBlockIndex + caveSpawnInfo[2]; j++)
+				{
+					backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(j), 3 }); // add background visual blocks for the cave
+				}
+				startBlockIndex += caveSpawnInfo[2]; // spawn cave
+				spawnCaveIn = -1;
+				continue;
+			}
+
+
+			GameObject aboveGameObject = BlockHashtable.getBlockByID(verticalLine[startBlockIndex - 1]);
+			if (aboveGameObject != null)
+			{
+				// if the block next to this one is an ore, then maybe spawn that same ore again
+				if (prevLineOreSpawns[startBlockIndex] != null) verticalLine[startBlockIndex] = OreSpawnScript.chanceAtSpawningSameOre((int)prevLineOreSpawns[startBlockIndex]);
+				else if (aboveGameObject.gameObject.tag == "Ore") verticalLine[startBlockIndex] = OreSpawnScript.chanceAtSpawningSameOre(verticalLine[startBlockIndex - 1]); // if the above block is an ore
+				else verticalLine[startBlockIndex] = OreSpawnScript.spawnOre(blockIndexToYPosition(startBlockIndex));
+			}
+			else verticalLine[startBlockIndex] = 3;
+
+			startBlockIndex++;
+		}
+
+		verticalLine[139] = 4; // bedrock is last block
+
+		return new object[] { verticalLine, backgroundVisualBlocks};
+	}
+	/**
+	 * 
+	 * returns int[]{-1 if we shouldn't spawn a cave, caveOffset, caveHeight}
+	 */
+	private int[] decideIfSpawnCave(int[] prevVerticalLine, int blockIndex, float prevLineHeight, bool atTop)
+	{
+		int checkCaveOffset = atTop ? 0 : 2; // how many blocks below the "current height" will you check if there was a cave in the previous 
+		// lets check if we are in the process of spawning in a cave 
+		// if prevVerticalLine != null && we are underground && not by the end of the list (close to bedrock) && there is a cave on the prev line (we check 2 blocks below bcuz caves can go 2 blocks up)
+		if (prevVerticalLine != null && blockIndexToYPosition(blockIndex) <= prevLineHeight && blockIndex+5 < prevVerticalLine.Length && prevVerticalLine[blockIndex+checkCaveOffset] == 0)
+		{
+			int caveHeight = 1;
+			int caveIndex = blockIndex + 3;
+			while (prevVerticalLine[caveIndex] == 0) // find the height of the cave
+			{
+				caveHeight++;
+				caveIndex++;
+			}
+			if (caveHeight <= 1) return new int[] { -1 };
+			int[] caveOffsetAndHeight = CaveSpawnScript.continueSpawningCave(caveHeight, (int)blockIndexToYPosition(blockIndex+2));
+			if (caveOffsetAndHeight[0] == -1 ) return caveOffsetAndHeight;
+			if (atTop && (caveOffsetAndHeight[0] < 2 || caveOffsetAndHeight[0] == 4)) caveOffsetAndHeight[0] = 2; // if were at the top then we dont want the cave to go up
+			return new int[] { 1, caveOffsetAndHeight[0], caveOffsetAndHeight[1] };
+		}
+
+		// otherwise we check if we should start spawning a cave
+		int caveH = CaveSpawnScript.spawnCave(blockIndexToYPosition(blockIndex)); // returns -1 if we shouldn't spawn in a cave
+		return new int[] { caveH, 0, caveH };
+	}
 
 	// converts a index from a list to a y position in the world where the block should spawn
 	public float blockIndexToYPosition(int blockIndex)
 	{
 		return maxBuildHeight - blockIndex - 0.5f;
+	}
+
+	private int yPositionToBlockIndex(float yPos)
+	{
+		return (int)(maxBuildHeight - yPos - 0.5f);
 	}
 
 }

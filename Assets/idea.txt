@@ -327,4 +327,8 @@ then checking for all furnaces in the list, which has the same world position as
 when we open the furnace we need to add the items to the furnace slots
 
 
-x*10 = 76.8
+
+How i will implement caves:
+make a CaveSpawnScript that can choose with like .5% chance at starting to spawn a cave, if it was already spawning a cave at this position then
+continue spawning the cave, make the cave randomly bigger/smaller with some constraints which should lead the cave also randomly going up/down.
+and have a small chance to stop spawning the cave, gradually closing it.

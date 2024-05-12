@@ -168,7 +168,6 @@ public class BlockScript : MonoBehaviour
 	 */
 	public void createBackgroundVisualBlock()
 	{
-		Debug.Log(SpawningChunkData.getVerticalLineHeight(transform.position.x) + " >= " + transform.position.y + "     .... " + (SpawningChunkData.getVerticalLineHeight(transform.position.x) >= transform.position.y));
 		// check if this block is below the surface level, then we need to display a background block
 		if (SpawningChunkData.getVerticalLineHeight(transform.position.x) >= transform.position.y)
 		{
