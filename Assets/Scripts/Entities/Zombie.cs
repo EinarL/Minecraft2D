@@ -4,15 +4,6 @@ using UnityEngine;
 
 public class Zombie : Mob
 {
-
-	// Start is called before the first frame update
-	void Start()
-    {
-		initializeEntity();
-		initializeAudio();
-		StartCoroutine(decideIfMakeNoise());
-	}
-
 	/**
 	 * drops loot and destroys the gameobject
 	 */

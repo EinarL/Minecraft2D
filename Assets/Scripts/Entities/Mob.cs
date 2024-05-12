@@ -11,15 +11,140 @@ public abstract class Mob : Entity
 	public AudioSource sayAudioSource;
 	private float makeNoiseChance = 0.04f;
 	protected bool isHunting = false; // this is true when the mob is hunting the player
+	
+	private int huntPlayerWithinRange = 20; // can see player from within this radius, does not apply to y axis, only x
+	private int huntPlayerWithinYAxis = 5; // if the enemy is x blocks above/below the player then it wont see the player
+	protected float canHurtPlayerWithin = 2; // can damage the player when its within x blocks, applies to x axis
+	protected int damage = 6; // how much the mob damages the player when it hits him, 1 heart is 2 hp
+	protected bool isDamageCoroutineRunning = false;
 
+	protected Transform playerPos;
+	protected HealthbarScript healthbarScript; // script for the health of the player
+
+	// Start is called before the first frame update
+	void Start()
+	{
+		initializeEntity();
+		initializeAudio();
+		StartCoroutine(decideIfMakeNoise());
+		playerPos = GameObject.Find("SteveContainer").transform;
+		healthbarScript = GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>();
+		StartCoroutine(checkIfHuntPlayer());
+	}
 
 	private new void Update()
 	{
-		if(!isHunting) base.Update();
-		else
-		{
+		base.Update();
+		if (isHunting) huntPlayer();
+	}
 
+	/**
+	 * checks if the player is close, if so then it starts hunting the player
+	 */
+	private IEnumerator checkIfHuntPlayer()
+	{
+		while (true)
+		{
+			yield return new WaitForSeconds(2f); // check if player is in range every x seconds
+			if (isPlayerInRange() && !isHunting) startHunting(); // if the mob isnt hunting, then check if it should start hunting
+			else if (isHunting && !isPlayerInRange()) stopHunting(); // if the mob is hunting, then check if it should stop
 		}
+	}
+
+	private void startHunting()
+	{
+		isHunting = true;
+		StopCoroutine(walkingCoroutine); // stop roaming
+		isWalking = false;
+	}
+
+	private void stopHunting()
+	{
+		isHunting = false;
+		anim.SetBool("isWalking", false);
+		walkingCoroutine = StartCoroutine(decideIfWalk()); // start roaming randomly
+	}
+	/**
+	 * returns true if the player is in the range of the mobs visibility
+	 */
+	private bool isPlayerInRange()
+	{
+		float distance = Vector2.Distance(playerPos.position, transform.position);
+
+		// if the player is within range of the mob && the difference in the y axis is <= huntPlayerWithinYAxis
+		return distance <= huntPlayerWithinRange && Mathf.Abs(playerPos.position.y - transform.position.y) <= huntPlayerWithinYAxis;
+	}
+
+	protected virtual bool canHurtPlayer()
+	{
+		float playerDistanceX = Mathf.Abs(playerPos.position.x - transform.position.x);
+		float playerDistanceY = Mathf.Abs(playerPos.position.y - transform.position.y);
+		return playerDistanceX <= canHurtPlayerWithin && playerDistanceY <= 1.5f;
+	}
+
+	protected virtual void huntPlayer()
+	{
+		float playerDistanceX = Mathf.Abs(playerPos.position.x - transform.position.x);
+		if (canHurtPlayer() && isDamageCoroutineRunning == false)
+		{
+			StartCoroutine(damagePlayer());
+		}
+		
+		if(playerDistanceX <= 1) // if player is really close, then dont move
+		{
+			facePlayer();
+			anim.SetBool("isWalking", false);
+			return;
+		}
+		// if we reach this point then we want to move to the player
+		facePlayer(); // turn towards player
+		bool isPlayerOnRightSide = playerPos.position.x > transform.position.x;
+		if (isPlayerOnRightSide) makeDirectionRight(); // make the direction variable be to the right
+		else makeDirectionLeft();
+
+		if (!isPathBlocked())
+		{
+			rb.velocity = new Vector2(direction.x * speed, rb.velocity.y);
+			anim.SetBool("isWalking", true);
+		}
+		else // if path is blocked
+		{
+			anim.SetBool("isWalking", false);
+		}
+
+		if (isBlockInPath()) jump();
+	}
+
+	protected void facePlayer()
+	{
+		bool isPlayerOnRightSide = playerPos.position.x > transform.position.x;
+		if (isPlayerOnRightSide && !isFacingRight()) turnRight();
+		else if (!isPlayerOnRightSide && isFacingRight()) turnLeft();
+	}
+
+	protected virtual IEnumerator damagePlayer()
+	{
+		isDamageCoroutineRunning = true;
+		while (true)
+		{
+			if (!canHurtPlayer())
+			{
+				isDamageCoroutineRunning = false;
+				yield break;
+			}
+			if (healthbarScript.getHealth() > 0)
+			{
+				anim.Play("punch"); // play punch animation
+				healthbarScript.takeDamage(damage); // make player take damage
+				yield return new WaitForSeconds(1.5f);
+			}
+			else
+			{
+				isDamageCoroutineRunning = false;
+				yield break;
+			}
+		}
+		
 	}
 
 	public override void takeDamage(float damage, float playerXPos)

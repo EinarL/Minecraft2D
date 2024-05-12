@@ -18,6 +18,7 @@ public abstract class Entity : MonoBehaviour
 	protected Transform higherBlockCheck; // this checks if there is a 2-high block in the way of where the entity is going
 	protected Transform lowerBlockCheck; // this checks if there is a block where the entity is going (then it needs to jump if there is no higher block)
 	protected Animator anim;
+	protected Coroutine walkingCoroutine;
 
 	public void initializeEntity()
 	{
@@ -26,7 +27,7 @@ public abstract class Entity : MonoBehaviour
 		rb = GetComponent<Rigidbody2D>();
 		anim = GetComponent<Animator>();
 
-		StartCoroutine(decideIfWalk());
+		walkingCoroutine = StartCoroutine(decideIfWalk());
 		//StartCoroutine(makeStepSound());
 	}
 
@@ -148,23 +149,38 @@ public abstract class Entity : MonoBehaviour
 		anim.SetBool("isWalking", false);
 	}
 
+	protected bool isFacingRight()
+	{
+		return transform.rotation.y == -1;
+	}
+
 	public void faceDirection()
 	{
-		bool isFacingRight = transform.rotation.y == -1;
+		bool facingRight = isFacingRight();
 		bool goingRight = direction.x > 0;
 
-		if(goingRight && !isFacingRight) // if going right && the entity is not facing right
+		if(goingRight && !facingRight) // if going right && the entity is not facing right
 		{
-			var rotationVector = transform.rotation.eulerAngles;
-			rotationVector.y = 180;
-			transform.rotation = Quaternion.Euler(rotationVector); // rotate
+			turnRight();
 		}
-		else if(!goingRight && isFacingRight) // if going left && the entity is not facing left
+		else if(!goingRight && facingRight) // if going left && the entity is not facing left
 		{
-			var rotationVector = transform.rotation.eulerAngles;
-			rotationVector.y = 0;
-			transform.rotation = Quaternion.Euler(rotationVector); // rotate
+			turnLeft();
 		}
+	}
+
+	protected void turnRight()
+	{
+		var rotationVector = transform.rotation.eulerAngles;
+		rotationVector.y = 180;
+		transform.rotation = Quaternion.Euler(rotationVector); // rotate
+	}
+
+	protected void turnLeft()
+	{
+		var rotationVector = transform.rotation.eulerAngles;
+		rotationVector.y = 0;
+		transform.rotation = Quaternion.Euler(rotationVector); // rotate
 	}
 
 	/**
@@ -202,8 +218,8 @@ public abstract class Entity : MonoBehaviour
 				anim.SetBool("isWalking", true);
 				float randomDirection = Random.value;
 				// Generate a random direction for the entity's movement
-				if (randomDirection < 0.5) direction = new Vector2(1, 0).normalized;
-				else direction = new Vector2(-1, 0).normalized;
+				if (randomDirection < 0.5) makeDirectionRight();
+				else makeDirectionLeft();
 				faceDirection();
 
 				yield return new WaitForSeconds(Random.Range(walkingTime[0], walkingTime[1])); // walk for a random amount of time
@@ -216,6 +232,16 @@ public abstract class Entity : MonoBehaviour
 			}
 			stopWalking();
 		}
+	}
+
+	protected void makeDirectionRight()
+	{
+		direction = new Vector2(1, 0).normalized;
+	}
+
+	protected void makeDirectionLeft()
+	{
+		direction = new Vector2(-1, 0).normalized;
 	}
 
 	//public abstract IEnumerator makeStepSound();
