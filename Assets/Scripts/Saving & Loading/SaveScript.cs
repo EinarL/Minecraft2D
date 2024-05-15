@@ -14,6 +14,7 @@ public class SaveScript : MonoBehaviour
 	private OpenFurnaceScript openFurnaceScript;
 	private HealthbarScript healthbarScript;
 	private HungerbarScript hungerbarScript;
+	private DayProcessScript dayProcessScript;
 	private static IDataService dataService = new JsonDataService();
 
 	// Start is called before the first frame update
@@ -22,6 +23,7 @@ public class SaveScript : MonoBehaviour
 		openFurnaceScript = GameObject.Find("Canvas").transform.Find("InventoryParent").GetComponent<OpenFurnaceScript>();
 		healthbarScript = GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>();
 		hungerbarScript = GameObject.Find("Canvas").transform.Find("Hungerbar").GetComponent<HungerbarScript>();
+		dayProcessScript = GameObject.Find("CM vcam").transform.Find("SunAndMoonTexture").GetComponent<DayProcessScript>();
 	}
 
     // Update is called once per frame
@@ -37,6 +39,11 @@ public class SaveScript : MonoBehaviour
 			if (!dataService.saveData("health-and-hunger-bar.json", new float[] { health, hunger })) // save health bar and food bar
 			{
 				Debug.LogError("Could not save health and hunger bar file :(");
+			}
+			// save day time
+			if (!dataService.saveData("day-time.json", dayProcessScript.getDataToSave()))
+			{
+				Debug.LogError("Could not save day time file :(");
 			}
 		}
 	}

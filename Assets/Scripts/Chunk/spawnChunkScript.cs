@@ -36,11 +36,13 @@ public class spawnChunkScript : MonoBehaviour
 	private int biomeLength; 
 
     private OpenFurnaceScript openFurnaceScript;
+    private SunLightMovementScript sunLightMovementScript;
 
 	// Start is called before the first frame update
 	void Start()
     {
 		openFurnaceScript = GameObject.Find("Canvas").transform.Find("InventoryParent").GetComponent<OpenFurnaceScript>();
+		sunLightMovementScript = GameObject.Find("Sun").GetComponent<SunLightMovementScript>();
 
 		BlockHashtable.initializeBlockHashtable();
         spawnChunkStrategy = decideBiome(); // dont do this if the biome is already decided, we need to save which biome was rendering when we quit the game
@@ -97,13 +99,11 @@ public class spawnChunkScript : MonoBehaviour
 			{
 				renderChunk(rendered + amountOfChunksToRender * chunkSize);
                 unrenderChunk(rendered); // unrender leftmost chunk
-                // need to unrender chunk rendered
 			}
 			else if (leftMostChunkToRender == rendered - chunkSize) // need to load chunk rendered - chunkSize (leftmost chunk)
             {
 				renderChunk(rendered - chunkSize);
                 unrenderChunk(rendered + (amountOfChunksToRender-1) * chunkSize); // unrender rightmost chunk
-                // need to unrender chunk rendered + (getAmountOfChunksToRender()-1)*chunkSize
             }
             else
             {
@@ -204,6 +204,7 @@ public class spawnChunkScript : MonoBehaviour
                 spawnChunkStrategy = decideBiome();
             }
 		}
+        sunLightMovementScript.addChunkHeight(chunkData.getVerticalLineHeights());
         SpawningChunkData.addRenderedChunk(chunkData);
 		renderSavedChunk(chunkData, !fromRight);
 	}
@@ -248,6 +249,8 @@ public class spawnChunkScript : MonoBehaviour
         }
         SpawningChunkData.overwriteEntities(chunkPos, entities); // save entities
 		openFurnaceScript.saveFurnaces(); // save furnaces
+        ChunkData chunkToRemove = SpawningChunkData.getChunkByChunkPos(chunkPos);
+		if (chunkToRemove != null) sunLightMovementScript.removeChunkHeight(chunkToRemove.getVerticalLineHeights()); // for sun position adjustment
 
 		// TODO: implement so it saves dropped item also (maybe not tho?)
 		SpawningChunkData.removeAndSaveChunkByChunkPosition(chunkPos); // save

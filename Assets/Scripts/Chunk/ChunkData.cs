@@ -102,6 +102,11 @@ public class ChunkData
 		return verticalLineHeights[index];
 	}
 
+	public float[] getVerticalLineHeights()
+	{
+		return verticalLineHeights;
+	}
+
 	public List<object[]> getEntities()
 	{
 		return entities;

@@ -127,24 +127,16 @@ public abstract class Mob : Entity
 		isDamageCoroutineRunning = true;
 		while (true)
 		{
-			if (!canHurtPlayer())
-			{
-				isDamageCoroutineRunning = false;
-				yield break;
-			}
+			if (!canHurtPlayer()) break;
 			if (healthbarScript.getHealth() > 0)
 			{
 				anim.Play("punch"); // play punch animation
 				healthbarScript.takeDamage(damage); // make player take damage
 				yield return new WaitForSeconds(1.5f);
 			}
-			else
-			{
-				isDamageCoroutineRunning = false;
-				yield break;
-			}
+			else break;
 		}
-		
+		isDamageCoroutineRunning = false;
 	}
 
 	public override void takeDamage(float damage, float playerXPos)

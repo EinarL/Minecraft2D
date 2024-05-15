@@ -156,7 +156,7 @@ public static class SpawningChunkData
 		correspondingChunk.setEntities(entities);
 	}
 
-	private static ChunkData getChunkByChunkPos(int chunkPos)
+	public static ChunkData getChunkByChunkPos(int chunkPos)
 	{
 		for (int i = 0; i < renderedChunks.Count; i++)
 		{
