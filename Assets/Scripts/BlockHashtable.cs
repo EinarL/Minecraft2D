@@ -46,7 +46,8 @@ public static class BlockHashtable
 			{ 20, getBlockTileWithName("Wool")},
 			{ 21, getBlockTileWithName("Furnace")},
 			{ 22, getBlockTileWithName("Glass")},
-			{ 23, getBlockTileWithName("Tombstone")}
+			{ 23, getBlockTileWithName("Tombstone")},
+			{ 24, getBlockTileWithName("Torch")}
 		};
 		// id's in blockTiles and blocks hashtable need to be the same for each block
 		blocks = new Hashtable()
@@ -73,7 +74,8 @@ public static class BlockHashtable
 			{ 20, getBlockWithName("Wool")},
 			{ 21, getBlockWithName("Furnace") },
 			{ 22, getBlockWithName("Glass")},
-			{ 23, getBlockWithName("Tombstone")}
+			{ 23, getBlockWithName("Tombstone")},
+			{ 24, getBlockWithName("Torch")}
 		};
 
 		foreach(DictionaryEntry entry in blocks) // create the opposite type of hashtable, i.e. block to ID

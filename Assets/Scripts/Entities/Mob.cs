@@ -5,11 +5,8 @@ using UnityEngine;
 
 public abstract class Mob : Entity
 {
-	private AudioClip[] saySounds = new AudioClip[3];
 	private AudioClip[] hurtSounds = new AudioClip[2]; // the sound that the mob makes when it takes damage
 	private AudioClip deathSound;
-	public AudioSource sayAudioSource;
-	private float makeNoiseChance = 0.04f;
 	protected bool isHunting = false; // this is true when the mob is hunting the player
 	
 	private int huntPlayerWithinRange = 20; // can see player from within this radius, does not apply to y axis, only x
@@ -147,19 +144,6 @@ public abstract class Mob : Entity
 		else makeDeathNoise();
 	}
 
-	public IEnumerator decideIfMakeNoise()
-	{
-		while (true)
-		{
-			float rand = Random.value;
-			if (rand < makeNoiseChance)
-			{
-				makeNoise();
-			}
-			yield return new WaitForSeconds(2.5f); // Wait
-		}
-	}
-
 	private void makeDeathNoise()
 	{
 		sayAudioSource.clip = deathSound;
@@ -171,15 +155,6 @@ public abstract class Mob : Entity
 		var random = new System.Random();
 		int randIndex = random.Next(hurtSounds.Length);
 		AudioClip randClip = hurtSounds[randIndex];
-		sayAudioSource.clip = randClip;
-		sayAudioSource.Play();
-	}
-
-	protected void makeNoise()
-	{
-		var random = new System.Random();
-		int randIndex = random.Next(saySounds.Length);
-		AudioClip randClip = saySounds[randIndex];
 		sayAudioSource.clip = randClip;
 		sayAudioSource.Play();
 	}

@@ -13,12 +13,19 @@ public abstract class Entity : MonoBehaviour
 	protected Vector3 direction;
 	protected int[] walkingTime = new int[] { 1,5}; // min and max walking time
 	protected float health = 10;
+	protected float makeNoiseChance = 0.04f;
+
+	//public AudioClip[] stepSounds = new AudioClip[5];
+	protected AudioClip[] saySounds = new AudioClip[3];
+	//public AudioSource stepAudioSource;
+	protected AudioSource sayAudioSource;
 
 	protected Rigidbody2D rb;
 	protected Transform higherBlockCheck; // this checks if there is a 2-high block in the way of where the entity is going
 	protected Transform lowerBlockCheck; // this checks if there is a block where the entity is going (then it needs to jump if there is no higher block)
 	protected Animator anim;
 	protected Coroutine walkingCoroutine;
+	protected Transform playerTransform;
 
 	public void initializeEntity()
 	{
@@ -26,6 +33,8 @@ public abstract class Entity : MonoBehaviour
 		lowerBlockCheck = transform.Find("LowerBlockCheck");
 		rb = GetComponent<Rigidbody2D>();
 		anim = GetComponent<Animator>();
+		sayAudioSource = GetComponent<AudioSource>();
+		playerTransform = GameObject.Find("SteveContainer").transform;
 
 		walkingCoroutine = StartCoroutine(decideIfWalk());
 		//StartCoroutine(makeStepSound());
@@ -200,6 +209,29 @@ public abstract class Entity : MonoBehaviour
 	{
 		// if there is a block in the way && there is not a block above the block that is in the way
 		return Physics2D.OverlapCircle(lowerBlockCheck.position, 0.05f, LayerMask.GetMask("Default")) && !isPathBlocked();
+	}
+
+	protected virtual IEnumerator decideIfMakeNoise()
+	{
+		while (true)
+		{
+			// if the entity is within 10 blocks on the y value, then it can make noise
+			if(Mathf.Abs(playerTransform.position.y - transform.position.y) <= 10)
+			{
+				float rand = Random.value;
+				if (rand < makeNoiseChance) makeNoise();
+			}
+			yield return new WaitForSeconds(2.5f); // Wait
+		}
+	}
+
+	protected void makeNoise()
+	{
+		var random = new System.Random();
+		int randIndex = random.Next(saySounds.Length);
+		AudioClip randClip = saySounds[randIndex];
+		sayAudioSource.clip = randClip;
+		sayAudioSource.Play();
 	}
 
 	// A coroutine that checks the walking condition every 3 seconds

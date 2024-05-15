@@ -17,6 +17,7 @@ public class DayProcessScript : MonoBehaviour
 	private bool isDay = true;
 	private bool isTransitioningToDay = true; // false if going from day to night, true if going from night to day
 	private float transitionProcess = 0f;
+	private float starTransitionProcess = 0f;
 	private float prevAngle = 170f;
 	private bool hasResetVariables = false;
 
@@ -46,7 +47,7 @@ public class DayProcessScript : MonoBehaviour
 
 		if (dataService.exists("day-time.json"))
 		{
-			// returns: new object[] { angle, isDay, isTransitioningToDay, transitionProcess, prevAngle, hasResetVariables };
+			// returns: new object[] { angle, isDay, isTransitioningToDay, transitionProcess, prevAngle, hasResetVariables, starTransitionProcess };
 			object[] timeInfo = dataService.loadData<object[]>("day-time.json");
 			angle = Convert.ToSingle(timeInfo[0]);
 			isDay = (bool)timeInfo[1];
@@ -54,6 +55,15 @@ public class DayProcessScript : MonoBehaviour
 			transitionProcess = Convert.ToSingle(timeInfo[3]);
 			prevAngle = Convert.ToSingle(timeInfo[4]);
 			hasResetVariables = (bool)timeInfo[5];
+			starTransitionProcess = Convert.ToSingle(timeInfo[6]);
+
+			if (!isDay) spriteRenderer.sprite = moonTexture;
+			float angleInDegrees = angle * Mathf.Rad2Deg;
+			if(angleInDegrees <= 170f && angleInDegrees >= 10f && !isDay)
+			{
+				sunLight.intensity = 0.2f;
+				mainCamera.backgroundColor = nightColor;
+			}
 		} 
 		if (isDay) UpdateStarsOpacity(0f);
 	}
@@ -91,6 +101,7 @@ public class DayProcessScript : MonoBehaviour
 				isTransitioningToDay = !isTransitioningToDay;
 				prevAngle = 170f;
 				transitionProcess = 0f;
+				starTransitionProcess = 0f;
 				hasResetVariables = true;
 			}
 		}else hasResetVariables = false;
@@ -102,7 +113,11 @@ public class DayProcessScript : MonoBehaviour
 			transitionProcess += (angleInDegrees - prevAngle) / 40f;
 			sunLight.intensity = Mathf.Lerp(1f, 0.2f, transitionProcess); // lower intensity of the sunlight
 			mainCamera.backgroundColor = Color.Lerp(dayColor, nightColor, transitionProcess); // change background to night color
-			UpdateStarsOpacity(transitionProcess); // Stars fade in
+			if (transitionProcess >= .5f)
+			{
+				starTransitionProcess += (angleInDegrees - prevAngle) / 20f;
+				UpdateStarsOpacity(starTransitionProcess); // Stars fade in
+			}
 			prevAngle = angleInDegrees;
 		}
 		else if (isTransitioningToDay && (angleInDegrees > 170f || angleInDegrees < 10f)) // night to day
@@ -112,7 +127,11 @@ public class DayProcessScript : MonoBehaviour
 			transitionProcess += (angleInDegrees - prevAngle) / 40f;
 			sunLight.intensity = Mathf.Lerp(0.2f, 1f, transitionProcess); // increase intensity of the sunlight
 			mainCamera.backgroundColor = Color.Lerp(nightColor, dayColor, transitionProcess);
-			UpdateStarsOpacity(1 - transitionProcess); // Stars fade out
+			if (transitionProcess <= .5f)
+			{
+				starTransitionProcess += (angleInDegrees - prevAngle) / 20f;
+				UpdateStarsOpacity(1 - starTransitionProcess); // Stars fade out
+			}
 			prevAngle = angleInDegrees;
 		}
 	}
@@ -132,7 +151,7 @@ public class DayProcessScript : MonoBehaviour
 	 */
 	public object[] getDataToSave()
 	{
-		return new object[] { angle, isDay, isTransitioningToDay, transitionProcess, prevAngle, hasResetVariables };
+		return new object[] { angle, isDay, isTransitioningToDay, transitionProcess, prevAngle, hasResetVariables, starTransitionProcess };
 	}
 
 	private void OnDrawGizmos()

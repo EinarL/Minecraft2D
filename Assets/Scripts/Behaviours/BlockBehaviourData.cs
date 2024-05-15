@@ -26,7 +26,8 @@ public static class BlockBehaviourData
 		{ "Furnace", new BreakStone() },
 		{ "Glass", new BreakGlass() },
 		{ "Bedrock", new BreakBedrock() },
-		{ "Tombstone", new BreakTombstone() }
+		{ "Tombstone", new BreakTombstone() },
+		{ "Torch", new BreakWoodInstantly() },
 
 	};
 
@@ -65,7 +66,8 @@ public static class BlockBehaviourData
 		{ "Wool", new object[] { "cloth", 4} },
 		{ "Furnace", new object[]{ "stone", 6 } },
 		{ "Glass", new object[]{ "stone", 6 } },
-		{ "Bedrock", new object[]{ "stone", 6 } }
+		{ "Bedrock", new object[]{ "stone", 6 } },
+		{ "Torch", new object[]{ "wood", 6 }},
 
 	};
 

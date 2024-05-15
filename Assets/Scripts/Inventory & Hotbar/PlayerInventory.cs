@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 /**
  * This script is responsible for:
@@ -16,17 +17,20 @@ public class PlayerInventory : MonoBehaviour
 {
 
     private SpriteRenderer holdingItemSpriteRenderer;
+    private Light2D torchLight;
     private PlaceBlockScript placeBlockScript;
+	private Animator anim;
 
-    private float pickupRange = 1; // can pick up items from within this range
+	private float pickupRange = 1; // can pick up items from within this range
 
 
     // Start is called before the first frame update
     void Start()
     {
 		holdingItemSpriteRenderer = transform.Find("Arm Front").transform.Find("HoldingItemPosition").transform.Find("HoldingItem").GetComponent<SpriteRenderer>();
+        torchLight = holdingItemSpriteRenderer.gameObject.transform.Find("TorchLight").GetComponent<Light2D>();
 		placeBlockScript = GetComponent<PlaceBlockScript>();
-
+		anim = GetComponent<Animator>();
 		InventoryScript.initializeInventory();
         Craft.initializeCrafting();
 	}
@@ -49,6 +53,18 @@ public class PlayerInventory : MonoBehaviour
         {
             holdingItemSpriteRenderer.sprite = Resources.Load<Sprite>("Textures\\BlockTextures\\" + itemName);
 		}
+
+        if (itemName.Equals("Torch"))
+        {
+            anim.SetBool("isHoldingTorch", true);
+            torchLight.enabled = true;
+        }
+        else
+        {
+            anim.SetBool("isHoldingTorch", false);
+            torchLight.enabled = false;
+        }
+
 		placeBlockScript.checkIfHoldingPlaceableItem(itemName);
 	}
 

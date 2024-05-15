@@ -10,11 +10,6 @@ public abstract class Animal : Entity
 	private float runTime = 10; // how many seconds the animal runs after being hit
 	private float runCounter = 0;
 	protected bool isRunning = false;
-	//public AudioClip[] stepSounds = new AudioClip[5];
-	public AudioClip[] saySounds = new AudioClip[3];
-	//public AudioSource stepAudioSource;
-	public AudioSource sayAudioSource;
-	private float makeNoiseChance = 0.04f;
 	private float runningChangeDirectionChance = 0.6f;
 
 
@@ -128,27 +123,6 @@ public abstract class Animal : Entity
 		}
 	}
 
-	public IEnumerator decideIfMakeNoise()
-	{
-		while (true)
-		{
-			float rand = Random.value;
-			if (rand < makeNoiseChance)
-			{
-				makeNoise();
-			}
-			yield return new WaitForSeconds(2.5f); // Wait
-		}
-	}
-
-	public void makeNoise()
-	{
-		var random = new System.Random();
-		int randIndex = random.Next(saySounds.Length);
-		AudioClip randClip = saySounds[randIndex];
-		sayAudioSource.clip = randClip;
-		sayAudioSource.Play();
-	}
 
 	// A coroutine that checks the walking condition every 3 seconds
 	public override IEnumerator decideIfWalk()
