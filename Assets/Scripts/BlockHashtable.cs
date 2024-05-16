@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using static Unity.Collections.AllocatorManager;
@@ -15,6 +16,7 @@ public static class BlockHashtable
 	private static Hashtable blocks;
 	private static Hashtable blockTiles;
 	private static Hashtable blockToID = new Hashtable();
+	private static Hashtable placeBlockBehaviours = new Hashtable();
 	private static Object[] blockObjects;
 	private static Tile[] blockTileTextures;
 
@@ -47,7 +49,10 @@ public static class BlockHashtable
 			{ 21, getBlockTileWithName("Furnace")},
 			{ 22, getBlockTileWithName("Glass")},
 			{ 23, getBlockTileWithName("Tombstone")},
-			{ 24, getBlockTileWithName("Torch")}
+			{ 24, getBlockTileWithName("Torch")},
+			{ 25, getBlockTileWithName("TorchWall")},
+			{ 26, getBlockTileWithName("TorchLeft")},
+			{ 27, getBlockTileWithName("TorchRight")},
 		};
 		// id's in blockTiles and blocks hashtable need to be the same for each block
 		blocks = new Hashtable()
@@ -75,7 +80,16 @@ public static class BlockHashtable
 			{ 21, getBlockWithName("Furnace") },
 			{ 22, getBlockWithName("Glass")},
 			{ 23, getBlockWithName("Tombstone")},
-			{ 24, getBlockWithName("Torch")}
+			{ 24, getBlockWithName("Torch")},
+			{ 25, getBlockWithName("TorchWall")},
+			{ 26, getBlockWithName("TorchLeft")},
+			{ 27, getBlockWithName("TorchRight")},
+		};
+
+		// contains behaviours for blocks that need special functionality upon placing the block, e.g. torches need to be rotated to be placed on right/left wall
+		placeBlockBehaviours = new Hashtable()
+		{
+			{"Torch", new PlaceTorch()}
 		};
 
 		foreach(DictionaryEntry entry in blocks) // create the opposite type of hashtable, i.e. block to ID
@@ -105,6 +119,11 @@ public static class BlockHashtable
 
 		Debug.LogError("Did not find block with name: " + name + " in the Tile sprites folder");
 		return null;
+	}
+
+	public static PlaceBlockBehaviour getPlaceBlockBehaviour(string blockName)
+	{
+		return placeBlockBehaviours[blockName] as PlaceBlockBehaviour;
 	}
 
 	public static GameObject getBlockByID(int id)

@@ -28,7 +28,9 @@ public static class BlockBehaviourData
 		{ "Bedrock", new BreakBedrock() },
 		{ "Tombstone", new BreakTombstone() },
 		{ "Torch", new BreakWoodInstantly() },
-
+		{ "TorchWall", new BreakWoodInstantly() },
+		{ "TorchRight", new BreakWoodInstantly() },
+		{ "TorchLeft", new BreakWoodInstantly() },
 	};
 
 	private static Hashtable itemDropBehaviours = new Hashtable()
@@ -42,7 +44,10 @@ public static class BlockBehaviourData
 		{ "Furnace", new PickaxeDrop() },
 		{ "CoalOre", new PickaxeDrop() },
 		{ "Glass", new DropNothing() },
-		{ "Tombstone", "Tombstone" }
+		{ "Tombstone", "Tombstone" },
+		{ "TorchWall", new TorchDrop() },
+		{ "TorchRight", new TorchDrop() },
+		{ "TorchLeft", new TorchDrop() },
 	};
 
 	private static Hashtable rightClickBehaviours = new Hashtable()
@@ -67,7 +72,6 @@ public static class BlockBehaviourData
 		{ "Furnace", new object[]{ "stone", 6 } },
 		{ "Glass", new object[]{ "stone", 6 } },
 		{ "Bedrock", new object[]{ "stone", 6 } },
-		{ "Torch", new object[]{ "wood", 6 }},
 
 	};
 

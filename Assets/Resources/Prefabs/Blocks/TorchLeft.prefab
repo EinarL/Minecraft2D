@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -4347543958987324741}
   - component: {fileID: -5020272306545019266}
   m_Layer: 7
-  m_Name: Torch
+  m_Name: TorchLeft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 4839058183190948766}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.5, y: -1.5, z: 0}
+  m_LocalPosition: {x: 1.5, y: -3.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -78,7 +78,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 79874a2af83570d419f9ac31cf948cdd, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 7ea6a01fe1d021a4383ad6113bcc0a77, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -184,7 +184,7 @@ Transform:
   m_GameObject: {fileID: 8028140450483603777}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.058, z: 0}
+  m_LocalPosition: {x: -0.266, y: 0.188, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -254,11 +254,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4141116183248208731, guid: c5b2eede203aa1c429ae594998f030da, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.239
       objectReference: {fileID: 0}
     - target: {fileID: 4141116183248208731, guid: c5b2eede203aa1c429ae594998f030da, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.161
+      value: 0.293
       objectReference: {fileID: 0}
     - target: {fileID: 4141116183248208731, guid: c5b2eede203aa1c429ae594998f030da, type: 3}
       propertyPath: m_LocalPosition.z

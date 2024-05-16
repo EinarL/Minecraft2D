@@ -21,7 +21,7 @@ public class PlaceBlockScript : MonoBehaviour
     private bool holdingItemIsPlaceable = false;
     private GameObject holdingItem; // the item that the player is holding
     private BreakBlockScript breakBlockScript;
-    private Tilemap backgroundVisualTiles;
+    public Tilemap backgroundVisualTiles;
 
     private GameObject hoverGrid = null; // this is the grid that gets placed where mouse is
     private Vector2 hoveringOverPosition; // the position that the mouse is hovering over, rounded to a potential block position
@@ -109,11 +109,9 @@ public class PlaceBlockScript : MonoBehaviour
      */
     private void placeBlockInForeground()
     {
-		GameObject placedBlock = Instantiate(holdingItem, hoveringOverPosition, Quaternion.identity); // place block
-        InventoryScript.decrementSlot(InventoryScript.getSelectedSlot()); // remove the block from the inventory
-		// here we need to check if placedBlock is a special type of block which goes on the FrontBackground Layer
-		placedBlock.name = placedBlock.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
+        GameObject placedBlock = placeBlock();
 
+		// here we need to check if placedBlock is a special type of block which goes on the FrontBackground Layer
 		if (FrontBackgroundBlocks.isFrontBackgroundBlock(placedBlock.name)) // if its a "front background" block
 		{
 			placedBlock.layer = LayerMask.NameToLayer("FrontBackground");
@@ -143,11 +141,9 @@ public class PlaceBlockScript : MonoBehaviour
      */
 	private void placeBlockInBackground()
 	{
-		GameObject placedBlock = Instantiate(holdingItem, hoveringOverPosition, Quaternion.identity); // place block
-		InventoryScript.decrementSlot(InventoryScript.getSelectedSlot()); // remove the block from the inventory
-																		  
-		placedBlock.name = placedBlock.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
-	    // here we need to check if placedBlock is a special type of block which goes on the FrontBackground Layer
+		GameObject placedBlock = placeBlock();
+
+		// here we need to check if placedBlock is a special type of block which goes on the FrontBackground Layer
 		if (FrontBackgroundBlocks.isFrontBackgroundBlock(placedBlock.name)) // if its a "front background" block
 		{
 			placedBlock.layer = LayerMask.NameToLayer("FrontBackground");
@@ -171,6 +167,24 @@ public class PlaceBlockScript : MonoBehaviour
 			placedBlock.GetComponent<FallScript>().fall();
 		}
 
+	}
+	//helper function that both placeBlockInForeground() and placeBlockInBackground() use
+	private GameObject placeBlock()
+    {
+		PlaceBlockBehaviour pbBehaviour = BlockHashtable.getPlaceBlockBehaviour(holdingItem.name);
+		GameObject placedBlock;
+		if (pbBehaviour != null)
+		{
+			placedBlock = pbBehaviour.placeBlock(holdingItem, this, breakBlockScript);
+
+			if (placedBlock == null) placedBlock = Instantiate(holdingItem, hoveringOverPosition, Quaternion.identity); // place block
+
+		}
+		else placedBlock = Instantiate(holdingItem, hoveringOverPosition, Quaternion.identity); // place block
+		InventoryScript.decrementSlot(InventoryScript.getSelectedSlot()); // remove the block from the inventory
+		placedBlock.name = placedBlock.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
+
+        return placedBlock;
 	}
 
 	private void createHighlight(Vector2 position)
@@ -277,7 +291,7 @@ public class PlaceBlockScript : MonoBehaviour
     /**
      * returns true if a block in the contactFilter's layer is in holdingItem's (the position of the block where the cursor is) position.
      */
-	private bool checkIfBlockInPosition(ContactFilter2D filter)
+	public bool checkIfBlockInPosition(ContactFilter2D filter)
 	{
 		// if the item is a "Front Background" type, then we cant place it if there already is a block in the FrontBackground in this spot
 		if (FrontBackgroundBlocks.isFrontBackgroundBlock(holdingItem.name)) filter.SetLayerMask(filter.layerMask | LayerMask.GetMask("FrontBackground"));
@@ -324,7 +338,8 @@ public class PlaceBlockScript : MonoBehaviour
 
     private bool isBlockNextToBlock(GameObject futureBlockPos)
     {
-        if(breakBlockScript.isBlockAboveBlock(futureBlockPos, true, true)) return true;
+        // if its a front background block then we dont check if there is a block above, because torches, grass, flowers, etc. cant float below a block
+        if(!FrontBackgroundBlocks.isFrontBackgroundBlock(holdingItem.name) && breakBlockScript.isBlockAboveBlock(futureBlockPos, true, true)) return true;
         if(breakBlockScript.isBlockOnRightSideOfBlock(futureBlockPos, true, true)) return true;
         if(breakBlockScript.isBlockBelowBlock(futureBlockPos, true, true)) return true;
         if(breakBlockScript.isBlockOnLeftSideOfBlock(futureBlockPos, true, true)) return true;
@@ -341,10 +356,6 @@ public class PlaceBlockScript : MonoBehaviour
 		float distance = Vector2.Distance(start, end);
 		if (distance > placingRange) return false; // if its out of the placing range
         distance = Mathf.Min(distance, placingRange);
-												   //direction.Normalize();
-		// Draw the ray for debugging purposes
-		Debug.DrawRay(start, direction * distance, Color.red, 1.0f); // Draw a red ray for 1 second
-
 
 		// Cast the ray
 		RaycastHit2D hit = Physics2D.Raycast(start, direction, distance, LayerMask.GetMask("Default"));
