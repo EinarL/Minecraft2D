@@ -5,16 +5,11 @@ maybe different sound for walking on grass.
 
 make it so that you can place a block in the BackBackground behind an entity and player
 
-
-use raycasts to check if you can place/break a block
-
 picking up items make them fly at you with some velocity and then put in your inventory
 
 there is a bug in the spawning trees when you load a chunk that hasnt finished spawning the entire tree, then you close the game
 and open it again, the game wont know that it was spawning a tree so it wont continue to spawn in the tree
 FIX: have a variable in chunkData that corresponds how much is left off spawning a tree, also the treeHeight
-
-have the correct sound for breaking grass
 
 change how ores spawn
 
@@ -23,3 +18,11 @@ furnaces sometimes cant be accessed due to FrontBacgroundBlocks being on the sam
 change it so that all blocks are tiles initially in a chunk and when the chunk next to the spawns, i.e. the chunk has chunks on both sides of it,
 then change the tiles that are exposed to air to gameObjects
 FIXING THIS WOULD ONLY BOOST PERFORMANCE
+
+finish implementing charcoal
+
+dont have the sky/background as blue below bedrock, rather black
+
+change it so that you can place frontBackgroundBlocks where players and entities are
+
+change the sound for breaking wood blocks

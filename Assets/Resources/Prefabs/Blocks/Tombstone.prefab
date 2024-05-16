@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: -1488470632656384627}
   - component: {fileID: -4347543958987324741}
   - component: {fileID: -5020272306545019266}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Tombstone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -168,7 +168,7 @@ GameObject:
   - component: {fileID: 9155322309004197875}
   - component: {fileID: 1038037143727198962}
   - component: {fileID: 4750331195921790500}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: RIP
   m_TagString: Untagged
   m_Icon: {fileID: 0}

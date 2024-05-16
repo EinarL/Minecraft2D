@@ -279,38 +279,78 @@ public class BreakBlockScript : MonoBehaviour
 		return headPosition.transform.position.y < block.transform.position.y - block.bounds.size.y/2;
 
 	}
-	// checks if there is a block on the right side of GameObject block (right next to it)
+    // checks if there is a block on the right side of GameObject block (right next to it)
     // bool includeBackBackground: true if you want to check if there is a block on the right side with layer: BackBackground or Default/foreground
     //                             if its false then you're only checking if there is a Default layer block next to it
-	public bool isBlockOnRightSideOfBlock(GameObject block, bool includeBackBackground = false)
+    public bool isBlockOnRightSideOfBlock(GameObject block, bool includeBackBackground = false, bool includeFrontBackground = false)
     {
         Vector2 rightBlockPosition = new Vector2(block.transform.position.x + block.GetComponent<SpriteRenderer>().bounds.size.x, block.transform.position.y);
         int mask = LayerMask.GetMask("Default");
         if (includeBackBackground) mask |= LayerMask.GetMask("BackBackground"); // add BackBackground
+        if (includeFrontBackground)
+        {
+            int frontBackgroundMask = LayerMask.GetMask("FrontBackground");
+            Collider2D blockHit = Physics2D.OverlapCircle(rightBlockPosition, 0.1f, frontBackgroundMask);
+            if (blockHit != null) // if hit block on frontBackground
+            {
+				blockHit.name = blockHit.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
+				if (FrontBackgroundBlocks.isFrontBackgroundBlockPlaceableNextTo(blockHit.name)) return true; // if you can place a block next to this block
+            }
+		}
 		return Physics2D.OverlapCircle(rightBlockPosition, 0.1f, mask);
 	}
 
-	public bool isBlockOnLeftSideOfBlock(GameObject block, bool includeBackBackground = false)
+	public bool isBlockOnLeftSideOfBlock(GameObject block, bool includeBackBackground = false, bool includeFrontBackground = false)
 	{
 		Vector2 leftBlockPosition = new Vector2(block.transform.position.x - block.GetComponent<SpriteRenderer>().bounds.size.x, block.transform.position.y);
 		int mask = LayerMask.GetMask("Default");
 		if (includeBackBackground) mask |= LayerMask.GetMask("BackBackground"); // add BackBackground
+		if (includeFrontBackground)
+		{
+			int frontBackgroundMask = LayerMask.GetMask("FrontBackground");
+			Collider2D blockHit = Physics2D.OverlapCircle(leftBlockPosition, 0.1f, frontBackgroundMask);
+			if (blockHit != null) // if hit block on frontBackground
+			{
+				blockHit.name = blockHit.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
+				if (FrontBackgroundBlocks.isFrontBackgroundBlockPlaceableNextTo(blockHit.name)) return true; // if you can place a block next to this block
+			}
+		}
 		return Physics2D.OverlapCircle(leftBlockPosition, 0.1f, mask);
 	}
 	// checks if there is a block above GameObject block (right up against it)
-	public bool isBlockAboveBlock(GameObject block, bool includeBackBackground = false)
+	public bool isBlockAboveBlock(GameObject block, bool includeBackBackground = false, bool includeFrontBackground = false)
 	{
 		Vector2 aboveBlockPosition = new Vector2(block.transform.position.x, block.transform.position.y + block.GetComponent<SpriteRenderer>().bounds.size.y);
 		int mask = LayerMask.GetMask("Default");
 		if (includeBackBackground) mask |= LayerMask.GetMask("BackBackground"); // add BackBackground
+		if (includeFrontBackground)
+		{
+			int frontBackgroundMask = LayerMask.GetMask("FrontBackground");
+			Collider2D blockHit = Physics2D.OverlapCircle(aboveBlockPosition, 0.1f, frontBackgroundMask);
+			if (blockHit != null) // if hit block on frontBackground
+			{
+				blockHit.name = blockHit.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
+				if (FrontBackgroundBlocks.isFrontBackgroundBlockPlaceableNextTo(blockHit.name)) return true; // if you can place a block next to this block
+			}
+		}
 		return Physics2D.OverlapCircle(aboveBlockPosition, 0.1f, mask);
 	}
 
-	public bool isBlockBelowBlock(GameObject block, bool includeBackBackground = false)
+	public bool isBlockBelowBlock(GameObject block, bool includeBackBackground = false, bool includeFrontBackground = false)
 	{
 		Vector2 belowBlockPosition = new Vector2(block.transform.position.x, block.transform.position.y - block.GetComponent<SpriteRenderer>().bounds.size.y);
 		int mask = LayerMask.GetMask("Default");
 		if (includeBackBackground) mask |= LayerMask.GetMask("BackBackground"); // add BackBackground
+		if (includeFrontBackground)
+		{
+			int frontBackgroundMask = LayerMask.GetMask("FrontBackground");
+			Collider2D blockHit = Physics2D.OverlapCircle(belowBlockPosition, 0.1f, frontBackgroundMask);
+			if (blockHit != null) // if hit block on frontBackground
+			{
+				blockHit.name = blockHit.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
+				if (FrontBackgroundBlocks.isFrontBackgroundBlockPlaceableNextTo(blockHit.name)) return true; // if you can place a block next to this block
+			}
+		}
 		return Physics2D.OverlapCircle(belowBlockPosition, 0.1f, mask);
 	}
 }

@@ -17,7 +17,7 @@ public class PlayerInventory : MonoBehaviour
 {
 
     private SpriteRenderer holdingItemSpriteRenderer;
-    private Light2D torchLight;
+    private GameObject torchLight;
     private PlaceBlockScript placeBlockScript;
 	private Animator anim;
 
@@ -28,7 +28,7 @@ public class PlayerInventory : MonoBehaviour
     void Start()
     {
 		holdingItemSpriteRenderer = transform.Find("Arm Front").transform.Find("HoldingItemPosition").transform.Find("HoldingItem").GetComponent<SpriteRenderer>();
-        torchLight = holdingItemSpriteRenderer.gameObject.transform.Find("TorchLight").GetComponent<Light2D>();
+        torchLight = holdingItemSpriteRenderer.gameObject.transform.Find("TorchLight").gameObject;
 		placeBlockScript = GetComponent<PlaceBlockScript>();
 		anim = GetComponent<Animator>();
 		InventoryScript.initializeInventory();
@@ -57,12 +57,12 @@ public class PlayerInventory : MonoBehaviour
         if (itemName.Equals("Torch"))
         {
             anim.SetBool("isHoldingTorch", true);
-            torchLight.enabled = true;
+            torchLight.SetActive(true);
         }
         else
         {
             anim.SetBool("isHoldingTorch", false);
-            torchLight.enabled = false;
+            torchLight.SetActive(false);
         }
 
 		placeBlockScript.checkIfHoldingPlaceableItem(itemName);

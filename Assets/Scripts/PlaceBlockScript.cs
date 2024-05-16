@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using static Unity.Collections.AllocatorManager;
 
 
@@ -20,6 +21,7 @@ public class PlaceBlockScript : MonoBehaviour
     private bool holdingItemIsPlaceable = false;
     private GameObject holdingItem; // the item that the player is holding
     private BreakBlockScript breakBlockScript;
+    private Tilemap backgroundVisualTiles;
 
     private GameObject hoverGrid = null; // this is the grid that gets placed where mouse is
     private Vector2 hoveringOverPosition; // the position that the mouse is hovering over, rounded to a potential block position
@@ -28,12 +30,18 @@ public class PlaceBlockScript : MonoBehaviour
     private bool canPlaceAgain = true; // this needed so that the player cant continue holding right click to continue placing more blocks
     private float holdRightClickTimer = 0f;
     private float holdDownThreshold = 0.2f; // hold right click for this many seconds to place on background layer
+    private float placingRange = 6f;
+    private Transform head; // steve's head
+    private Transform torso;
     
 	// Start is called before the first frame update
 	void Start()
     {
 		breakBlockScript = GetComponent<BreakBlockScript>();
         hoverTexture = breakBlockScript.hoverTexture;
+        head = transform.Find("Head").transform;
+        torso = transform.Find("Torso").transform;
+        backgroundVisualTiles = GameObject.Find("Grid").transform.Find("BackgroundVisualTiles").GetComponent<Tilemap>();
 	}
 
     // Update is called once per frame
@@ -47,7 +55,7 @@ public class PlaceBlockScript : MonoBehaviour
 
         if(hoverGrid != null) // if we can place a block
         {
-            if (Input.GetMouseButton(1) && canPlaceAgain)
+            if (Input.GetMouseButton(1) && canPlaceAgain) // hold down right click
             {
                 didPress = true;
                 holdRightClickTimer += Time.deltaTime;
@@ -71,15 +79,15 @@ public class PlaceBlockScript : MonoBehaviour
 
 				}
             }
-            else if (didPress && Input.GetMouseButtonUp(1))
+            else if (didPress && Input.GetMouseButtonUp(1)) // single click
             {
                 didPress = false;
                 holdRightClickTimer = 0;
 				// if the block to be placed is a NoFloatType && we can only place the float type block in the foreground
 				if (holdingItem.tag.Equals("NoFloatType"))
                 {
-                    // returns true if the block below is in the default layer
-					if (breakBlockScript.isBlockBelowBlock(holdingItem)) placeBlockInForeground(); // place block in foreground layer
+                    // returns true if the block below is in the default or frontBackground layer
+					if (breakBlockScript.isBlockBelowBlock(holdingItem, false, true)) placeBlockInForeground(); // place block in foreground layer
                 }
                 else
                 {
@@ -90,7 +98,8 @@ public class PlaceBlockScript : MonoBehaviour
             else if(!Input.GetMouseButton(1))
             {
                 canPlaceAgain = true;
-            }
+				holdRightClickTimer = 0;
+			}
         }
 
     }
@@ -224,24 +233,16 @@ public class PlaceBlockScript : MonoBehaviour
         //if (RoundedMousePos == hoveringOverPosition && transform.position == prevPosition) return; // if have not moved mouse nor player, we know we dont need to create a new hoverTexture
 		removeHighlight();
 		holdingItem.transform.position = RoundedMousePos;
-        // if mousePosition isnt behind another block and mousePos is within placing range
-        if(breakBlockScript.isBlockReachable(holdingItem) && breakBlockScript.isBlockWithinRange(holdingItem.transform))
+
+		if (checkIfPlaceable(holdingItem)) // if its placeable, then display the hoverTexture
         {
-            // lets check if there is already a block in this position; then we cant place it
-            if (checkIfBlockInPosition()) return;
-			
-
-			if (checkIfPlaceable(holdingItem)) // if its placeable, then display the hoverTexture
+            // if its a no float type then there must be a block below in order to place it
+            if (holdingItem.tag.Equals("NoFloatType"))
             {
-                // if its a no float type then there must be a block below in order to place it
-                if (holdingItem.tag.Equals("NoFloatType"))
-                {
-                    if (isBlockBelow(holdingItem)) createHighlight(RoundedMousePos);
-				}
-				else createHighlight(RoundedMousePos);
-            }
-		}
-
+                if (breakBlockScript.isBlockBelowBlock(holdingItem, true, true)) createHighlight(RoundedMousePos);
+			}
+			else createHighlight(RoundedMousePos);
+        }
     }
 
 	/*
@@ -273,9 +274,86 @@ public class PlaceBlockScript : MonoBehaviour
 		}
         return false;
 	}
+    /**
+     * returns true if a block in the contactFilter's layer is in holdingItem's (the position of the block where the cursor is) position.
+     */
+	private bool checkIfBlockInPosition(ContactFilter2D filter)
+	{
+		// if the item is a "Front Background" type, then we cant place it if there already is a block in the FrontBackground in this spot
+		if (FrontBackgroundBlocks.isFrontBackgroundBlock(holdingItem.name)) filter.SetLayerMask(filter.layerMask | LayerMask.GetMask("FrontBackground"));
+		// Create a list to store the results
+		List<Collider2D> results = new List<Collider2D>();
+
+		// Check for overlaps
+		Physics2D.OverlapCircle(holdingItem.transform.position, 0.45f, filter, results);
+
+		foreach (Collider2D coll in results)
+		{
+			// if the collider isn't the inactiveBlock, then there is already a block here and we cant display the hover texture
+			if (!ReferenceEquals(holdingItem, coll.gameObject)) return true;
+		}
+		return false;
+	}
+	/**
+     * returns true if the block is placeable in futureBlockPos.
+     * returns true if:
+     *  futureBlockPos is within 7 blocks of the player &&
+     *  you cast a raycast towards the cursor and if the raycast can get there without hitting a block on the default layer &&
+     *  there is not already a block in this position on the default layer &&
+     *  (there is a block in the backgroundVisualLayer or background layer at futureBlockPos || there is a block next to futureBlockPos)
+     * 
+     */
+	private bool checkIfPlaceable(GameObject futureBlockPos)
+    {
+        // cast a ray from the players head and torso to check if the ray can get to the block's position
+        bool raycastSuccess = raycast(head.transform.position, futureBlockPos.transform.position) || raycast(torso.transform.position, futureBlockPos.transform.position) || raycast(new Vector2(head.transform.position.x + 1.5f, head.transform.position.y), futureBlockPos.transform.position);
+        if(!raycastSuccess) return false;
+        if (checkIfBlockInPosition()) return false;
+		// Create a collision filter to only include colliders in the default layer
+		ContactFilter2D filter = new ContactFilter2D();
+		filter.SetLayerMask(LayerMask.GetMask("Default") | LayerMask.GetMask("Player"));
+        if(checkIfBlockInPosition(filter)) return false;
+
+		filter = new ContactFilter2D();
+		filter.SetLayerMask(LayerMask.GetMask("BackBackground") | LayerMask.GetMask("BackgroundVisual"));
+
+		if (checkIfBlockInPosition(filter) || backgroundVisualTiles.HasTile(backgroundVisualTiles.WorldToCell(futureBlockPos.transform.position))) return true;
+        if (isBlockNextToBlock(futureBlockPos)) return true;
+        return false;
+	}
+
+    private bool isBlockNextToBlock(GameObject futureBlockPos)
+    {
+        if(breakBlockScript.isBlockAboveBlock(futureBlockPos, true, true)) return true;
+        if(breakBlockScript.isBlockOnRightSideOfBlock(futureBlockPos, true, true)) return true;
+        if(breakBlockScript.isBlockBelowBlock(futureBlockPos, true, true)) return true;
+        if(breakBlockScript.isBlockOnLeftSideOfBlock(futureBlockPos, true, true)) return true;
+        return false;
+    }
+    /**
+     * returns true if the raycast can get from start to end without hitting a block on the default layer
+     */
+    private bool raycast(Vector2 start, Vector2 end) 
+    {
+
+		// Calculate direction and distance
+		Vector2 direction = end - start;
+		float distance = Vector2.Distance(start, end);
+		if (distance > placingRange) return false; // if its out of the placing range
+        distance = Mathf.Min(distance, placingRange);
+												   //direction.Normalize();
+		// Draw the ray for debugging purposes
+		Debug.DrawRay(start, direction * distance, Color.red, 1.0f); // Draw a red ray for 1 second
 
 
-    // checks if the block is placeable in the cursor position
+		// Cast the ray
+		RaycastHit2D hit = Physics2D.Raycast(start, direction, distance, LayerMask.GetMask("Default"));
+
+        return hit.collider == null;
+	}
+
+	// checks if the block is placeable in the cursor position
+	/*
     private bool checkIfPlaceable(GameObject futureBlockPos)
     {
 		SpriteRenderer blockRenderer = futureBlockPos.GetComponent<SpriteRenderer>();
@@ -333,22 +411,13 @@ public class PlaceBlockScript : MonoBehaviour
 		}
         return false;
 	}
-
-    private bool isBlockBelow(GameObject futureBlockPos)
-    {
-        if (breakBlockScript.isBlockBelowBlock(futureBlockPos, true))
-        {
-            return true;
-        }
-        return false;
-	}
-
-    /**
+    */
+	/**
      * returns true if one of these conditions is true:
      *   a) there is a block below which is in the BackBackground layer
      *   b) there is a block below which is in the Default layer && the block below is not a NoFloatType
      */
-    private bool canPlaceNoFloatTypeInBackground()
+	private bool canPlaceNoFloatTypeInBackground()
     {
 		Vector2 belowBlockPosition = new Vector2(holdingItem.transform.position.x, holdingItem.transform.position.y - holdingItem.GetComponent<SpriteRenderer>().bounds.size.y);
 		

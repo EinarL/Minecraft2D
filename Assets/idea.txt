@@ -7,7 +7,7 @@ Placing blocks:
 * hold right click in order to place blocks on the background layer
 
 
-chunks are 10-wide blocks that will spawn in depending on the position of the player/camera
+chunks are 10-block wide that will spawn in depending on the position of the player/camera
 chunks will be saved 
 x position in world will have a boolean:
 * whether it has been rendered before, if not then it will render something new, else render what is saved
@@ -21,7 +21,7 @@ we will have a chunk Class which will contain information on what blocks are spa
 the info will be a 2d array of numbers from 0,1,... which are the ID of the blocks (0 being no block)
 we will have a new file for each chunk
 
-when you render a line there will be a hashtable that has the oreID and the blockIndes/yPos for the ore.
+when you render a line there will be a hashtable that has the oreID and the blockIndex/yPos for the ore.
 the next line to be rendered then always checks whether that y value had an ore in the previous line
 and if so then it calls a function which generates the same ore with a 50/50 chance, otherwise a regular stone.
 also if a line creates an ore, then there is a 50/50 chance that the same ore will spawn again in the block below.
@@ -332,3 +332,15 @@ How i will implement caves:
 make a CaveSpawnScript that can choose with like .5% chance at starting to spawn a cave, if it was already spawning a cave at this position then
 continue spawning the cave, make the cave randomly bigger/smaller with some constraints which should lead the cave also randomly going up/down.
 and have a small chance to stop spawning the cave, gradually closing it.
+
+
+how i will refactor placing blocks:
+you can place a block if:
+	* futureBlockPos is within 7 blocks of the player, and
+	* you cast a raycast towards the cursor and if the raycast can get there without hitting a block on the default layer, or
+	* there is a block in the backgroundVisualLayer or background layer at futureBlockPos.
+
+if(futureBlockPos is within 7 blocks of the player && 
+	you cast a raycast towards the cursor and if the raycast can get there without hitting a block on the default layer &&
+	(there is a block in the backgroundVisualLayer or background layer at futureBlockPos || there is a block next to futureBlockPos)
+  )

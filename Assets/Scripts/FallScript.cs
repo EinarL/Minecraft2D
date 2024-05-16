@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Tilemaps;
@@ -38,6 +39,7 @@ public class FallScript : MonoBehaviour
 	{
 		SpawningChunkData.updateChunkData(transform.position.x, transform.position.y, 0, LayerMask.LayerToName(gameObject.layer)); // remove block from data
         isFalling = true;
+		if(blockScript == null) blockScript = GetComponent<BlockScript>();
 		blockScript.createBackgroundVisualBlock(); // create a background visual block 
 		checkIfAboveBlockIsFallType(); // check if above block needs to fall also
 		checkIfAboveIsNoFloatType(); // check if above block needs to get destroyed because some blocks are not allowed to float

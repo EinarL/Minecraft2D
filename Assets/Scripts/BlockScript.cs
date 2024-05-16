@@ -168,11 +168,14 @@ public class BlockScript : MonoBehaviour
 	 */
 	public void createBackgroundVisualBlock()
 	{
+		float vLineHeight = SpawningChunkData.getVerticalLineHeight(transform.position.x);
 		// check if this block is below the surface level, then we need to display a background block
-		if (SpawningChunkData.getVerticalLineHeight(transform.position.x) >= transform.position.y)
+		if (vLineHeight >= transform.position.y)
 		{
-			// TODO: if this block is a dirt block && it is at the top block position, then display a grass block as a background block
-			int backgroundBlockID = BlockHashtable.getBackBackgroundBlock(gameObject.name);
+			int backgroundBlockID = 3;
+			// if this block is a dirt block && it is at the top block position, then display a grass block as a background block
+			if (gameObject.name.Equals("Dirt") && vLineHeight == transform.position.y) backgroundBlockID = 2;
+			else backgroundBlockID = BlockHashtable.getBackBackgroundBlock(gameObject.name);
 			bool added = SpawningChunkData.addBackgroundVisualBlock(transform.position.x, transform.position.y, backgroundBlockID); // add the background block to the data
 			if (added) scScript.instantiateTile(backgroundBlockID, transform.position.x, transform.position.y, true); // instantiate the tile
 		}
