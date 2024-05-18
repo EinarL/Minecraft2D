@@ -9,7 +9,7 @@ using UnityEngine;
 public class SunLightMovementScript : MonoBehaviour
 {
     private Transform playerPos;
-    private List<float> chunkAvgHeights = new List<float>(); // avg heights of the chunks that are rendered
+    private List<float> chunkLowestHeights = new List<float>(); // lowest vertical line height for each chunk that is rendered
     private Coroutine adjustHeightCoroutine;
     private int targetHeight = 1940;
 
@@ -22,31 +22,31 @@ public class SunLightMovementScript : MonoBehaviour
 
     public void addChunkHeight(float[] heights)
     {
-		float avgHeight = getAverageHeight(heights);
-        chunkAvgHeights.Add(avgHeight);
+		float lowHeight = getLowestHeight(heights);
+		chunkLowestHeights.Add(lowHeight);
 	}
 
 	public void removeChunkHeight(float[] heights)
     {
-        float avgHeight = getAverageHeight(heights);
-        bool removed = chunkAvgHeights.Remove(avgHeight);
-        if (!removed) Debug.LogError("Avg height " + avgHeight + " wasn't found in the list, so it wasn't removed. The list: " + chunkAvgHeights);
+        float lowHeight = getLowestHeight(heights);
+        bool removed = chunkLowestHeights.Remove(lowHeight);
+        if (!removed) Debug.LogError("Lowest height " + lowHeight + " wasn't found in the list, so it wasn't removed. The list: " + chunkLowestHeights);
            
-        float overallAvgHeight = getAverageHeight(chunkAvgHeights);
-        adjustSunHeight((int)Mathf.Round(overallAvgHeight));
+        float lowestHeight = getLowestHeight(chunkLowestHeights);
+        adjustSunHeight((int)Mathf.Round(lowestHeight));
     }
 
-    private void adjustSunHeight(int avgChunkHeight)
+    private void adjustSunHeight(int lowestChunkHeight)
     {
         
-        targetHeight = 1940 + avgChunkHeight + 1;
+        targetHeight = 1940 + lowestChunkHeight + 3;
         if(adjustHeightCoroutine == null)
         {
             adjustHeightCoroutine = StartCoroutine(changeSunHeight());
         }
 	}
 
-
+    // follows player on the x axis
     private IEnumerator followPlayer()
     {
         while (true)
@@ -74,25 +74,25 @@ public class SunLightMovementScript : MonoBehaviour
         adjustHeightCoroutine = null;
     }
 
-	private float getAverageHeight(float[] heights)
+	private float getLowestHeight(float[] heights)
 	{
-		float avg = 0;
-		foreach (float height in heights)
-		{
-			avg += height;
-		}
+		float lowest = heights[0];
+        for (int i = 1; i < heights.Length; i++)
+        {
+            if (heights[i] < lowest) lowest = heights[i];
+        }
 
-		return avg / SpawningChunkData.blocksInChunk;
+        return lowest;
 	}
 
-	private float getAverageHeight(List<float> heights)
+	private float getLowestHeight(List<float> heights)
 	{
-		float avg = 0;
-		foreach (float height in heights)
+		float lowest = heights[0];
+		for (int i = 1; i < heights.Count; i++)
 		{
-			avg += height;
+			if (heights[i] < lowest) lowest = heights[i];
 		}
 
-		return avg / SpawningChunkData.blocksInChunk;
+        return lowest;
 	}
 }

@@ -180,4 +180,9 @@ public class DayProcessScript : MonoBehaviour
             yield return new WaitForSeconds(0.01f);
 		}
     }
+
+	public bool isDaytime()
+	{
+		return isDay;
+	}
 }

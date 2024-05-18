@@ -264,13 +264,13 @@ public class PlaceBlockScript : MonoBehaviour
      * bool includeEntity: true if the block should not be placeable if there is an entity in this position
      * returns true if there is a block in this position with the corresponding layer, otherwise false
      */
-	private bool checkIfBlockInPosition(bool includeBackBackground = false, bool includeEntity = true)
+	private bool checkIfBlockInPosition(bool includeBackBackground = false, bool includeEntity = true, bool includePlayer = true)
     {
 		// Create a collision filter to only include colliders in the default layer
 		ContactFilter2D filter = new ContactFilter2D();
-		filter.SetLayerMask(LayerMask.GetMask("Default") | LayerMask.GetMask("Player"));
-
-        if (includeBackBackground) filter.SetLayerMask(filter.layerMask | LayerMask.GetMask("BackBackground"));
+		filter.SetLayerMask(LayerMask.GetMask("Default"));
+        if (includePlayer) filter.SetLayerMask(filter.layerMask | LayerMask.GetMask("Player"));
+		if (includeBackBackground) filter.SetLayerMask(filter.layerMask | LayerMask.GetMask("BackBackground"));
 		if (includeEntity) filter.SetLayerMask(filter.layerMask | LayerMask.GetMask("Entity"));
 
 		// if the item is a "Front Background" type, then we cant place it if there already is a block in the FrontBackground in this spot
@@ -322,13 +322,14 @@ public class PlaceBlockScript : MonoBehaviour
         // cast a ray from the players head and torso to check if the ray can get to the block's position
         bool raycastSuccess = raycast(head.transform.position, futureBlockPos.transform.position) || raycast(torso.transform.position, futureBlockPos.transform.position) || raycast(new Vector2(head.transform.position.x + 1.5f, head.transform.position.y), futureBlockPos.transform.position);
         if(!raycastSuccess) return false;
-        if (checkIfBlockInPosition()) return false;
+        if (futureBlockPos.layer == 7) // if it's a frontBackground block
+        {
+			if (checkIfBlockInPosition(false, false, false)) return false;
+		}
+        else if (checkIfBlockInPosition()) return false;
+
 		// Create a collision filter to only include colliders in the default layer
 		ContactFilter2D filter = new ContactFilter2D();
-		filter.SetLayerMask(LayerMask.GetMask("Default") | LayerMask.GetMask("Player"));
-        if(checkIfBlockInPosition(filter)) return false;
-
-		filter = new ContactFilter2D();
 		filter.SetLayerMask(LayerMask.GetMask("BackBackground") | LayerMask.GetMask("BackgroundVisual"));
 
 		if (checkIfBlockInPosition(filter) || backgroundVisualTiles.HasTile(backgroundVisualTiles.WorldToCell(futureBlockPos.transform.position))) return true;

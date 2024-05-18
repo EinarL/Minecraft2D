@@ -22,15 +22,25 @@ public class Desert : Biome
 	{
 		List<float[]> frontBackgroundLayerBlocks = new List<float[]>();
 		int blockIndex = maxBuildHeight - (int)startHeight; // start blockIndex for the first block
+		float yPos = blockIndexToYPosition(blockIndex - 1);
 
 		// if it was spawning a tree, then finish it.
 		if (SpawnTreeScript.isSpawningTree(chunkPos >= 0)) frontBackgroundLayerBlocks = SpawnTreeScript.decideIfSpawnTree(blockIndexToYPosition(blockIndex - 1), chunkPos, xPos);
 		else frontBackgroundLayerBlocks = SpawnDesertThings.decideIfSpawnDesertThing(blockIndexToYPosition(blockIndex - 1), xPos);
 
-		object[] returnValue = createVerticalLine(14, 14, blockIndex, prevLineOreSpawns, prevLineHeight, prevVerticalLine, xPos); // returns {verticalLine, backgroundVisualBlocks}
+		//object[] animalToSpawn = SpawnAnimalScript.decideIfSpawnAnimal(xPos, yPos); // maybe spawn animal
 
+		List<object[]> entities = new List<object[]>();
+		//if (animalToSpawn != null) entities.Add(animalToSpawn);
 
-		return new object[] { returnValue[0], frontBackgroundLayerBlocks, null, returnValue[1] };
+		object[] returnValue = createVerticalLine(14, 14, blockIndex, prevLineOreSpawns, prevLineHeight, prevVerticalLine, xPos); // returns {verticalLine, backgroundVisualBlocks, entitiesInCave}
+
+		foreach (object[] entity in (List<object[]>)returnValue[2])
+		{
+			entities.Add(entity);
+		}
+
+		return new object[] { returnValue[0], frontBackgroundLayerBlocks, entities, returnValue[1] };
 	}
 
 }

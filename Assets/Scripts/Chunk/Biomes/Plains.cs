@@ -25,7 +25,6 @@ public class Plains : Biome
 	public override object[] renderLine(float startHeight, float xPos, int xIndex, int chunkPos, Hashtable prevLineOreSpawns, float prevLineHeight, int[] prevVerticalLine)
 	{
 		List<float[]> frontBackgroundLayerBlocks = new List<float[]>();
-		object[] animalToSpawn = null;
 
 		int blockIndex = maxBuildHeight - (int)startHeight; // start blockIndex for the first block
 
@@ -35,11 +34,19 @@ public class Plains : Biome
 		float[] blockToAdd = SpawnGrassScript.decideIfSpawnGrass(xPos, yPos); // for spawning grass and flowers
 		if (blockToAdd != null) frontBackgroundLayerBlocks.Add(blockToAdd);
 
-		animalToSpawn = SpawnAnimalScript.decideIfSpawnAnimal(xPos, yPos); // maybe spawn animal
+		object[] animalToSpawn = SpawnAnimalScript.decideIfSpawnAnimal(xPos, yPos); // maybe spawn animal TODO: prob remove this
 
-		object[] returnValue = createVerticalLine(2, 1, blockIndex, prevLineOreSpawns, prevLineHeight, prevVerticalLine, xPos); // returns {verticalLine, backgroundVisualBlocks}
+		List<object[]> entities = new List<object[]>();
+		if(animalToSpawn != null) entities.Add(animalToSpawn);
 
-		return new object[] { returnValue[0], frontBackgroundLayerBlocks, animalToSpawn, returnValue[1] };
+		object[] returnValue = createVerticalLine(2, 1, blockIndex, prevLineOreSpawns, prevLineHeight, prevVerticalLine, xPos); // returns {verticalLine, backgroundVisualBlocks, entitiesInCave}
+
+		foreach (object[] entity in (List<object[]>)returnValue[2])
+		{
+			entities.Add(entity);
+		}
+
+		return new object[] { returnValue[0], frontBackgroundLayerBlocks, entities, returnValue[1] };
 	}
 
 }

@@ -43,7 +43,7 @@ public abstract class Biome
 		int chunkIndex = chunkSize - 1;
 		for (float i = chunkEnd - blockSize; i >= chunkStart; i -= blockSize)
 		{
-			// returns {vLine, blocksToAddToFrontBackgroundLayer, entity, backgroundVisualBlocks }
+			// returns {vLine, blocksToAddToFrontBackgroundLayer, entities, backgroundVisualBlocks }
 			object[] returnValue = renderLine(height, i + blockSize / 2, chunkIndex, chunkStart, prevSpawnedOresLeft, prevLineHeight, vLine);
 			vLine = (int[])returnValue[0];
 			prevSpawnedOresLeft = getOreSpawnsFromVerticalLine(vLine);
@@ -55,7 +55,7 @@ public abstract class Biome
 			{
 				backgroundVisualBlocks.Add(value); // add block info to the list
 			}
-			if (returnValue[2] != null) entities.Add((object[])returnValue[2]); // add entity to list
+			addEntitesToList(entities, (List<object[]>)returnValue[2]); // add entities to list
 
 			addVerticalLineToChunk(chunk, chunkIndex, vLine);
 
@@ -91,7 +91,7 @@ public abstract class Biome
 		int chunkIndex = 0;
 		for (float i = chunkStart + blockSize / 2; i < chunkEnd; i += blockSize)
 		{
-			// returns {vLine, blocksToAddToFrontBackgroundLayer, entity, backgroundVisualBlocks }
+			// returns {vLine, blocksToAddToFrontBackgroundLayer, entities, backgroundVisualBlocks }
 			object[] returnValue = renderLine(height, i, chunkIndex, chunkStart, prevSpawnedOresRight, prevLineHeight, vLine);
 			vLine = (int[])returnValue[0];
 			prevSpawnedOresRight = getOreSpawnsFromVerticalLine(vLine);
@@ -103,7 +103,7 @@ public abstract class Biome
 			{
 				backgroundVisualBlocks.Add(value); // add block info to the list
 			}
-			if (returnValue[2] != null) entities.Add((object[])returnValue[2]); // add entity to list
+			addEntitesToList(entities, (List<object[]>)returnValue[2]); // add entities to list
 
 			addVerticalLineToChunk(chunk, chunkIndex, vLine);
 
@@ -241,6 +241,7 @@ public abstract class Biome
 	{
 		if (prevLineHeight > 0) prevLineHeight -= 1; // this is to fix some bug, idk why i need to -1 when its a positive number
 		List<float[]> backgroundVisualBlocks = new List<float[]>(); // list of type {[x,y, blockID], ...}, these are the blocks that are in the background of a cave
+		List<object[]> entitiesInCave = new List<object[]>();
 
 		int[] verticalLine = new int[maxAmountOfBlocksInLine]; // represents the blocks in the line with the blocks ID's // on the Default layer
 		int spawnCaveIn = -1; // if this is a positive number, then we should start spawning a cave in spawnCaveIn blocks.
@@ -303,13 +304,14 @@ public abstract class Biome
 		{
 			if (spawnCaveIn == -1)
 			{
+				// returns int[]{-1 if we shouldn't spawn a cave, caveOffset, caveHeight}
 				caveSpawnInfo = decideIfSpawnCave(prevVerticalLine, startBlockIndex, prevLineHeight, false);
 				
 				if (caveSpawnInfo[0] != -1)
 				{
 					//Debug.Log("spawning cave with height: " + caveSpawnInfo[2]);
 					spawnCaveIn = caveSpawnInfo[1];
-					if (spawnCaveIn == 0)
+					if (spawnCaveIn == 0) // spawn cave
 					{
 						for(int j = startBlockIndex; j < startBlockIndex + caveSpawnInfo[2]; j++)
 						{
@@ -317,6 +319,7 @@ public abstract class Biome
 						}
 						startBlockIndex += caveSpawnInfo[2]; // spawn cave
 						spawnCaveIn = -1;
+						AddToListIfNotNull(entitiesInCave, SpawnMobScript.decideIfSpawnMobInCave(xPos, blockIndexToYPosition(startBlockIndex))); // maybe spawn mob in cave
 						continue;
 					}
 					// else
@@ -333,6 +336,7 @@ public abstract class Biome
 				}
 				startBlockIndex += caveSpawnInfo[2]; // spawn cave
 				spawnCaveIn = -1;
+				AddToListIfNotNull(entitiesInCave, SpawnMobScript.decideIfSpawnMobInCave(xPos, blockIndexToYPosition(startBlockIndex))); // maybe spawn mob in cave
 				continue;
 			}
 
@@ -352,7 +356,7 @@ public abstract class Biome
 
 		verticalLine[139] = 4; // bedrock is last block
 
-		return new object[] { verticalLine, backgroundVisualBlocks};
+		return new object[] { verticalLine, backgroundVisualBlocks, entitiesInCave};
 	}
 	/**
 	 * 
@@ -393,6 +397,19 @@ public abstract class Biome
 	private int yPositionToBlockIndex(float yPos)
 	{
 		return (int)(maxBuildHeight - yPos - 0.5f);
+	}
+
+	private void addEntitesToList(List<object[]> entities, List<object[]> entitiesToAdd)
+	{
+		foreach (object[] entity in entitiesToAdd)
+		{
+			entities.Add(entity);
+		}
+	}
+
+	private void AddToListIfNotNull(List<object[]> list, object[] toAdd)
+	{
+		if(toAdd != null) list.Add(toAdd);
 	}
 
 }

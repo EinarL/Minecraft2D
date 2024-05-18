@@ -26,3 +26,11 @@ dont have the sky/background as blue below bedrock, rather black
 change it so that you can place frontBackgroundBlocks where players and entities are
 
 change the sound for breaking wood blocks
+
+make it so that BackBackground blocks dont break noFloatType blocks that are above it 
+
+make it so that torches are NoFloatType, but you need another implementation because they can "float" if there is a block behind them
+
+just remove the implementation that adds entities to a new chunk, because i already have an algorithm that adds entities when rendering saved chunks
+so when creating a new chunks, then both algorithms will run which adds too many entities
+probably keep the cave entity spawning algorithm the same though i.e. just spawn entities in caves on new chunks.

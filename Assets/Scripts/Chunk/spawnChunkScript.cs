@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.Jobs;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor.VersionControl;
 using UnityEngine;
@@ -13,9 +14,9 @@ using static Unity.Collections.AllocatorManager;
 
 public class spawnChunkScript : MonoBehaviour
 {
+	private static System.Random random = new System.Random();
 
-
-    private int chunkSize;
+	private int chunkSize;
     private int amountOfChunksToRender = 4; // amount of chunks to be rendered at the same time
     private float defaultStartSpawnY = -2.5f; // the default height of the vertical line that is to be spawned
 
@@ -37,14 +38,16 @@ public class spawnChunkScript : MonoBehaviour
 
     private OpenFurnaceScript openFurnaceScript;
     private SunLightMovementScript sunLightMovementScript;
+    private DayProcessScript dayProcessScript;
 
 	// Start is called before the first frame update
 	void Start()
     {
 		openFurnaceScript = GameObject.Find("Canvas").transform.Find("InventoryParent").GetComponent<OpenFurnaceScript>();
 		sunLightMovementScript = GameObject.Find("Sun").GetComponent<SunLightMovementScript>();
+        dayProcessScript = GameObject.Find("CM vcam").transform.Find("SunAndMoonTexture").GetComponent<DayProcessScript>();
 
-		BlockHashtable.initializeBlockHashtable();
+	    BlockHashtable.initializeBlockHashtable();
         spawnChunkStrategy = decideBiome(); // dont do this if the biome is already decided, we need to save which biome was rendering when we quit the game
 
 		cam = Camera.main;
@@ -285,7 +288,7 @@ public class spawnChunkScript : MonoBehaviour
 		int chunkPos = chunkData.getChunkPosition(); // position of the chunk (left side of the chunk)
 		float height = chunkData.getStartHeight();  // height of where blocks started spawning in this chunk, (basically means: y position of grass block)
         Hashtable prevOreSpawns = chunkData.getPrevOreSpawns();
-        List<object[]> entities = chunkData.getEntities();
+        List<object[]> entities = editEntities(chunkData.getEntities(), chunkData);
 
         List<Vector3Int> tilePositionsInChunk = new List<Vector3Int>(); // list of the tiles in the chunk
 
@@ -584,6 +587,85 @@ public class spawnChunkScript : MonoBehaviour
 
 		return false;
     }
+    /**
+     * when spawning in a chunk that has already spawned before we need to:
+     *      * check if its daytime, then despawn mobs that are above ground
+     *      * maybe spawn in new animals
+     *      
+     * this method takes in a list of entities that are in the saved chunk that is being spawned in and
+     * adds/removes entities from it.
+     * 
+     */
+    private List<object[]> editEntities(List<object[]> chunkEntities, ChunkData chunkData)
+    {
+        List<object[]> entities = new List<object[]>();
+		if (dayProcessScript.isDaytime()) // if its daytime then we want to remove the mobs, if they're above ground
+		{
+            int amountOfAnimalsInChunk = 0;
+			foreach (object[] entity in chunkEntities)
+			{
+                // if the entity is a mob
+                if (Array.Exists(SpawnMobScript.getMobs(), element => element.Equals(entity[2])))
+                {
+					if ((float)entity[0] < 0)
+                    {
+                        // if the vertical line height is higher than the entity's y position
+                        if (chunkData.getVerticalLineHeight(9 - convertWorldXPosToChunkIndex((float)entity[0])) > (float)entity[1])
+                        {
+							// don't remove this entity
+							entities.Add(entity);
+                        }
+					}
+                    else
+                    {
+                        // if the vertical line height is higher than the entity's y position
+                        if (chunkData.getVerticalLineHeight(convertWorldXPosToChunkIndex((float)entity[0])) > (float)entity[1])
+                        {
+                            // don't remove this entity
+                            entities.Add(entity);
+                        }
+                    }
+
+                }
+				else // if the entity is an animal
+				{
+                    entities.Add(entity);
+                    amountOfAnimalsInChunk++;
+                }
+			}
+
+            if(amountOfAnimalsInChunk == 0)
+            {
+                // spawn in animals possibly
+                foreach (object[] animal in SpawnAnimalScript.decideIfSpawnAnimalsOnSavedChunk(chunkData.getChunkPosition(), chunkData.getVerticalLineHeights())){
+                    entities.Add(animal);
+                }
+			}
+		}
+        else // if its nighttime, then we want to spawn in mobs
+        {
+			int amountOfMobsInChunk = 0;
+			foreach (object[] entity in chunkEntities)
+			{
+				// if the entity is a mob
+				if (Array.Exists(SpawnMobScript.getMobs(), element => element.Equals(entity[2])))
+				{
+                    amountOfMobsInChunk++;
+				}
+				entities.Add(entity);
+			}
+            if (amountOfMobsInChunk <= 1)
+            {
+				for (int _ = 0; _ < 2; _++) // do it x amount of times so x different types of mobs can spawn in the same chunk
+				{
+					entities.AddRange(SpawnMobScript.decideIfSpawnMob(chunkData.getChunkPosition(), chunkData.getVerticalLineHeights()));
+				}
+			}
+
+        }
+
+        return entities;
+	}
 
     public int getLeftmostChunkPos()
     {
@@ -604,4 +686,10 @@ public class spawnChunkScript : MonoBehaviour
     {
         amountOfChunksToRender = num;
     }
+
+	private int convertWorldXPosToChunkIndex(float x)
+    {
+        return Mathf.Abs(Mathf.FloorToInt(x)) % SpawningChunkData.blocksInChunk;
+
+	}
 }
