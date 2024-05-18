@@ -76,7 +76,7 @@ public abstract class Mob : Entity
 	{
 		float playerDistanceX = Mathf.Abs(playerPos.position.x - transform.position.x);
 		float playerDistanceY = Mathf.Abs(playerPos.position.y - transform.position.y);
-		return playerDistanceX <= canHurtPlayerWithin && playerDistanceY <= 1.5f;
+		return playerDistanceX <= canHurtPlayerWithin && playerDistanceY <= 1.5f && !anim.GetBool("isDead");
 	}
 
 	protected virtual void huntPlayer()

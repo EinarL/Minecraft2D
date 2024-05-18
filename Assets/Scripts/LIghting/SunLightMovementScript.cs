@@ -87,6 +87,8 @@ public class SunLightMovementScript : MonoBehaviour
 
 	private float getLowestHeight(List<float> heights)
 	{
+        if (heights.Count == 0) return -2.5f;
+
 		float lowest = heights[0];
 		for (int i = 1; i < heights.Count; i++)
 		{
