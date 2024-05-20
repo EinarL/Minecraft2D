@@ -18,13 +18,13 @@ public class StepSoundScript : MonoBehaviour
 		stepAudioSource = GetComponent<AudioSource>();
         stepAudioSource.volume = 0.1f;
 
-        loadSound("Dirt");
+        //loadSound("Dirt");
 	}
 
     /**
      * plays step sound
      */
-    public void playSound(string blockSteppingOn, bool isRunning)
+    public void playSound(GameObject blockSteppingOn, bool isRunning)
     {
         if (stepAudioSource.isPlaying) return;
 
@@ -43,7 +43,7 @@ public class StepSoundScript : MonoBehaviour
         stepAudioSource.Play();
     }
 
-    private void loadSound(string blockSteppingOn)
+    private void loadSound(GameObject blockSteppingOn)
     {
         object[] folderInfo = BlockBehaviourData.getSoundFolder(blockSteppingOn); // returns {folder name, amount of sound files in the folder }
         string folderName = (string)folderInfo[0];
@@ -55,7 +55,7 @@ public class StepSoundScript : MonoBehaviour
 		{
 			steppingSound.Add(Resources.Load($"Sounds\\Steps\\{folderName}\\{folderName}{i}") as AudioClip);
 		}
-        float[] pitch = BlockBehaviourData.getStepSoundPitch(blockSteppingOn); // {walking pitch, running pitch}
+        float[] pitch = BlockBehaviourData.getStepSoundPitch(blockSteppingOn.gameObject.name); // {walking pitch, running pitch}
         walkingSoundSpeed = pitch[0];
         runSoundSpeed = pitch[1];
 	}

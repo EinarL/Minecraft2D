@@ -7,8 +7,11 @@ public static class BlockBehaviourData
 	private static Hashtable digBehaviours = new Hashtable() { // hashtable that holds the class for the different block sounds and speed when breaking them
 		{ "Dirt", new BreakDirt() },
 		{ "LogOak", new BreakWood() },
+		{ "LogSpruce", new BreakWood() },
 		{ "LeavesOak", new BreakLeaves() },
+		{ "LeavesSpruce", new BreakLeaves() },
 		{ "SaplingOak", new BreakInstantly() },
+		{ "SaplingSpruce", new BreakInstantly() },
 		{ "PlankOak", new BreakWood() },
 		{ "CraftingTable", new BreakWood() },
 		{ "Stone", new BreakStone() },
@@ -22,6 +25,8 @@ public static class BlockBehaviourData
 		{ "Grass", new BreakInstantly() },
 		{ "Rose", new BreakInstantly() },
 		{ "Dandelion", new BreakInstantly() },
+		{ "MushroomBrown", new BreakInstantly() },
+		{ "MushroomRed", new BreakInstantly() },
 		{ "Wool", new BreakCloth() },
 		{ "Furnace", new BreakStone() },
 		{ "Glass", new BreakGlass() },
@@ -31,11 +36,14 @@ public static class BlockBehaviourData
 		{ "TorchWall", new BreakWoodInstantly() },
 		{ "TorchRight", new BreakWoodInstantly() },
 		{ "TorchLeft", new BreakWoodInstantly() },
+		{ "SnowBlock", new BreakSnow() },
+		{ "SnowBlockThin", new BreakSnow() },
 	};
 
 	private static Hashtable itemDropBehaviours = new Hashtable()
 	{
-		{ "LeavesOak", new LeafItemDrop() },
+		{ "LeavesOak", new LeafItemDrop("Oak") },
+		{ "LeavesSpruce", new LeafItemDrop("Spruce") },
 		{ "Stone", new StoneItemDrop() },
 		{ "IronOre", new StonePickOrBetter() },
 		{ "DiamondOre", new DiamondItemDrop()},
@@ -48,6 +56,8 @@ public static class BlockBehaviourData
 		{ "TorchWall", new TorchDrop() },
 		{ "TorchRight", new TorchDrop() },
 		{ "TorchLeft", new TorchDrop() },
+		{ "SnowBlock", new SnowDrop(3,5)},
+		{ "SnowBlockThin", new SnowDrop(1,1)},
 	};
 
 	private static Hashtable rightClickBehaviours = new Hashtable()
@@ -72,6 +82,7 @@ public static class BlockBehaviourData
 		{ "Furnace", new object[]{ "stone", 6 } },
 		{ "Glass", new object[]{ "stone", 6 } },
 		{ "Bedrock", new object[]{ "stone", 6 } },
+		{ "SnowBlock", new object[] { "cloth", 4} },
 
 	};
 
@@ -87,9 +98,10 @@ public static class BlockBehaviourData
 		return new float[] { 1.1f, 1.4f };
 	}
 
-	public static object[] getSoundFolder(string blockName)
+	public static object[] getSoundFolder(GameObject block)
 	{
-		object[] folderInfo = (object[])blockToStepSoundFolder[blockName];
+		object[] folderInfo = (object[])blockToStepSoundFolder[block.gameObject.name];
+		if(folderInfo == null && block.GetComponent<SpriteRenderer>().sprite.name.Equals("SnowyGrassBlock")) return new object[] { "cloth", 4 }; // if stepping on a snowy grass block
 
 		if (folderInfo == null) return new object[] { "dirt", 4 };
 		return folderInfo;

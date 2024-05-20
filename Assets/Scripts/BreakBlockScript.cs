@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -173,7 +174,17 @@ public class BreakBlockScript : MonoBehaviour
 		// Check for overlaps
 		Physics2D.OverlapCircle(new Vector2(worldMousePos.x, worldMousePos.y), 0.0001f, filter, blockToBreak);
 		if (blockToBreak.Count == 0) return null; // mousePosition wasn't on any block
-
+        if(blockToBreak.Count > 1) // if hovering over many blocks then here you can define which block has the highest priority to be broken/right-clicked first
+        {
+            string[] highestPriority = new string[] { "Furnace", "CraftingTable" }; // these blocks all have equal highest priority over other blocks
+            string[] lowestPriority = new string[] { "SnowBlockThin" };
+            for (int i = 0; i < blockToBreak.Count; i++)
+            {
+                if (highestPriority.Contains(blockToBreak[i].gameObject.name)) return blockToBreak[i].gameObject;
+                if (lowestPriority.Contains(blockToBreak[i].gameObject.name)) return i == 0 ? blockToBreak[1].gameObject : blockToBreak[0].gameObject;
+            }
+        }
+        
 		return blockToBreak[0].gameObject; // this is the game object the mouse is hovering over
 	}
 

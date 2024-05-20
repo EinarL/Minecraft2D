@@ -31,7 +31,7 @@ public static class CaveSpawnScript
 	/**
 	 * gets the cave height (how tall the cave is), and cave world Y position
 	 * 
-	 * decides if the cave should contionue spawning, if so then it returns the cave offset and height.
+	 * decides if the cave should continue spawning, if so then it returns the cave offset and height.
 	 * the offset is a number between 0 and 4:
 	 *	* 0: cave goes up
 	 *	* 1: cave goes a little up
@@ -42,7 +42,7 @@ public static class CaveSpawnScript
 	 */
 	public static int[] continueSpawningCave(int caveHeight, int caveY)
 	{
-		if(caveHeight <= 2) // check if the cave should stop spawning
+		if(caveHeight <= 2 && caveY < 20) // check if the cave should stop spawning
 		{
 			float random = Random.value * 100;
 			if (random < stopSpawningChance) return new int[] { -1 };

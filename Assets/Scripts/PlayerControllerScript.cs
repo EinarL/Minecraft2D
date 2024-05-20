@@ -27,7 +27,7 @@ public class PlayerControllerScript : MonoBehaviour
     private bool isInAirAfterJumping = false;
     private bool facingRight = true;
     private float animationRunningSpeed = 1.5f;
-    private string blockBelowPlayer = ""; // the block name that the player is standing on
+    private GameObject blockBelowPlayer; // the block name that the player is standing on
 
     private bool didFall = false; // used to know when the player hits the ground after falling
     private float fellFrom = float.NegativeInfinity; // how high the player fell from, this is a y value in the world space
@@ -172,7 +172,7 @@ public class PlayerControllerScript : MonoBehaviour
 
 		int count = Physics2D.OverlapCircle(groundCheck.position, 0.05f, contactFilter, results);
         bool isGrounded = count > 0;
-        if (isGrounded) blockBelowPlayer = results[0].gameObject.name;
+        if (isGrounded) blockBelowPlayer = results[0].gameObject;
 
         return isGrounded;
     }

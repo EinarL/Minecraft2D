@@ -70,7 +70,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!70 &7607955817980639101
 CapsuleCollider2D:
@@ -104,8 +104,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.004381555, y: -0.038961623}
-  m_Size: {x: 0.16092598, y: 0.17477882}
+  m_Offset: {x: -0.004381555, y: -0.04223865}
+  m_Size: {x: 0.16092598, y: 0.18133286}
   m_Direction: 0
 --- !u!114 &8005265194930138883
 MonoBehaviour:
@@ -119,11 +119,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac6e0f863c93bbe4ca24f3fde575ab31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  saySounds:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  sayAudioSource: {fileID: 4230694021241922158}
 --- !u!95 &4241708026875112195
 Animator:
   serializedVersion: 5

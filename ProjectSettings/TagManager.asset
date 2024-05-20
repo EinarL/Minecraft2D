@@ -20,7 +20,7 @@ TagManager:
   - BackBackground
   - BackgroundVisual
   - Entity
-  - 
+  - Tilemap
   - 
   - 
   - 
@@ -44,4 +44,7 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: BackLayer
+    uniqueID: 1381717425
     locked: 0

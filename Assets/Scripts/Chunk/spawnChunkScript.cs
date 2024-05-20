@@ -21,19 +21,24 @@ public class spawnChunkScript : MonoBehaviour
     private float defaultStartSpawnY = -2.5f; // the default height of the vertical line that is to be spawned
 
     public Sprite grassTexture;
+	public Sprite snowyGrassTexture;
 	private Camera cam;
     public Tilemap tilemap;
     public Tilemap backgroundVisualTiles;
+    public ParticleSystem snowParticleSystem;
+
+	// the snow particle systems that are being rendered, the key is the chunk position
+	private Dictionary<int, ParticleSystem> snowParticleSystems = new Dictionary<int, ParticleSystem>(); 
 
 
     private int lowestBlockPos = -60;
     private int rendered; // leftmost chunk that is rendered
 
     private Biome spawnChunkStrategy;
-    private List<Biome> biomes = new List<Biome> { new Plains(), new Desert() };
+    private List<Biome> biomes = new List<Biome> { new Tundra() }; // new List<Biome> { new Plains(), new Desert(), new Tundra() };
 
 	// how long the biome is (in chunks), this counts down every time a new chunk is rendered and when
-    // it hits 0, then a new random chunk gets generated
+	// it hits 0, then a new random chunk gets generated
 	private int biomeLength; 
 
     private OpenFurnaceScript openFurnaceScript;
@@ -122,7 +127,7 @@ public class spawnChunkScript : MonoBehaviour
 
         Biome currentBiome = spawnChunkStrategy;
 
-        if(currentBiome != null) biomes.Remove(currentBiome);
+        //if(currentBiome != null) biomes.Remove(currentBiome);
 
 		System.Random rand = new System.Random();
 		int randIndex = rand.Next(biomes.Count); // get random index
@@ -130,7 +135,7 @@ public class spawnChunkScript : MonoBehaviour
 		Biome newBiome = biomes[randIndex];
         biomeLength = rand.Next(newBiome.biomeLength[0], newBiome.biomeLength[1] + 1);
         
-        if (currentBiome != null) biomes.Add(currentBiome);
+        //if (currentBiome != null) biomes.Add(currentBiome);
 
         return newBiome; // newBiome
     }
@@ -250,6 +255,12 @@ public class spawnChunkScript : MonoBehaviour
             }
             Destroy(collider.gameObject);
         }
+        if (snowParticleSystems.ContainsKey(chunkPos)) // destroy the snow particle system if there is one in this chunk
+        {
+            Destroy(snowParticleSystems[chunkPos]);
+            snowParticleSystems.Remove(chunkPos);
+        }
+
         SpawningChunkData.overwriteEntities(chunkPos, entities); // save entities
 		openFurnaceScript.saveFurnaces(); // save furnaces
         ChunkData chunkToRemove = SpawningChunkData.getChunkByChunkPos(chunkPos);
@@ -303,7 +314,20 @@ public class spawnChunkScript : MonoBehaviour
                 //instantiateBlock(chunk[x,y], xPos + SpawningChunkData.blockSize* x, yPos - SpawningChunkData.blockSize* y); // (blockID, xPos, yPos, layer)
             }
         }
-        foreach (float[] block in frontBackgroundBlocks) // spawn blocks on the "FrontBackground" layer
+		// if this chunk is in a tundra biome, then randomly add snow on top of the topmost blocks
+		if (spawnChunkStrategy is Tundra)
+		{
+			List<float[]> snow = generateSnow(chunkData);
+			foreach (float[] block in snow) // spawn the thin snow blocks and add them to the chunk data
+			{
+				chunkData.changeBlock(block[0], block[1], (int)block[2], "FrontBackground");
+				instantiateBlock((int)block[2], block[0], block[1], "FrontBackground");
+			}
+            // spawn the falling snow at y=30
+            snowParticleSystems[chunkPos] = Instantiate(snowParticleSystem, new Vector2(chunkPos + 5, 30), Quaternion.Euler(90f, 0f, 0f));
+
+		}
+		foreach (float[] block in frontBackgroundBlocks) // spawn blocks on the "FrontBackground" layer
 		{
             instantiateBlock((int)block[2], block[0], block[1], "FrontBackground");
         }
@@ -334,9 +358,44 @@ public class spawnChunkScript : MonoBehaviour
         // check what tiles are exposed to air and turn them into GameObjects
         changeTilesToGameObjects(tilePositionsInChunk);
 
+
         // add lighting to the blocks
         //addLightingToBlocks(chunkPos);
 
+    }
+    // returns a list of SnowBlockThin that will be on the tundra chunk
+    private List<float[]> generateSnow(ChunkData chunkData)
+    {
+		int[,] chunk = chunkData.getChunkData();
+		List<float[]> frontBackgroundBlocks = chunkData.getFrontBackgroundBlocks();
+
+        List<float[]> thinSnowBlocksToAdd = new List<float[]>();
+		for (int i = 0; i < SpawningChunkData.blocksInChunk; i++)
+        {
+			float rand = (float)(random.NextDouble() * 100); // get random number between 0 and 100
+            if(rand < 50)
+            {
+                int index = 0;
+                while (index < chunk.GetLength(1) && chunk[i,index] == 0) // find the topmost block in the vertical line in the chunk
+                {
+                    index++;
+                }
+                Vector2 snowPosition = new Vector2(chunkData.getChunkPosition() + i + 0.5f, blockIndexToYPosition(index - 1));
+                bool doAdd = true;
+                foreach (float[] block in frontBackgroundBlocks)
+                {
+                    // if there is already a thin snow block at this position, then dont add a new one
+                    if ((int)block[2] == 35 && block[0] == snowPosition.x && block[1] == snowPosition.y)
+                    {
+                        doAdd = false;
+                        break;
+                    }
+                }
+                // add the thin snow block above the topmost block
+                if(doAdd) thinSnowBlocksToAdd.Add(new float[] {snowPosition.x, snowPosition.y, 35 });
+            }
+		}
+        return thinSnowBlocksToAdd;
     }
 
     private void spawnEntities(List<object[]> entities)
@@ -364,10 +423,16 @@ public class spawnChunkScript : MonoBehaviour
         {
 			dirtTexture = BlockHashtable.getBlockByID(2).GetComponent<SpriteRenderer>().sprite;
 			BlockHashtable.getBlockByID(2).GetComponent<SpriteRenderer>().sprite = grassTexture;
-		}		
+		}
+        else if (blockID == 28) // snowy grass block
+        {
+			dirtTexture = BlockHashtable.getBlockByID(28).GetComponent<SpriteRenderer>().sprite;
+			BlockHashtable.getBlockByID(28).GetComponent<SpriteRenderer>().sprite = snowyGrassTexture;
+		}
 		GameObject spawnedBlock = Instantiate(BlockHashtable.getBlockByID(blockID), new Vector3(xPos, yPos, 0), transform.rotation);
 		if (blockID == 2) BlockHashtable.getBlockByID(2).GetComponent<SpriteRenderer>().sprite = dirtTexture;
-        spawnedBlock.layer = LayerMask.NameToLayer(layer);
+		else if (blockID == 28) BlockHashtable.getBlockByID(28).GetComponent<SpriteRenderer>().sprite = dirtTexture;
+		spawnedBlock.layer = LayerMask.NameToLayer(layer);
 
         if (layer.Equals("BackBackground"))
         {
@@ -431,7 +496,12 @@ public class spawnChunkScript : MonoBehaviour
             instantiateBlock(2, tilePos.x + .5f, tilePos.y + .5f); // spawn grass block
             return;
         }
-        instantiateBlock(BlockHashtable.getIDByBlockName(tile.name), tilePos.x + .5f, tilePos.y + .5f);
+		if (tile.name == "SnowyGrassBlock")
+		{
+			instantiateBlock(28, tilePos.x + .5f, tilePos.y + .5f); // spawn grass block
+			return;
+		}
+		instantiateBlock(BlockHashtable.getIDByBlockName(tile.name), tilePos.x + .5f, tilePos.y + .5f);
     }
 
     private bool isTileExposedToAir(Vector3Int tilePos)
@@ -691,5 +761,10 @@ public class spawnChunkScript : MonoBehaviour
     {
         return Mathf.Abs(Mathf.FloorToInt(x)) % SpawningChunkData.blocksInChunk;
 
+	}
+
+	public float blockIndexToYPosition(int blockIndex)
+	{
+		return SpawningChunkData.maxBuildHeight - blockIndex - 0.5f;
 	}
 }

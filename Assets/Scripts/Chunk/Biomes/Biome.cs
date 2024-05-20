@@ -268,9 +268,9 @@ public abstract class Biome
 							i++;
 							startBlockIndex++;
 						}
-						if (i >= 4) break;
 					}
 					spawnCaveIn--;
+					continue;
 				}
 			}
 			else if (spawnCaveIn > 0) spawnCaveIn--;
@@ -286,7 +286,7 @@ public abstract class Biome
 					i++;
 					startBlockIndex++;
 				}
-				if (i >= 4) break;
+				continue;
 			}
 
 
@@ -362,7 +362,7 @@ public abstract class Biome
 	 * 
 	 * returns int[]{-1 if we shouldn't spawn a cave, caveOffset, caveHeight}
 	 */
-	private int[] decideIfSpawnCave(int[] prevVerticalLine, int blockIndex, float prevLineHeight, bool atTop)
+	protected int[] decideIfSpawnCave(int[] prevVerticalLine, int blockIndex, float prevLineHeight, bool atTop)
 	{
 		int checkCaveOffset = atTop ? 0 : 2; // how many blocks below the "current height" will you check if there was a cave in the previous 
 		// lets check if we are in the process of spawning in a cave 
@@ -394,7 +394,7 @@ public abstract class Biome
 		return maxBuildHeight - blockIndex - 0.5f;
 	}
 
-	private int yPositionToBlockIndex(float yPos)
+	protected int yPositionToBlockIndex(float yPos)
 	{
 		return (int)(maxBuildHeight - yPos - 0.5f);
 	}

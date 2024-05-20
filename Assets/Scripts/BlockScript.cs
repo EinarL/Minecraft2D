@@ -174,7 +174,11 @@ public class BlockScript : MonoBehaviour
 		{
 			int backgroundBlockID = 3;
 			// if this block is a dirt block && it is at the top block position, then display a grass block as a background block
-			if (gameObject.name.Equals("Dirt") && vLineHeight == transform.position.y) backgroundBlockID = 2;
+			if (vLineHeight == transform.position.y)
+			{
+				if(gameObject.GetComponent<SpriteRenderer>().sprite.name.Equals("GrassBlock")) backgroundBlockID = 2;
+				else if (gameObject.GetComponent<SpriteRenderer>().sprite.name.Equals("SnowyGrassBlock")) backgroundBlockID = 28;
+			}
 			else backgroundBlockID = BlockHashtable.getBackBackgroundBlock(gameObject.name);
 			bool added = SpawningChunkData.addBackgroundVisualBlock(transform.position.x, transform.position.y, backgroundBlockID); // add the background block to the data
 			if (added) scScript.instantiateTile(backgroundBlockID, transform.position.x, transform.position.y, true); // instantiate the tile

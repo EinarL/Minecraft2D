@@ -10,8 +10,8 @@ public class MusicScript : MonoBehaviour
 	private AudioClip[] overworldMusic;
 	private AudioClip[] caveAmbientNoise;
 
-	private int playMusicChance = 15;
-	private int playCaveNoiseChance = 15;
+	private int playMusicChance = 10;
+	private int playCaveNoiseChance = 5;
 
 	// Start is called before the first frame update
 	void Start()

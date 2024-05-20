@@ -7,8 +7,8 @@ public static class SpawnAnimalScript // Animal
 	private static System.Random random = new System.Random();
 
 	private static float animalClusterChance = 3f;
-	private static float animalSpawnChance = 10f; // lower this? maybe not
-	private static int[] animalClusterSize = new int[] { 5, 20};
+	private static float animalSpawnChance = 5f;
+	private static int[] animalClusterSize = new int[] { 5, 10}; // will spawn animal cluster in a range from x1 to x2 blocks
 	private static int spawningProcess = 0; // how much is left of spawning the animal cluster (0 is finished)
 	private static string spawningAnimal = null; // what animal we are spawning in the cluster
 	private static string[] animals = new string[] { "Sheep", "Pig" };
@@ -35,7 +35,7 @@ public static class SpawnAnimalScript // Animal
 
 
 
-	private static float spawningOnSavedChunkChance = 10f; // odds that animals spawn on a previously saved chunk (the chunk must have no animals in it to begin with)
+	private static float spawningOnSavedChunkChance = 3f; // odds that animals spawn on a previously saved chunk (the chunk must have no animals in it to begin with)
 	private static int[] savedChunkAnimalClusterSize = new int[] { 1, 4 }; // min and max amount of animals that can spawn on a saved chunk
 
 
@@ -79,6 +79,6 @@ public static class SpawnAnimalScript // Animal
 	// based on an x position in the world, it will find the corresponding index for the place in the verticalLineHeights array and return the height
 	private static float getYValueBasedOnX(float x, float[] verticalLineHeights)
 	{
-		return verticalLineHeights[Mathf.Abs(Mathf.FloorToInt(x)) % SpawningChunkData.blocksInChunk] + 1; // + 1 to spawn the animal above the block
+		return verticalLineHeights[Mathf.Abs(Mathf.FloorToInt(x)) % SpawningChunkData.blocksInChunk] + 2; // + 2 to spawn the animal above the block
 	}
 }

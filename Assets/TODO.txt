@@ -31,12 +31,10 @@ make it so that BackBackground blocks dont break noFloatType blocks that are abo
 
 make it so that torches are NoFloatType, but you need another implementation because they can "float" if there is a block behind them
 
-just remove the implementation that adds entities to a new chunk, because i already have an algorithm that adds entities when rendering saved chunks
-so when creating a new chunks, then both algorithms will run which adds too many entities
-probably keep the cave entity spawning algorithm the same though i.e. just spawn entities in caves on new chunks.
+make it so that when youre spawning a new chunk then more animals will spawn rather than when spawning a previously spawned in chunk
 
 burp sound for steve
 
 make particle systems for: eating, when entities dissapear when they die, when steve runs, breaking blocks
 
-make sound for placing blocks
+add fall damage for entities

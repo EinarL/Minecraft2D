@@ -192,6 +192,13 @@ public static class CraftingRecipes
 			new object[] { "Charcoal", new Vector2(0, 1) }
 		}, new InventorySlot("Torch", 4)
 		},
+
+		new object[]{ "SnowBall", new object[] {
+			new object[] { "SnowBall", new Vector2(1, 0) },
+			new object[] { "SnowBall", new Vector2(0, 1) },
+			new object[] { "SnowBall", new Vector2(1, 1) }
+		}, new InventorySlot("SnowBlock", 1)
+		},
 	};
 
 	public static List<object[]> getRecipesByLeftBottomMostItem(string itemName)

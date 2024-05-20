@@ -92,7 +92,7 @@ public class RespawnButtonScript : MonoBehaviour
 		float roundedYPos = Mathf.RoundToInt(deathPos.y);
 		roundedYPos -= .5f;
 
-		SpawningChunkData.updateChunkData(roundedXPos, roundedYPos, 23); // update chunk with the tombstone
+		SpawningChunkData.updateChunkData(roundedXPos, roundedYPos, 23, "FrontBackground" ); // update chunk with the tombstone
 
 		// save the contents of the tombstone (players inventory)
 		// it will look like: [xPos, yPos, inventory]

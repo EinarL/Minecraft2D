@@ -635,7 +635,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!70 &91382400090159636
 CapsuleCollider2D:
@@ -801,4 +801,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3833187f017b9d740bf790f7cb201b0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sayAudioSource: {fileID: 2696891628827029801}

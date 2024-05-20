@@ -22,6 +22,7 @@ public class PlaceBlockScript : MonoBehaviour
     private GameObject holdingItem; // the item that the player is holding
     private BreakBlockScript breakBlockScript;
     public Tilemap backgroundVisualTiles;
+    private AudioSource placeBlockAudioSource;
 
     private GameObject hoverGrid = null; // this is the grid that gets placed where mouse is
     private Vector2 hoveringOverPosition; // the position that the mouse is hovering over, rounded to a potential block position
@@ -42,6 +43,7 @@ public class PlaceBlockScript : MonoBehaviour
         head = transform.Find("Head").transform;
         torso = transform.Find("Torso").transform;
         backgroundVisualTiles = GameObject.Find("Grid").transform.Find("BackgroundVisualTiles").GetComponent<Tilemap>();
+        placeBlockAudioSource = GameObject.Find("Audio").transform.Find("BreakBlockSound").GetComponent<AudioSource>();
 	}
 
     // Update is called once per frame
@@ -102,6 +104,16 @@ public class PlaceBlockScript : MonoBehaviour
 			}
         }
 
+    }
+
+    private void makePlaceBlockSound()
+    {
+        AudioClip placeBlockAudio = BlockHashtable.getBlockPlacingAudio(holdingItem.name);
+        if(placeBlockAudio != null)
+        {
+			placeBlockAudioSource.clip = placeBlockAudio;
+			placeBlockAudioSource.Play();
+		}
     }
 
     /**
@@ -171,6 +183,7 @@ public class PlaceBlockScript : MonoBehaviour
 	//helper function that both placeBlockInForeground() and placeBlockInBackground() use
 	private GameObject placeBlock()
     {
+		makePlaceBlockSound();
 		PlaceBlockBehaviour pbBehaviour = BlockHashtable.getPlaceBlockBehaviour(holdingItem.name);
 		GameObject placedBlock;
 		if (pbBehaviour != null)
@@ -320,7 +333,7 @@ public class PlaceBlockScript : MonoBehaviour
 	private bool checkIfPlaceable(GameObject futureBlockPos)
     {
         // cast a ray from the players head and torso to check if the ray can get to the block's position
-        bool raycastSuccess = raycast(head.transform.position, futureBlockPos.transform.position) || raycast(torso.transform.position, futureBlockPos.transform.position) || raycast(new Vector2(head.transform.position.x + 1.5f, head.transform.position.y), futureBlockPos.transform.position);
+        bool raycastSuccess = raycast(head.transform.position, futureBlockPos.transform.position) || raycast(torso.transform.position, futureBlockPos.transform.position) || raycast(new Vector2(head.transform.position.x, head.transform.position.y + 1.5f), futureBlockPos.transform.position);
         if(!raycastSuccess) return false;
         if (futureBlockPos.layer == 7) // if it's a frontBackground block
         {
