@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Tilemaps;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class FallScript : MonoBehaviour
 {
@@ -12,12 +13,21 @@ public class FallScript : MonoBehaviour
     private Transform groundCheck;
 	private BlockScript blockScript;
 
-    // Start is called before the first frame update
-    void Start()
+	// Start is called before the first frame update
+	void Start()
     {
         groundCheck = transform.Find("GroundCheck");
 		blockScript = GetComponent<BlockScript>();
-    }
+		/*
+		IEnumerator f()
+		{
+			yield return new WaitForSeconds(0.5f);
+			fall();
+		}
+
+		StartCoroutine(f());
+		*/
+	}
 
 	void Update()
 	{
@@ -41,43 +51,13 @@ public class FallScript : MonoBehaviour
         isFalling = true;
 		if(blockScript == null) blockScript = GetComponent<BlockScript>();
 		blockScript.createBackgroundVisualBlock(); // create a background visual block 
-		checkIfAboveBlockIsFallType(); // check if above block needs to fall also
-		checkIfAboveIsNoFloatType(); // check if above block needs to get destroyed because some blocks are not allowed to float
+		GetComponent<BlockScript>().checkIfAboveBlockIsFallType(); // check if above block needs to fall also
+		GetComponent<BlockScript>().checkIfAboveIsNoFloatType(); // check if above block needs to get destroyed because some blocks are not allowed to float
 	}
 
-	private void checkIfAboveBlockIsFallType()
-	{
-		ContactFilter2D contactFilter = new ContactFilter2D();
-		contactFilter.layerMask = LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer)) | LayerMask.GetMask("BackBackground");
-		contactFilter.useLayerMask = true;
+	
 
-		GameObject aboveBlock = getAboveBlock(contactFilter);
-		if (aboveBlock != null && aboveBlock.tag.Equals("FallType"))
-		{
-			Debug.Log("above is fall type, so fall");
-			aboveBlock.GetComponent<FallScript>().fall();
-		}
-	}
 
-	private void checkIfAboveIsNoFloatType()
-	{
-		ContactFilter2D contactFilter = new ContactFilter2D();
-		contactFilter.layerMask = LayerMask.GetMask("Default") | LayerMask.GetMask("BackBackground") | LayerMask.GetMask("FrontBackground");
-		contactFilter.useLayerMask = true;
-
-		GameObject aboveBlock = getAboveBlock(contactFilter);
-		if (aboveBlock != null && aboveBlock.tag.Equals("NoFloatType")) aboveBlock.GetComponent<BlockScript>().breakBlock();
-	}
-
-	private GameObject getAboveBlock(ContactFilter2D contactFilter)
-	{
-		Collider2D[] results = new Collider2D[1];
-
-		int count = Physics2D.OverlapCircle(new Vector2(transform.position.x, transform.position.y + 1), 0.05f, contactFilter, results);
-
-		if (count > 0) return results[0].gameObject;
-		return null;
-	}
 	// returns true if falling else false
 	public void checkIfHitGround()
     {
@@ -86,7 +66,7 @@ public class FallScript : MonoBehaviour
 		Collider2D[] results = new Collider2D[2];
 
 		ContactFilter2D contactFilter = new ContactFilter2D();
-		contactFilter.layerMask = LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer)) | LayerMask.GetMask("Default");
+		contactFilter.layerMask = LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer)) | LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap");
 		contactFilter.useLayerMask = true;
 
 		int count = Physics2D.OverlapCircle(groundCheck.position, 0.01f, contactFilter, results);

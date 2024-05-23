@@ -26,11 +26,16 @@ public class BlockScript : MonoBehaviour
 	private OpenFurnaceScript openFurnaceScript;
 
 
-
+	void Awake()
+	{
+		gameObject.name = gameObject.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
+		scScript = GameObject.Find("Main Camera").GetComponent<spawnChunkScript>();
+		tilemap = GameObject.Find("Grid").transform.Find("Tilemap").GetComponent<Tilemap>();
+	}
 	// Start is called before the first frame update
 	void Start()
     {
-		gameObject.name = gameObject.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
+
 
 		breakAnimationObject = Resources.Load("Prefabs\\BreakBlockAnimation") as GameObject;
         // initialize break behaviour
@@ -44,9 +49,6 @@ public class BlockScript : MonoBehaviour
 		mineBlockAudioSource.pitch = audioSpeed;
 
 		breakBlockAudioSource = audioParent.Find("BreakBlockSound").GetComponent<AudioSource>();
-
-		tilemap = GameObject.Find("Grid").transform.Find("Tilemap").GetComponent<Tilemap>();
-		scScript = GameObject.Find("Main Camera").GetComponent<spawnChunkScript>();
 
 		openFurnaceScript = GameObject.Find("Canvas").transform.Find("InventoryParent").GetComponent<OpenFurnaceScript>();
 	}
@@ -151,7 +153,7 @@ public class BlockScript : MonoBehaviour
 		}
 
 		// make tiles next to this block turn into gameObjects
-		turnTilesToGameObjects();
+		//turnTilesToGameObjects();
 
 		// check if above block is fallType, then make it fall
 		checkIfAboveBlockIsFallType();
@@ -174,12 +176,12 @@ public class BlockScript : MonoBehaviour
 		{
 			int backgroundBlockID = 3;
 			// if this block is a dirt block && it is at the top block position, then display a grass block as a background block
-			if (vLineHeight == transform.position.y)
+			if (gameObject.name.Equals("Dirt") && vLineHeight == transform.position.y)
 			{
 				if(gameObject.GetComponent<SpriteRenderer>().sprite.name.Equals("GrassBlock")) backgroundBlockID = 2;
 				else if (gameObject.GetComponent<SpriteRenderer>().sprite.name.Equals("SnowyGrassBlock")) backgroundBlockID = 28;
 			}
-			else backgroundBlockID = BlockHashtable.getBackBackgroundBlock(gameObject.name);
+			else backgroundBlockID = BlockHashtable.getBackgroundVisualBlock(gameObject.name);
 			bool added = SpawningChunkData.addBackgroundVisualBlock(transform.position.x, transform.position.y, backgroundBlockID); // add the background block to the data
 			if (added) scScript.instantiateTile(backgroundBlockID, transform.position.x, transform.position.y, true); // instantiate the tile
 		}
@@ -224,25 +226,62 @@ public class BlockScript : MonoBehaviour
 		}
 	}
 
-
-	private void checkIfAboveBlockIsFallType()
+	private void turnAboveTileToGameObject()
 	{
-		ContactFilter2D contactFilter = new ContactFilter2D();
-		contactFilter.layerMask = LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer)) | LayerMask.GetMask("BackBackground");
-		contactFilter.useLayerMask = true;
-
-		GameObject aboveBlock = getAboveBlock(contactFilter);
-		if (aboveBlock != null && aboveBlock.tag.Equals("FallType")) aboveBlock.GetComponent<FallScript>().fall();
+		Vector3Int aboveBlockPos = new Vector3Int((int)(transform.position.x - .5f), (int)(transform.position.y - .5f) + 1);
+		if (tilemap.HasTile(aboveBlockPos)) // if there is a tile above this block
+		{
+			TileBase tile = tilemap.GetTile(aboveBlockPos);
+			scScript.spawnGameObjectInsteadOfTile(tile, aboveBlockPos); // place gameObject at tiles position
+			tilemap.SetTile(aboveBlockPos, null); // remove tile
+		}
 	}
 
-	private void checkIfAboveIsNoFloatType()
+
+	public void checkIfAboveBlockIsFallType()
 	{
 		ContactFilter2D contactFilter = new ContactFilter2D();
-		contactFilter.layerMask = LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer)) | LayerMask.GetMask("FrontBackground");
+		contactFilter.layerMask = LayerMask.GetMask("Tilemap");
 		contactFilter.useLayerMask = true;
 
 		GameObject aboveBlock = getAboveBlock(contactFilter);
-		if (aboveBlock != null && aboveBlock.tag.Equals("NoFloatType")) aboveBlock.GetComponent<BlockScript>().breakBlock();
+		if(aboveBlock != null)
+		{
+			// if above block is a fall type
+			if (FrontBackgroundBlocks.isFallType((tilemap.GetTile(tilemap.WorldToCell(new Vector2(transform.position.x, transform.position.y + 1))) as Tile)?.sprite.name))
+			{
+				turnAboveTileToGameObject();
+
+			}
+		}
+
+		contactFilter = new ContactFilter2D();
+		contactFilter.layerMask = LayerMask.GetMask("Default");
+		contactFilter.useLayerMask = true;
+
+		aboveBlock = getAboveBlock(contactFilter);
+		if (aboveBlock != null)
+		{
+			// if above block is a fall type
+			if (aboveBlock.tag == "FallType")
+			{
+				aboveBlock.GetComponent<FallScript>().fall();
+			}
+		}
+	}
+
+	public void checkIfAboveIsNoFloatType()
+	{
+		ContactFilter2D contactFilter = new ContactFilter2D();
+		contactFilter.layerMask = LayerMask.GetMask("Default") | LayerMask.GetMask("BackBackground") | LayerMask.GetMask("FrontBackground");
+		contactFilter.useLayerMask = true;
+
+		List<Collider2D> aboveBlock = getAllAboveColliders(contactFilter);
+
+		foreach (Collider2D c in aboveBlock)
+		{
+			if (c.gameObject.tag.Equals("NoFloatType")) c.gameObject.GetComponent<BlockScript>().breakBlock();
+		}
 	}
 
 	private GameObject getAboveBlock(ContactFilter2D contactFilter)
@@ -253,5 +292,14 @@ public class BlockScript : MonoBehaviour
 
 		if (count > 0) return results[0].gameObject;
 		return null;
+	}
+
+	private List<Collider2D> getAllAboveColliders(ContactFilter2D contactFilter)
+	{
+		List<Collider2D> results = new List<Collider2D>();
+
+		int count = Physics2D.OverlapCircle(new Vector2(transform.position.x, transform.position.y + 1), 0.05f, contactFilter, results);
+
+		return results;
 	}
 }

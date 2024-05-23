@@ -9,12 +9,14 @@ public static class FrontBackgroundBlocks
 	{
 		{"SaplingOak"},
 		{"Rose"},
-		{"Dandelions"},
+		{"Dandelion"},
 		{"Torch"},
 		{"Tombstone"},
 		{"Cactus"},
 		{"DeadBush"},
-		{"Grass"}
+		{"Grass"},
+		{"MushroomBrown"},
+		{"MushroomRed"},
 	};
 	// you can place blocks next to these blocks
 	private static HashSet<string> frontLayerBlocksThatCanBePlacedNextTo = new HashSet<string>()
@@ -22,6 +24,16 @@ public static class FrontBackgroundBlocks
 		{"Tombstone"},
 		{"Cactus"},
 	};
+
+	private static HashSet<string> fallTypes = new HashSet<string>()
+	{
+		{"Sand"}
+	};
+
+	public static bool isFallType(string blockName)
+	{
+		return fallTypes.Contains(blockName);
+	}
 
 	public static bool isFrontBackgroundBlock(string blockName)
 	{

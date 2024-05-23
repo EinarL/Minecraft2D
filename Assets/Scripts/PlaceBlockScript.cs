@@ -203,7 +203,7 @@ public class PlaceBlockScript : MonoBehaviour
 	private void createHighlight(Vector2 position)
     {
         if (hoverGrid != null) return;
-        Vector2 highlightPos = new Vector3(position.x + 0.205f, position.y + 0.33f);
+        Vector2 highlightPos = new Vector3(position.x, position.y);
         hoverGrid = Instantiate(hoverTexture, highlightPos, Quaternion.identity);
         hoveringOverPosition = position;
 
@@ -372,7 +372,7 @@ public class PlaceBlockScript : MonoBehaviour
         distance = Mathf.Min(distance, placingRange);
 
 		// Cast the ray
-		RaycastHit2D hit = Physics2D.Raycast(start, direction, distance, LayerMask.GetMask("Default"));
+		RaycastHit2D hit = Physics2D.Raycast(start, direction, distance, LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap"));
 
         return hit.collider == null;
 	}
@@ -447,13 +447,14 @@ public class PlaceBlockScript : MonoBehaviour
 		Vector2 belowBlockPosition = new Vector2(holdingItem.transform.position.x, holdingItem.transform.position.y - holdingItem.GetComponent<SpriteRenderer>().bounds.size.y);
 		
         ContactFilter2D contactFilter = new ContactFilter2D();
-        contactFilter.layerMask = LayerMask.GetMask("Default") | LayerMask.GetMask("BackBackground");
+        contactFilter.layerMask = LayerMask.GetMask("Default") | LayerMask.GetMask("BackBackground") | LayerMask.GetMask("Tilemap");
 		contactFilter.useLayerMask = true;
 		
         Collider2D[] result = new Collider2D[1];
 
 		Physics2D.OverlapCircle(belowBlockPosition, 0.1f, contactFilter, result);
 
+        if (result[0] == null) return false;
         if (LayerMask.LayerToName(result[0].gameObject.layer).Equals("BackBackground")) return true;
         if (LayerMask.LayerToName(result[0].gameObject.layer).Equals("Default") && !result[0].gameObject.tag.Equals("NoFloatType")) return true;
         return false;

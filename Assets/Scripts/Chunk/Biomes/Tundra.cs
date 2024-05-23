@@ -15,7 +15,7 @@ public class Tundra : Biome
 
 	public Tundra() : base()
 	{
-
+		biomeType = "Tundra";
 	}
 
 	/**

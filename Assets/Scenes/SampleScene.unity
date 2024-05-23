@@ -8099,6 +8099,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hoverTexture: {fileID: 6961825046304047479, guid: 75e645768c2437e4eafada367d8136cd, type: 3}
+  tilemap: {fileID: 1139891637}
 --- !u!114 &467764343
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8231,7 +8232,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 697637977915838428c96a35ad8897ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundVisualTiles: {fileID: 0}
+  backgroundVisualTiles: {fileID: 899169872}
 --- !u!114 &467764347
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30506,6 +30507,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: caf6d4031ea71ce478b599a86d34ac0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tilemap: {fileID: 1139891637}
 --- !u!50 &1760642420
 Rigidbody2D:
   serializedVersion: 4
