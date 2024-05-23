@@ -1,3 +1,4 @@
+using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -33,9 +34,11 @@ public class spawnChunkScript : MonoBehaviour
 
     private int lowestBlockPos = -60;
     private int rendered; // leftmost chunk that is rendered
+    public bool pauseChunkRendering = false;
+    public bool needsReset = false; // true if the variables for chunk rendering need to reset, this happens when the player respawns
 
     private Biome spawnChunkStrategy;
-    private List<Biome> biomes = new List<Biome> { new Tundra() }; // new List<Biome> { new Plains(), new Desert(), new Tundra() };
+    private List<Biome> biomes = new List<Biome> { new Plains(), new Desert(), new Tundra() }; // new List<Biome> { new Plains(), new Desert(), new Tundra() };
 
 	// how long the biome is (in chunks), this counts down every time a new chunk is rendered and when
 	// it hits 0, then a new random chunk gets generated
@@ -71,7 +74,15 @@ public class spawnChunkScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (pauseChunkRendering) return;
+        if(needsReset) // TODO: we will probably have use the x variable for the spawn point in the future, for calculating the rendered variable
+		{
+			rendered = -2 * chunkSize; // getChunkNumber()
+			amountOfChunksToRender = 4;
+            cam.orthographicSize = 5f;
+            needsReset = false;
+		}
+
         int newAmountOfChunksToRender = getAmountOfChunksToRender();
 		// if we need to render more chunks (for the camera size change)
 		if (amountOfChunksToRender < newAmountOfChunksToRender)
@@ -99,8 +110,8 @@ public class spawnChunkScript : MonoBehaviour
             rendered = getChunkNumber();
 		}
 
-        // check if we need to render a new chunk (because of movement left or right)
-        int leftMostChunkToRender = getChunkNumber();
+		// check if we need to render a new chunk (because of movement left or right)
+		int leftMostChunkToRender = getChunkNumber();
         if (leftMostChunkToRender != rendered) // if we need to load a chunk
         {
             if (leftMostChunkToRender == rendered + chunkSize) // need to load chunk rendered + 4*chunkSize (rightmost chunk)
@@ -121,13 +132,26 @@ public class spawnChunkScript : MonoBehaviour
         }
     }
 
+    /**
+     * when the player respawns the cams soft zone setting is set to 0 to make the camera snap into the spawns position
+     * so we need to put the soft zone setting back to normal after the player has respawned, therefore we have a coroutine here that puts it back to normal.
+     */
+    public void setCamSettingsBackToNormal(CinemachineFramingTransposer vcam, float value)
+    {
+		IEnumerator putSoftZoneBackToNormal()
+		{
+			yield return new WaitForSeconds(0.5f);
+			vcam.m_SoftZoneWidth = value;
+		}
+		StartCoroutine(putSoftZoneBackToNormal());
+	}
 
     private Biome decideBiome()
     {
 
         Biome currentBiome = spawnChunkStrategy;
 
-        //if(currentBiome != null) biomes.Remove(currentBiome);
+        if(currentBiome != null) biomes.Remove(currentBiome);
 
 		System.Random rand = new System.Random();
 		int randIndex = rand.Next(biomes.Count); // get random index
@@ -135,7 +159,7 @@ public class spawnChunkScript : MonoBehaviour
 		Biome newBiome = biomes[randIndex];
         biomeLength = rand.Next(newBiome.biomeLength[0], newBiome.biomeLength[1] + 1);
         
-        //if (currentBiome != null) biomes.Add(currentBiome);
+        if (currentBiome != null) biomes.Add(currentBiome);
 
         return newBiome; // newBiome
     }
@@ -315,7 +339,7 @@ public class spawnChunkScript : MonoBehaviour
             }
         }
 		// if this chunk is in a tundra biome, then randomly add snow on top of the topmost blocks
-		if (spawnChunkStrategy is Tundra)
+		if (chunkData.getBiome().Equals("Tundra"))
 		{
 			List<float[]> snow = generateSnow(chunkData);
 			foreach (float[] block in snow) // spawn the thin snow blocks and add them to the chunk data
@@ -323,8 +347,8 @@ public class spawnChunkScript : MonoBehaviour
 				chunkData.changeBlock(block[0], block[1], (int)block[2], "FrontBackground");
 				instantiateBlock((int)block[2], block[0], block[1], "FrontBackground");
 			}
-            // spawn the falling snow at y=30
-            snowParticleSystems[chunkPos] = Instantiate(snowParticleSystem, new Vector2(chunkPos + 5, 30), Quaternion.Euler(90f, 0f, 0f));
+            // spawn the falling snow at y=chunkYposition + x
+            snowParticleSystems[chunkPos] = Instantiate(snowParticleSystem, new Vector2(chunkPos + 5, height + 60), Quaternion.Euler(90f, 0f, 0f));
 
 		}
 		foreach (float[] block in frontBackgroundBlocks) // spawn blocks on the "FrontBackground" layer
@@ -356,7 +380,7 @@ public class spawnChunkScript : MonoBehaviour
         spawnEntities(entities);
 
         // check what tiles are exposed to air and turn them into GameObjects
-        changeTilesToGameObjects(tilePositionsInChunk);
+        //changeTilesToGameObjects(tilePositionsInChunk);
 
 
         // add lighting to the blocks

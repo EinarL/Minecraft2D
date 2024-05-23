@@ -35,7 +35,7 @@ public static class SpawnAnimalScript // Animal
 
 
 
-	private static float spawningOnSavedChunkChance = 3f; // odds that animals spawn on a previously saved chunk (the chunk must have no animals in it to begin with)
+	private static float spawningOnSavedChunkChance = 1f; // odds that animals spawn on a previously saved chunk (the chunk must have no animals in it to begin with)
 	private static int[] savedChunkAnimalClusterSize = new int[] { 1, 4 }; // min and max amount of animals that can spawn on a saved chunk
 
 

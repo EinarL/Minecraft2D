@@ -13,6 +13,7 @@ public class ChunkData
 	private float startHeight = -2.5f; // height of the chunk (height of grass block)
 	// need to also have here the variables dontGoUpRight, dontGoUpLeft, etc.
 	private List<object[]> entities; // list of entities in this chunk // of type {[x, y, entityName], [x, y, entityName], ...}
+	private string biome;
 
 	// heights of the vertical lines (i.e. the height of the grass blocks)
 	// if this is a right chunk, then the leftmost vertical line height would be at index 0
@@ -23,7 +24,7 @@ public class ChunkData
 	// keeps track of where ores spawned, this is needed for a smooth transition for ores in the next chunk
 	private Hashtable prevOreSpawns = new Hashtable(); // (y, blockID) 
 
-	public ChunkData(int chunkPosition, int[,] chunkData, float startHeight, Hashtable prevOreSpawns, List<float[]> frontBackgroundBlocks, List<object[]> entities, float[] vLineHeights, List<float[]> backgroundVisualBlocks)
+	public ChunkData(int chunkPosition, int[,] chunkData, float startHeight, Hashtable prevOreSpawns, List<float[]> frontBackgroundBlocks, List<object[]> entities, float[] vLineHeights, List<float[]> backgroundVisualBlocks, string biome)
 	{
 		this.chunkData = chunkData;
 		this.chunkPosition = chunkPosition;
@@ -33,6 +34,7 @@ public class ChunkData
 		this.entities = entities;
 		verticalLineHeights = vLineHeights;
 		this.backgroundVisualBlocks = backgroundVisualBlocks;
+		this.biome = biome;
 	}
 
 	public void changeBlock(float x, float y, int newBlockID, string layer = "Default")
@@ -150,5 +152,10 @@ public class ChunkData
 	public Hashtable getPrevOreSpawns()
 	{
 		return prevOreSpawns;
+	}
+
+	public string getBiome()
+	{
+		return biome;
 	}
 }

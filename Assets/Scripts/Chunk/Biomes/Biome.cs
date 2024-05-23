@@ -17,6 +17,7 @@ public abstract class Biome
 	public int highestStartSpawnY = 20;
 	public int lowestStartSpawnY = -15;
 	public int[] biomeLength = new int[] {5,30}; // min and max biome length, in chunks; (both inclusive)
+	protected string biomeType = "Plains";
 
 	public Biome()
 	{
@@ -66,7 +67,7 @@ public abstract class Biome
 			height = getNewHeight(height, false);
 		}
 
-		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresLeft, frontBackgroundBlocks, entities, verticalLineHeights, backgroundVisualBlocks);
+		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresLeft, frontBackgroundBlocks, entities, verticalLineHeights, backgroundVisualBlocks, biomeType);
 		SpawningChunkData.prevVerticalLineLeft = vLine;
 		SaveChunk.save(chunkData);
 
@@ -114,7 +115,7 @@ public abstract class Biome
 			height = getNewHeight(height, true);
 		}
 
-		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresRight, frontBackgroundBlocks, entities, verticalLineHeights, backgroundVisualBlocks);
+		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresRight, frontBackgroundBlocks, entities, verticalLineHeights, backgroundVisualBlocks, biomeType);
 		SpawningChunkData.prevVerticalLineRight = vLine;
 		SaveChunk.save(chunkData);
 

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public static class BlockBehaviourData
 {
+
 	private static Hashtable digBehaviours = new Hashtable() { // hashtable that holds the class for the different block sounds and speed when breaking them
 		{ "Dirt", new BreakDirt() },
 		{ "LogOak", new BreakWood() },
@@ -83,8 +84,11 @@ public static class BlockBehaviourData
 		{ "Glass", new object[]{ "stone", 6 } },
 		{ "Bedrock", new object[]{ "stone", 6 } },
 		{ "SnowBlock", new object[] { "cloth", 4} },
+		{ "SnowyGrassBlock", new object[] { "cloth", 4} },
 
 	};
+	private static object[] prevStepSound = new object[] { "dirt", 4 };
+
 
 	private static Hashtable stepSoundPitches = new Hashtable()
 	{
@@ -93,18 +97,20 @@ public static class BlockBehaviourData
 	// for getting walking and running pitch for each block
 	public static float[] getStepSoundPitch(string blockName)
 	{
+		if(blockName == null) return new float[] { 1.1f, 1.4f };
 		float[] stepPitch = (float[])stepSoundPitches[blockName];
 		if (stepPitch != null) return stepPitch;
 		return new float[] { 1.1f, 1.4f };
 	}
 
-	public static object[] getSoundFolder(GameObject block)
+	public static object[] getSoundFolder(string blockName)
 	{
-		object[] folderInfo = (object[])blockToStepSoundFolder[block.gameObject.name];
-		if(folderInfo == null && block.GetComponent<SpriteRenderer>().sprite.name.Equals("SnowyGrassBlock")) return new object[] { "cloth", 4 }; // if stepping on a snowy grass block
+		if (blockName == null) return prevStepSound;
+		object[] folderInfo = (object[])blockToStepSoundFolder[blockName];
 
-		if (folderInfo == null) return new object[] { "dirt", 4 };
-		return folderInfo;
+		if (folderInfo == null) prevStepSound = new object[] { "dirt", 4 };
+		else prevStepSound = folderInfo;
+		return prevStepSound;
 	}
 
 	public static BreakBehaviour getBreakBehaviour(string blockName)

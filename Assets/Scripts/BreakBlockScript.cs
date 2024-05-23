@@ -1,39 +1,49 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class BreakBlockScript : MonoBehaviour
 {
 
     private Camera cam;
     public GameObject hoverTexture; // hovering over block texture
+    public Tilemap tilemap;
     private PlayerControllerScript playerControllerScript;
-    private Transform stevePosition; // get distance from this transform to the blockPos to check if the distance in within range of mining/placing blocks
+	private spawnChunkScript scScript;
+	private Transform stevePosition; // get distance from this transform to the blockPos to check if the distance in within range of mining/placing blocks
     private Transform headPosition;
     private Animator anim;
     private GameObject hoverGrid = null;
-    private GameObject hoveringOverBlock = null; // the block the mouse is hovering over
+    private object hoveringOverBlock = null; // the block the mouse is hovering over, this can either be a Tile or a GameObject
+    private Vector2 prevTilePosition; // the previously hovered over tile or gameobject world position
     private GameObject miningBlock = null; // the block that we are mining
     private float miningRange = 6;
     private bool isBreaking = false; // is in the process of breaking a block
 
     private AnimationClip punchRight;
+	private Transform head; // steve's head
+	private Transform torso;
 
 
-    // Start is called before the first frame update
-    void Start()
+	// Start is called before the first frame update
+	void Start()
     {
         cam = Camera.main;
         stevePosition = transform.Find("MiningPlacingRange");
         headPosition = transform.Find("Head");
         anim = GetComponent<Animator>();
         playerControllerScript = GameObject.Find("SteveContainer").transform.GetComponent<PlayerControllerScript>();
+		scScript = GameObject.Find("Main Camera").GetComponent<spawnChunkScript>();
+		head = transform.Find("Head").transform;
+		torso = transform.Find("Torso").transform;
 
-        foreach(AnimationClip clip in anim.runtimeAnimatorController.animationClips)
+		foreach (AnimationClip clip in anim.runtimeAnimatorController.animationClips)
         {
             if (clip.name.Equals("punch"))
             {
@@ -46,14 +56,26 @@ public class BreakBlockScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        mineBlock();
-        highlightBlock();
+        if(isBreaking || hoverGrid != null) mineBlock();
+		highlightBlock();
 
         if(hoveringOverBlock != null) // if the mouse is hovering over a block
         {
-            if (Input.GetMouseButtonDown(1)) // if right click
+			
+			if (Input.GetMouseButtonDown(1)) // if right click
             {
-                hoveringOverBlock.GetComponent<BlockScript>().rightClick(); // call right click method on the block
+                if(hoveringOverBlock is GameObject) ((GameObject)hoveringOverBlock).GetComponent<BlockScript>().rightClick(); // call right click method on the block
+                else if (hoveringOverBlock != null) // if its a tile
+                {
+                    spawnGameObjectInsteadOfTile(new Vector3Int((int)(prevTilePosition.x - .5f), (int)(prevTilePosition.y - .5f)));
+                    IEnumerator rightClickCoroutine()
+                    {
+                        yield return new WaitForEndOfFrame();
+						if (getHoveredBlock() != null && getHoveredBlock() is GameObject) ((GameObject)getHoveredBlock()).GetComponent<BlockScript>().rightClick();
+					}
+                    StartCoroutine(rightClickCoroutine());
+				}
+
             }
         }
 	}
@@ -66,19 +88,40 @@ public class BreakBlockScript : MonoBehaviour
      */
     private void highlightBlock()
     {
-		GameObject highlightedBlock = getHoveredBlock(); // block that is being hovered over
-	    // if not hovering over any block or block not within range or (block is fallType and is falling)
-		if (highlightedBlock == null || !isBlockWithinRange(highlightedBlock.transform) || !isBlockReachable(highlightedBlock) || InventoryScript.getIsInUI() || (highlightedBlock.gameObject.tag.Equals("FallType") && highlightedBlock.gameObject.GetComponent<FallScript>().isFallingDown())) 
-		{
-            removeHighlighting();
-			return;
+		object highlightedBlock = getHoveredBlock(); // block that is being hovered over
+        if (highlightedBlock is Tile)
+        {
+            Tile highlightedTile = highlightedBlock as Tile;
+            Vector2 tilePos = getRoundedMousePosition();
+			// if not hovering over any block or block not within range nor reachable
+			if (highlightedTile == null || !isBlockWithinRange(tilePos) || !isTileReachable(tilePos) || InventoryScript.getIsInUI())
+			{
+				removeHighlighting();
+				return;
+			}
+			if (tilePos == prevTilePosition) return;
+			Destroy(hoverGrid);
+            prevTilePosition = tilePos;
+			hoverGrid = Instantiate(hoverTexture, getRoundedMousePosition(), Quaternion.identity); // create highlight
+			hoveringOverBlock = highlightedTile;
 		}
-        if (ReferenceEquals(highlightedBlock, hoveringOverBlock)) return; // if they are the same object
-        Destroy(hoverGrid);
+        else
+        {
+            GameObject highlightedGameObject = highlightedBlock as GameObject;
+			// if not hovering over any block or block not within range or (block is fallType and is falling)
+			if (highlightedGameObject == null || !isBlockWithinRange(highlightedGameObject.transform.position) || !isBlockReachable(highlightedGameObject) || InventoryScript.getIsInUI() || (highlightedGameObject.gameObject.tag.Equals("FallType") && highlightedGameObject.gameObject.GetComponent<FallScript>().isFallingDown()))
+			{
+				removeHighlighting();
+				return;
+			}
+			if (ReferenceEquals(highlightedGameObject, hoveringOverBlock)) return; // if they are the same object
+			Destroy(hoverGrid);
+            prevTilePosition = getRoundedMousePosition();
+			Vector3 highlightPos = new Vector3(highlightedGameObject.transform.position.x, highlightedGameObject.transform.position.y, highlightedGameObject.transform.position.z - 1);
+			hoverGrid = Instantiate(hoverTexture, highlightPos, highlightedGameObject.transform.rotation); // create highlight
+			hoveringOverBlock = highlightedGameObject;
+		}
 
-        Vector3 highlightPos = new Vector3(highlightedBlock.transform.position.x + 0.205f, highlightedBlock.transform.position.y + 0.33f, highlightedBlock.transform.position.z - 1);
-        hoverGrid = Instantiate(hoverTexture, highlightPos, highlightedBlock.transform.rotation); // create highlight
-        hoveringOverBlock = highlightedBlock;
 	}
     // removes highlighing of block, if any
     private void removeHighlighting()
@@ -86,6 +129,7 @@ public class BreakBlockScript : MonoBehaviour
 		Destroy(hoverGrid);
         hoverGrid = null;
         hoveringOverBlock = null;
+        prevTilePosition = new Vector2(-999f,-999f);
 	}
 
     public bool isHoveringOverBlock()
@@ -98,15 +142,24 @@ public class BreakBlockScript : MonoBehaviour
      */
     private void mineBlock()
     {
-
+        
         if (Input.GetMouseButton(0) && !isBreaking)
         {
-            GameObject gameObjectToBreak = getHoveredBlock(); // this is the block object to break
-            if (gameObjectToBreak != null && hoveringOverBlock == gameObjectToBreak)
+            object blockToBreak = getHoveredBlock(); // this is the block gameObject/tile to break
+            GameObject gameObjectToBreak = null;
+            if (blockToBreak is GameObject) gameObjectToBreak = (GameObject) blockToBreak;
+            else if (blockToBreak != null)// if blockToBreak is a tile
             {
+				Vector3Int blockPos = new Vector3Int((int)(prevTilePosition.x - .5f), (int)(prevTilePosition.y - .5f));
+                gameObjectToBreak = spawnGameObjectInsteadOfTile(blockPos);
+                if (gameObjectToBreak == null) return;
+			}
+
+            if (gameObjectToBreak != null) //  && hoveringOverBlock as GameObject == gameObjectToBreak
+			{
                 isBreaking = true;
                 miningBlock = gameObjectToBreak;
-                ToolInstance heldTool = InventoryScript.getHeldTool(); // get the tool that the player is holding
+				ToolInstance heldTool = InventoryScript.getHeldTool(); // get the tool that the player is holding
                 gameObjectToBreak.GetComponent<BlockScript>().mineBlock(heldTool); 
                 doPunchAnimation();
             }
@@ -114,7 +167,7 @@ public class BreakBlockScript : MonoBehaviour
 
 
         }
-        else if ((isBreaking && Input.GetMouseButtonUp(0)) || (Input.GetMouseButton(0) && (hoveringOverBlock != miningBlock || hoveringOverBlock == null)))
+        else if ((isBreaking && Input.GetMouseButtonUp(0)) || (Input.GetMouseButton(0) && ((hoveringOverBlock is GameObject && ((GameObject)hoveringOverBlock != miningBlock || hoveringOverBlock == null)) || hoveringOverBlock is not GameObject)))
         {
             if (miningBlock != null) 
             {
@@ -124,6 +177,15 @@ public class BreakBlockScript : MonoBehaviour
             isBreaking = false;
             stopPunchAnimation();
         }
+	}
+
+    private GameObject spawnGameObjectInsteadOfTile(Vector3Int tilePos)
+    {
+		TileBase tile = tilemap.GetTile(tilePos);
+        if (tile == null) return null;
+		scScript.spawnGameObjectInsteadOfTile(tile, tilePos); // place gameObject at tiles position
+		tilemap.SetTile(tilePos, null); // remove tile
+		return getHoveredBlock() as GameObject; // get the gameObject that just spawned at the tiles position
 	}
 
     private void doPunchAnimation()
@@ -158,17 +220,27 @@ public class BreakBlockScript : MonoBehaviour
 	}
 
 	/** 
-     * returns the gameObject that is being hovered over by the mouse.
-     * the gameObject must be on the "Default" layer
+     * returns the gameObject or tile that is being hovered over by the mouse.
      */
-	private GameObject getHoveredBlock()
+	private object getHoveredBlock()
     {
 		Vector3 worldMousePos = getMousePosition();
+        // first lets check if there is a tile in the cursors position
+		Collider2D[] results = new Collider2D[1];
+		ContactFilter2D filter = new ContactFilter2D();
+		filter.SetLayerMask(LayerMask.GetMask("Tilemap")); // only blocks on layer "Tilemap"
+		// Check for overlaps
+		int count = Physics2D.OverlapCircle(worldMousePos, 0.0001f, filter, results);
+        if(count > 0)
+        {
+			return tilemap.GetTile(tilemap.WorldToCell(worldMousePos)); // return a tile
+		}
+
 
 		// Create a list to store the results
 		List<Collider2D> blockToBreak = new List<Collider2D>();
 
-		ContactFilter2D filter = new ContactFilter2D();
+		filter = new ContactFilter2D();
 		filter.SetLayerMask(LayerMask.GetMask("Default") | LayerMask.GetMask("FrontBackground") | LayerMask.GetMask("BackBackground")); // only blocks on layer "Default" or "FrontBackground" or "BackBackground"
 
 		// Check for overlaps
@@ -194,19 +266,116 @@ public class BreakBlockScript : MonoBehaviour
 		return cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, cam.nearClipPlane));
 	}
 
+    public Vector2 getRoundedMousePosition()
+    {
+		Vector2 mousePos = getMousePosition();
+		return new Vector2((float)Math.Round(mousePos.x + 0.5f) - 0.5f, (float)Math.Round(mousePos.y + 0.5f) - 0.5f); // round it to the closes possible "block position"
+	}
+
 	/**
      * checks if the block position is within the mining/placing block range (miningRange)
      */
-	public bool isBlockWithinRange(Transform block)
+	public bool isBlockWithinRange(Vector2 blockPos)
     {
-        float distance = Vector2.Distance(stevePosition.position, block.position);
+        float distance = Vector2.Distance(stevePosition.position, blockPos);
         return distance <= miningRange;
     }
+
+    private bool isBlockReachable(GameObject block)
+    {
+        if (block.layer == LayerMask.GetMask("Default")) return raycastGameObject(torso.transform.position, block.transform.position, block) || raycastGameObject(head.transform.position, block.transform.position, block) || raycastGameObject(new Vector2(head.transform.position.x, head.transform.position.y + 1f), block.transform.position, block);
+        else return raycastBackgroundGameObject(torso.transform.position, block.transform.position, block) || raycastBackgroundGameObject(head.transform.position, block.transform.position, block) || raycastBackgroundGameObject(new Vector2(head.transform.position.x, head.transform.position.y + 1f), block.transform.position, block);
+    }
+
+	/**
+     * returns true if the raycast can get from start to end without hitting a block on the default layer
+     */
+	private bool isTileReachable(Vector2 tileWorldPos)
+	{
+        return raycast(torso.transform.position, tileWorldPos, tilemap.WorldToCell(tileWorldPos)) || raycast(head.transform.position, tileWorldPos, tilemap.WorldToCell(tileWorldPos)) || raycast(new Vector2(head.transform.position.x, head.transform.position.y + 1f), tileWorldPos, tilemap.WorldToCell(tileWorldPos));
+	}
+
+	/**
+     * returns true if the raycast can get from start to end and hitting the tile at the tilePos
+     */
+	private bool raycast(Vector2 start, Vector2 end, Vector3Int tilePos)
+	{
+
+		// Calculate direction and distance
+		Vector2 direction = end - start;
+		float distance = Vector2.Distance(start, end);
+		if (distance > miningRange) return false; // if its out of the placing range
+		distance = Mathf.Min(distance, miningRange);
+
+		// Cast the ray
+		RaycastHit2D hit = Physics2D.Raycast(start, direction, distance, LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap"));
+		if (hit.collider != null)
+		{
+			// Get the cell position of the hit point and check if it matches the target tile position
+			Vector3Int hitTilePos = tilemap.WorldToCell(hit.point + direction * 0.01f); // Move slightly into the tile
+			//Debug.Log(hitTilePos + " == " + tilePos);
+			return hitTilePos == tilePos;
+		}
+
+		return false;
+	}
+
+	/**
+     * returns true if the raycast can get from start to end and hit the block without hitting any other block first
+     */
+	private bool raycastGameObject(Vector2 start, Vector2 end, GameObject block)
+	{
+
+		// Calculate direction and distance
+		Vector2 direction = end - start;
+		float distance = Vector2.Distance(start, end);
+		if (distance > miningRange) return false; // if its out of the placing range
+		distance = Mathf.Min(distance, miningRange);
+
+		// Cast the ray
+		RaycastHit2D hit = Physics2D.Raycast(start, direction, distance, LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap"));
+		if (hit.collider != null)
+		{
+			return ReferenceEquals(hit.collider.gameObject, block);
+		}
+
+		return false;
+	}
+
+	/**
+     * returns true if the raycast can get from start to end and hit the block
+     */
+	private bool raycastBackgroundGameObject(Vector2 start, Vector2 end, GameObject block)
+	{
+
+		// Calculate direction and distance
+		Vector2 direction = end - start;
+		float distance = Vector2.Distance(start, end);
+		if (distance > miningRange) return false; // if its out of the placing range
+		distance = Mathf.Min(distance, miningRange);
+
+		// Cast the ray
+		RaycastHit2D[] hits = Physics2D.RaycastAll(start, direction, distance, LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap") | LayerMask.GetMask("FrontBackground") | LayerMask.GetMask("BackBackground"));
+        bool hitBlock = false;
+        foreach (RaycastHit2D hit in hits)
+		{
+			if (hit.collider != null)
+			{
+                if (hit.collider.gameObject.layer == LayerMask.GetMask("Default") || hit.collider.gameObject.layer == LayerMask.GetMask("Tilemap")) return false;
+                if (ReferenceEquals(hit.collider.gameObject, block)) hitBlock = true;
+			}
+		}
+
+		return hitBlock;
+	}
+
+
 	/**
      * checks if a block is reachable from the player, i.e. not behind another block
      * 
      * note: maybe which to raycast
      */
+	/*
 	public bool isBlockReachable(GameObject block)
     {
 
@@ -266,8 +435,8 @@ public class BreakBlockScript : MonoBehaviour
 
         return true;
     }
-
-    public bool isPlayerOnRightSideOfBlock(SpriteRenderer block)
+    */
+	public bool isPlayerOnRightSideOfBlock(SpriteRenderer block)
     {
         return headPosition.transform.position.x > block.transform.position.x + block.bounds.size.x/2;
 
@@ -296,7 +465,7 @@ public class BreakBlockScript : MonoBehaviour
     public bool isBlockOnRightSideOfBlock(GameObject block, bool includeBackBackground = false, bool includeFrontBackground = false)
     {
         Vector2 rightBlockPosition = new Vector2(block.transform.position.x + block.GetComponent<SpriteRenderer>().bounds.size.x, block.transform.position.y);
-        int mask = LayerMask.GetMask("Default");
+        int mask = LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap");
         if (includeBackBackground) mask |= LayerMask.GetMask("BackBackground"); // add BackBackground
         if (includeFrontBackground)
         {
@@ -314,7 +483,7 @@ public class BreakBlockScript : MonoBehaviour
 	public bool isBlockOnLeftSideOfBlock(GameObject block, bool includeBackBackground = false, bool includeFrontBackground = false)
 	{
 		Vector2 leftBlockPosition = new Vector2(block.transform.position.x - block.GetComponent<SpriteRenderer>().bounds.size.x, block.transform.position.y);
-		int mask = LayerMask.GetMask("Default");
+		int mask = LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap");
 		if (includeBackBackground) mask |= LayerMask.GetMask("BackBackground"); // add BackBackground
 		if (includeFrontBackground)
 		{
@@ -332,7 +501,7 @@ public class BreakBlockScript : MonoBehaviour
 	public bool isBlockAboveBlock(GameObject block, bool includeBackBackground = false, bool includeFrontBackground = false)
 	{
 		Vector2 aboveBlockPosition = new Vector2(block.transform.position.x, block.transform.position.y + block.GetComponent<SpriteRenderer>().bounds.size.y);
-		int mask = LayerMask.GetMask("Default");
+		int mask = LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap");
 		if (includeBackBackground) mask |= LayerMask.GetMask("BackBackground"); // add BackBackground
 		if (includeFrontBackground)
 		{
@@ -350,7 +519,7 @@ public class BreakBlockScript : MonoBehaviour
 	public bool isBlockBelowBlock(GameObject block, bool includeBackBackground = false, bool includeFrontBackground = false)
 	{
 		Vector2 belowBlockPosition = new Vector2(block.transform.position.x, block.transform.position.y - block.GetComponent<SpriteRenderer>().bounds.size.y);
-		int mask = LayerMask.GetMask("Default");
+		int mask = LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap");
 		if (includeBackBackground) mask |= LayerMask.GetMask("BackBackground"); // add BackBackground
 		if (includeFrontBackground)
 		{

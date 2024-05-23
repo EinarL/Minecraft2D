@@ -197,7 +197,7 @@ public static class BlockHashtable
 	}
 
 	// gets the block id that will be behind the mined block
-	public static int getBackBackgroundBlock(string blockName)
+	public static int getBackgroundVisualBlock(string blockName)
 	{
 		switch (blockName)
 		{

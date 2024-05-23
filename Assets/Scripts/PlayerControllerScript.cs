@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using static UnityEditor.FilePathAttribute;
 
 public class PlayerControllerScript : MonoBehaviour
@@ -15,6 +16,7 @@ public class PlayerControllerScript : MonoBehaviour
     private Transform holdingItemObject; // the object that displays which item the player is holding
 	private Camera cam;
     private StepSoundScript stepSoundScript;
+    public Tilemap tilemap;
 
 	private float walkSpeed = 6;
 	private float runSpeed = 10;
@@ -27,7 +29,7 @@ public class PlayerControllerScript : MonoBehaviour
     private bool isInAirAfterJumping = false;
     private bool facingRight = true;
     private float animationRunningSpeed = 1.5f;
-    private GameObject blockBelowPlayer; // the block name that the player is standing on
+    private string blockBelowPlayer; // the block name that the player is standing on
 
     private bool didFall = false; // used to know when the player hits the ground after falling
     private float fellFrom = float.NegativeInfinity; // how high the player fell from, this is a y value in the world space
@@ -167,12 +169,24 @@ public class PlayerControllerScript : MonoBehaviour
         Collider2D[] results = new Collider2D[1];
 
         ContactFilter2D contactFilter = new ContactFilter2D();
-        contactFilter.layerMask = LayerMask.GetMask("Default");
+        contactFilter.layerMask = LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap");
         contactFilter.useLayerMask = true;
 
 		int count = Physics2D.OverlapCircle(groundCheck.position, 0.05f, contactFilter, results);
         bool isGrounded = count > 0;
-        if (isGrounded) blockBelowPlayer = results[0].gameObject;
+
+        if (isGrounded)
+        {
+            if (results[0].gameObject.layer == LayerMask.NameToLayer("Default")) // if its a gameObject (because GameObjects are on the default layer)
+            {
+                blockBelowPlayer = results[0].gameObject.name;
+            }
+            else // if its on the Tilemap layer
+            {
+				blockBelowPlayer = (tilemap.GetTile(tilemap.WorldToCell(new Vector2(groundCheck.position.x, groundCheck.position.y - 0.5f))) as Tile)?.sprite.name;
+			}
+            
+        }
 
         return isGrounded;
     }
@@ -184,8 +198,8 @@ public class PlayerControllerScript : MonoBehaviour
 
 	private bool hasBlockInPath() // OverlapBox(Vector2 point, Vector2 size, float angle)
 	{
-        if(goingLeft()) return Physics2D.OverlapBox(new Vector2(blockNextToPlayerLeft.position.x, blockNextToPlayerLeft.position.y), new Vector2(0.1f,1.8f), 0, LayerMask.GetMask("Default"));
-		if(goingRight())return Physics2D.OverlapBox(new Vector2(blockNextToPlayerRight.position.x, blockNextToPlayerRight.position.y), new Vector2(0.1f, 1.8f), 0, LayerMask.GetMask("Default"));
+        if(goingLeft()) return Physics2D.OverlapBox(new Vector2(blockNextToPlayerLeft.position.x, blockNextToPlayerLeft.position.y), new Vector2(0.1f,1.8f), 0, LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap"));
+		if(goingRight())return Physics2D.OverlapBox(new Vector2(blockNextToPlayerRight.position.x, blockNextToPlayerRight.position.y), new Vector2(0.1f, 1.8f), 0, LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap"));
         return false;
 	}
 

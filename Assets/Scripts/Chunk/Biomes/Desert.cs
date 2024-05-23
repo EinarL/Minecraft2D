@@ -6,9 +6,11 @@ using UnityEngine;
 
 public class Desert : Biome
 {
+
 	public Desert() : base()
 	{
 		biomeLength = new int[] { 5, 20 };
+		biomeType = "Desert";
 	}
 
 	/**

@@ -199,7 +199,7 @@ public abstract class Entity : MonoBehaviour
 	 */
 	public virtual bool isPathBlocked()
 	{
-		return Physics2D.OverlapCircle(higherBlockCheck.position, 0.05f, LayerMask.GetMask("Default"));
+		return Physics2D.OverlapCircle(higherBlockCheck.position, 0.05f, LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap"));
 	}
 
 	/**
@@ -208,7 +208,7 @@ public abstract class Entity : MonoBehaviour
 	public bool isBlockInPath()
 	{
 		// if there is a block in the way && there is not a block above the block that is in the way
-		return Physics2D.OverlapCircle(lowerBlockCheck.position, 0.05f, LayerMask.GetMask("Default")) && !isPathBlocked();
+		return Physics2D.OverlapCircle(lowerBlockCheck.position, 0.05f, LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap")) && !isPathBlocked();
 	}
 
 	protected virtual IEnumerator decideIfMakeNoise()
