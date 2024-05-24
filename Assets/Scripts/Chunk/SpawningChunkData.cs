@@ -126,7 +126,7 @@ public static class SpawningChunkData
 				// we know that the chunk being removed is either the rightmost or leftmost, so its position is either lower or higher than all the other chunks
 				if (renderedChunks.Count == 0) // if this happens, then we are in the process of unrendering all chunks
 				{
-					leftMostChunkEdge = -20;
+					leftMostChunkEdge = -20; // TODO: need to change this number when i implement spawning elsewhere
 				}
 				else if(chunkPos < renderedChunks[0].getChunkPosition()) // if we removed the leftmost chunk
 				{

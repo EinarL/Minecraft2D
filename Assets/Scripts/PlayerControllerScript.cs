@@ -13,9 +13,13 @@ public class PlayerControllerScript : MonoBehaviour
     private Transform blockNextToPlayerLeft;
 	private Transform blockNextToPlayerRight;
     private Transform steve; // character
+    private Transform head;
     private Transform holdingItemObject; // the object that displays which item the player is holding
 	private Camera cam;
     private StepSoundScript stepSoundScript;
+    private CapsuleCollider2D capCollider;
+    private Vector2 defaultColliderSize;
+    private Vector2 sleepingColliderSize;
     public Tilemap tilemap;
 
 	private float walkSpeed = 6;
@@ -35,6 +39,7 @@ public class PlayerControllerScript : MonoBehaviour
     private float fellFrom = float.NegativeInfinity; // how high the player fell from, this is a y value in the world space
     private HealthbarScript healthbarScript;
     private HungerbarScript hungerbarScript;
+    private SleepScript sleepScript;
 
     private bool isRunning = false;
 
@@ -53,15 +58,20 @@ public class PlayerControllerScript : MonoBehaviour
 		cam = Camera.main;
         speed = walkSpeed;
         jumpBoost = jumpBoostWhenWalking;
+		capCollider = GetComponent<CapsuleCollider2D>();
+        defaultColliderSize = capCollider.size;
+        sleepingColliderSize = new Vector2(capCollider.size.x, 0.3f);
+		head = steve.Find("Head"); // find player's head
 
-        healthbarScript = GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>();
+		healthbarScript = GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>();
 		hungerbarScript = GameObject.Find("Canvas").transform.Find("Hungerbar").GetComponent<HungerbarScript>();
+		sleepScript = GameObject.Find("Canvas").transform.Find("SleepTint").GetComponent<SleepScript>();
 	}
 
 	// Update is called once per frame
 	void Update()
     {
-		if (InventoryScript.getIsInUI()) return; // if user is in the UI, then we cant move
+		if (InventoryScript.getIsInUI() || anim.GetBool("isSleeping")) return; // if user is in the UI or if steve is sleeping, then we cant move
 
 		horizontalMove = Input.GetAxisRaw("Horizontal"); // -1: left, 0: still, 1: right
 
@@ -216,30 +226,14 @@ public class PlayerControllerScript : MonoBehaviour
         Vector3 worldMousePos = cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, cam.nearClipPlane));
         if (worldMousePos.x < transform.position.x && facingRight) // rotate character left
         {
-			Vector3 rotationVector = transform.rotation.eulerAngles;
-			rotationVector.y = 180;
-            gameObject.transform.rotation = Quaternion.Euler(rotationVector);
-            facingRight = false;
-            Transform temp = blockNextToPlayerLeft;
-            blockNextToPlayerLeft = blockNextToPlayerRight;
-            blockNextToPlayerRight = temp;
-			putHoldingItemToOtherHand(false);
+            rotatePlayer(false);
 		}
         else if (worldMousePos.x > transform.position.x && !facingRight) // rotate character right
         {
-			Vector3 rotationVector = transform.rotation.eulerAngles;
-			rotationVector.y = 0;
-			gameObject.transform.rotation = Quaternion.Euler(rotationVector);
-			facingRight = true;
-			Transform temp = blockNextToPlayerLeft;
-			blockNextToPlayerLeft = blockNextToPlayerRight;
-			blockNextToPlayerRight = temp;
-			putHoldingItemToOtherHand(true);
+            rotatePlayer(true);
 		}
 
 		// now rotate head to look towards mouse position
-		Transform head = steve.Find("Head"); // find player's head
-
 		Vector3 diff = worldMousePos - head.position;
 		diff.Normalize();
 
@@ -247,6 +241,18 @@ public class PlayerControllerScript : MonoBehaviour
 		
         if(!facingRight) head.rotation = Quaternion.Euler(-180f, 0f, -zRotation);
         else head.rotation = Quaternion.Euler(0f, 0f, zRotation);
+	}
+
+    public void rotatePlayer(bool rotateRight)
+    {
+		Vector3 rotationVector = transform.rotation.eulerAngles;
+		rotationVector.y = rotateRight ? 0f : 180f;
+		gameObject.transform.rotation = Quaternion.Euler(rotationVector);
+		facingRight = rotateRight;
+		Transform temp = blockNextToPlayerLeft;
+		blockNextToPlayerLeft = blockNextToPlayerRight;
+		blockNextToPlayerRight = temp;
+		putHoldingItemToOtherHand(rotateRight);
 	}
 
     /**
@@ -289,6 +295,33 @@ public class PlayerControllerScript : MonoBehaviour
     {
         anim.SetBool("isDead", true);
     }
+
+    public void goToSleep()
+    {
+		if (anim.GetBool("isSleeping")) return;
+		anim.SetBool("isSleeping", true);
+		capCollider.size = sleepingColliderSize;
+
+		if (!facingRight) head.rotation = Quaternion.Euler(-180f, 0f, -180f);
+		else head.rotation = Quaternion.Euler(0f, 0f, 0f);
+
+        sleepScript.sleep(); // create the dark tint & which will later make the player wake up
+	}
+    public void stopSleeping(bool wokeUp = false)
+    {
+        if (!anim.GetBool("isSleeping")) return;
+		anim.SetBool("isSleeping", false);
+		capCollider.size = defaultColliderSize;
+        transform.position = new Vector2(transform.position.x, transform.position.y + 1f);
+
+        if(!wokeUp) sleepScript.stopSleeping();
+	}
+
+    public bool isSleeping()
+    {
+        return anim.GetBool("isSleeping");
+
+	}
 
 	public void removeDeathAnimation()
 	{

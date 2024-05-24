@@ -11,7 +11,7 @@ public class DeadBushItemDrop : ItemDropBehaviour
 	}
 
 
-	public override List<GameObject> dropItem(string gameObjectaName, ToolInstance usingTool)
+	public override List<GameObject> dropItem(string gameObjectaName, ToolInstance usingTool, Vector2 blockPosition = default)
 	{
 		float rand = Random.value * 100; // Generate a random value between 0 and 100
 

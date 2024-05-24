@@ -14,6 +14,7 @@ public static class BlockBehaviourData
 		{ "SaplingOak", new BreakInstantly() },
 		{ "SaplingSpruce", new BreakInstantly() },
 		{ "PlankOak", new BreakWood() },
+		{ "PlankSpruce", new BreakWood() },
 		{ "CraftingTable", new BreakWood() },
 		{ "Stone", new BreakStone() },
 		{ "Cobblestone", new BreakStone() },
@@ -39,6 +40,10 @@ public static class BlockBehaviourData
 		{ "TorchLeft", new BreakWoodInstantly() },
 		{ "SnowBlock", new BreakSnow() },
 		{ "SnowBlockThin", new BreakSnow() },
+		{ "BedUpperLeft", new BreakWoodInstantly() },
+		{ "BedUpperRight", new BreakWoodInstantly() },
+		{ "BedLowerLeft", new BreakWoodInstantly() },
+		{ "BedLowerRight", new BreakWoodInstantly() }
 	};
 
 	private static Hashtable itemDropBehaviours = new Hashtable()
@@ -59,12 +64,16 @@ public static class BlockBehaviourData
 		{ "TorchLeft", new TorchDrop() },
 		{ "SnowBlock", new SnowDrop(3,5)},
 		{ "SnowBlockThin", new SnowDrop(1,1)},
+		{ "BedUpperLeft", new BedDrop(true)},
+		{ "BedLowerLeft", new BedDrop(false)},
+		{ "BedUpperRight", new BedDrop(false)},
+		{ "BedLowerRight", new BedDrop(true)},
 	};
 
 	private static Hashtable rightClickBehaviours = new Hashtable()
 	{
 		{ "CraftingTable", new OpenCraftingTableBehaviour() },
-		{ "Furnace", new OpenFurnaceBehaviour()}
+		{ "Furnace", new OpenFurnaceBehaviour()},
 	};
 
 	// hashtable that maps block names to the corresponding step sound folder, default is dirt sound so its unneccesary to have those blocks here
@@ -76,7 +85,9 @@ public static class BlockBehaviourData
 		{ "IronOre", new object[]{ "stone", 6 } },
 		{ "DiamondOre", new object[]{ "stone", 6 } },
 		{ "LogOak", new object[]{ "wood", 6 }},
+		{ "LogSpruce", new object[]{ "wood", 6 }},
 		{ "PlankOak", new object[]{ "wood", 6 }},
+		{ "PlankSpruce", new object[]{ "wood", 6 }},
 		{ "CraftingTable", new object[] { "wood", 6 } },
 		{ "Sand", new object[]{ "sand", 5} },
 		{ "Wool", new object[] { "cloth", 4} },
@@ -85,6 +96,10 @@ public static class BlockBehaviourData
 		{ "Bedrock", new object[]{ "stone", 6 } },
 		{ "SnowBlock", new object[] { "cloth", 4} },
 		{ "SnowyGrassBlock", new object[] { "cloth", 4} },
+		{ "BedUpperLeft", new object[] { "cloth", 4} },
+		{ "BedUpperRight", new object[] { "cloth", 4} },
+		{ "BedLowerLeft", new object[] { "cloth", 4} },
+		{ "BedLowerRight", new object[] { "cloth", 4} },
 
 	};
 	private static object[] prevStepSound = new object[] { "dirt", 4 };
@@ -128,8 +143,10 @@ public static class BlockBehaviourData
 		return dropBehaviour as ItemDropBehaviour;
 	}
 
-	public static RightClickBlockBehaviour getRightClickBehaviour(string blockName)
+	public static RightClickBlockBehaviour getRightClickBehaviour(string blockName, Vector2 blockPos)
 	{
+		if (blockName.StartsWith("BedUpper") || blockName.StartsWith("BedLower")) return new SleepBehaviour(blockName, blockPos); // if its a bed
+
 		RightClickBlockBehaviour rcBehaviour = rightClickBehaviours[blockName] as RightClickBlockBehaviour;
 		return rcBehaviour;
 	}

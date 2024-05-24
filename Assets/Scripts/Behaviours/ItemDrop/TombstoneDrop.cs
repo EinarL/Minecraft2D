@@ -16,7 +16,7 @@ public class TombstoneDrop : ItemDropBehaviour
 	}
 
 
-	public override List<GameObject> dropItem(string gameObjectName, ToolInstance usingTool)
+	public override List<GameObject> dropItem(string gameObjectName, ToolInstance usingTool, Vector2 blockPosition = default)
 	{
 		List<object[]> tombstones = dataService.loadData<List<object[]>>("tombstone.json"); // returns [[xPos, yPos, inv], [xPos, yPos, inv], ...]
 
@@ -35,9 +35,10 @@ public class TombstoneDrop : ItemDropBehaviour
 					foreach (InventorySlot item in remainingItems)
 					{
 						if (item.isEmpty()) continue;
-						GameObject itemToDrop = GameObject.Instantiate(Resources.Load("Prefabs\\ItemContainer") as GameObject);
+						GameObject itemToDrop = Resources.Load<GameObject>("Prefabs\\ItemContainer");
+						GameObject itemObject = itemToDrop.transform.Find("Item").gameObject; // get item within itemContainer
 
-						itemToDrop.transform.Find("Item").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Textures\\ItemTextures\\" + item.itemName); // change item texture 
+						itemObject.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Textures\\ItemTextures\\" + item.itemName); // change item texture 
 
 
 						DroppedItemScript itemScript = itemToDrop.GetComponent<DroppedItemScript>();

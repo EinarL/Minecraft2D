@@ -10,7 +10,7 @@ public class StoneItemDrop : ItemDropBehaviour
 
 	}
 
-	public override List<GameObject> dropItem(string gameObjectName, ToolInstance usingTool)
+	public override List<GameObject> dropItem(string gameObjectName, ToolInstance usingTool, Vector2 blockPosition = default)
 	{
 		if (usingTool == null) return null;
 

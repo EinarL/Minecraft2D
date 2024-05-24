@@ -4,5 +4,5 @@ using UnityEngine;
 
 public interface PlaceBlockBehaviour
 {
-	GameObject placeBlock(GameObject blockToPlace, PlaceBlockScript pbScript, BreakBlockScript bbScript);
+	List<GameObject> placeBlock(GameObject blockToPlace, PlaceBlockScript pbScript, BreakBlockScript bbScript);
 }

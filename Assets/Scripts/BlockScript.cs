@@ -41,7 +41,7 @@ public class BlockScript : MonoBehaviour
         // initialize break behaviour
         breakBehaviour = BlockBehaviourData.getBreakBehaviour(gameObject.name);
 		itemDropBehaviour = BlockBehaviourData.getItemDropBehaviour(gameObject.name, transform.position);
-		rightClickBehaviour = BlockBehaviourData.getRightClickBehaviour(gameObject.name);
+		rightClickBehaviour = BlockBehaviourData.getRightClickBehaviour(gameObject.name, transform.position);
 
 		Transform audioParent = GameObject.Find("Audio").transform;
 
@@ -127,15 +127,7 @@ public class BlockScript : MonoBehaviour
 	 */
 	public void breakBlock()
 	{
-		List<GameObject> itemsToDrop = itemDropBehaviour.dropItem(gameObject.name, toolBreakingWith); // get items to drop
-		if (itemsToDrop != null)
-		{
-			foreach (GameObject item in itemsToDrop)
-			{
-				Instantiate(item, transform.position, transform.rotation); // spawn item
-			}
-			
-		}
+		dropItems();
 
 		SpawningChunkData.updateChunkData(transform.position.x, transform.position.y, 0, LayerMask.LayerToName(gameObject.layer));
 
@@ -163,6 +155,22 @@ public class BlockScript : MonoBehaviour
 		if (gameObject.name.Equals("Furnace")) openFurnaceScript.removeFurnace(transform.position);
 
 		createBackgroundVisualBlock();
+	}
+
+	// runs when the block is broken, drops items from the block
+	private void dropItems()
+	{
+		List<GameObject> itemsToDrop;
+		if(gameObject.name.StartsWith("Bed")) itemsToDrop = itemDropBehaviour.dropItem(gameObject.name, toolBreakingWith, transform.position);
+		else itemsToDrop = itemDropBehaviour.dropItem(gameObject.name, toolBreakingWith); // get items to drop
+		if (itemsToDrop != null)
+		{
+			foreach (GameObject item in itemsToDrop)
+			{
+				Instantiate(item, transform.position, transform.rotation); // spawn item
+			}
+
+		}
 	}
 
 	/**

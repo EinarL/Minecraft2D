@@ -89,7 +89,7 @@ public class PlaceBlockScript : MonoBehaviour
 				if (holdingItem.tag.Equals("NoFloatType"))
                 {
                     // returns true if the block below is in the default or frontBackground layer
-					if (breakBlockScript.isBlockBelowBlock(holdingItem, false, true)) placeBlockInForeground(); // place block in foreground layer
+					if (breakBlockScript.isBlockBelowBlock(holdingItem.transform.position, false, true)) placeBlockInForeground(); // place block in foreground layer
                 }
                 else
                 {
@@ -121,31 +121,32 @@ public class PlaceBlockScript : MonoBehaviour
      */
     private void placeBlockInForeground()
     {
-        GameObject placedBlock = placeBlock();
+        List<GameObject> placedBlocks = placeBlock();
 
-		// here we need to check if placedBlock is a special type of block which goes on the FrontBackground Layer
-		if (FrontBackgroundBlocks.isFrontBackgroundBlock(placedBlock.name)) // if its a "front background" block
-		{
-			placedBlock.layer = LayerMask.NameToLayer("FrontBackground");
-		}
-
-		// update the chunkData
-		SpawningChunkData.updateChunkData(hoveringOverPosition.x, hoveringOverPosition.y, BlockHashtable.getIDByBlockName(placedBlock.name), LayerMask.LayerToName(placedBlock.layer)); 
-		
-
-		if (placedBlock.tag.Equals("FallType"))
+        foreach(GameObject block in placedBlocks)
         {
-            // we need FallScript to execute its Start() function before we call fall()
-            IEnumerator executeAfterStart(FallScript fallScript)
-            {
-                yield return null;
-                fallScript.fall();
-            }
+			// here we need to check if placedBlock is a special type of block which goes on the FrontBackground Layer
+			if (FrontBackgroundBlocks.isFrontBackgroundBlock(block.name)) // if its a "front background" block
+			{
+				block.layer = LayerMask.NameToLayer("FrontBackground");
+			}
 
-            StartCoroutine(executeAfterStart(placedBlock.GetComponent<FallScript>()));
-        }
-        
-        
+			// update the chunkData
+			if (block != null) SpawningChunkData.updateChunkData(block.transform.position.x, block.transform.position.y, BlockHashtable.getIDByBlockName(block.name), LayerMask.LayerToName(block.layer));
+
+
+			if (block.tag.Equals("FallType"))
+			{
+				// we need FallScript to execute its Start() function before we call fall()
+				IEnumerator executeAfterStart(FallScript fallScript)
+				{
+					yield return null;
+					fallScript.fall();
+				}
+
+				StartCoroutine(executeAfterStart(block.GetComponent<FallScript>()));
+			}
+		}
 	}
 
 	/**
@@ -153,51 +154,60 @@ public class PlaceBlockScript : MonoBehaviour
      */
 	private void placeBlockInBackground()
 	{
-		GameObject placedBlock = placeBlock();
+		List<GameObject> placedBlocks = placeBlock();
 
-		// here we need to check if placedBlock is a special type of block which goes on the FrontBackground Layer
-		if (FrontBackgroundBlocks.isFrontBackgroundBlock(placedBlock.name)) // if its a "front background" block
-		{
-			placedBlock.layer = LayerMask.NameToLayer("FrontBackground");
-		}
-        else // else place on BackBackground layer
+		foreach (GameObject block in placedBlocks)
         {
-			placedBlock.layer = LayerMask.NameToLayer("BackBackground");
+			// here we need to check if placedBlock is a special type of block which goes on the FrontBackground Layer
+			if (FrontBackgroundBlocks.isFrontBackgroundBlock(block.name)) // if its a "front background" block
+			{
+				block.layer = LayerMask.NameToLayer("FrontBackground");
+			}
+			else // else place on BackBackground layer
+			{
+				block.layer = LayerMask.NameToLayer("BackBackground");
 
-            SpriteRenderer blockRenderer = placedBlock.GetComponent<SpriteRenderer>();
-			blockRenderer.color = new Color(170f/255f, 170f / 255f, 170f / 255f); // dark tint
-            blockRenderer.sortingOrder = -10;
+				SpriteRenderer blockRenderer = block.GetComponent<SpriteRenderer>();
+				blockRenderer.color = new Color(170f / 255f, 170f / 255f, 170f / 255f); // dark tint
+				blockRenderer.sortingOrder = -10;
 
-		}
+			}
 
-		// update the chunkData
-		SpawningChunkData.updateChunkData(hoveringOverPosition.x, hoveringOverPosition.y, BlockHashtable.getIDByBlockName(placedBlock.name), LayerMask.LayerToName(placedBlock.layer));
+			// update the chunkData
+			SpawningChunkData.updateChunkData(block.transform.position.x, block.transform.position.y, BlockHashtable.getIDByBlockName(block.name), LayerMask.LayerToName(block.layer));
 
 
-		if (placedBlock.tag.Equals("FallType"))
-		{
-			placedBlock.GetComponent<FallScript>().fall();
+			if (block.tag.Equals("FallType"))
+			{
+				block.GetComponent<FallScript>().fall();
+			}
+
 		}
 
 	}
 	//helper function that both placeBlockInForeground() and placeBlockInBackground() use
-	private GameObject placeBlock()
+	private List<GameObject> placeBlock()
     {
 		makePlaceBlockSound();
 		PlaceBlockBehaviour pbBehaviour = BlockHashtable.getPlaceBlockBehaviour(holdingItem.name);
-		GameObject placedBlock;
-		if (pbBehaviour != null)
-		{
-			placedBlock = pbBehaviour.placeBlock(holdingItem, this, breakBlockScript);
+		List<GameObject> placedBlocks;
+        if (pbBehaviour != null)
+        {
+            placedBlocks = pbBehaviour.placeBlock(holdingItem, this, breakBlockScript);
 
-			if (placedBlock == null) placedBlock = Instantiate(holdingItem, hoveringOverPosition, Quaternion.identity); // place block
+            if (placedBlocks == null) placedBlocks = new List<GameObject>() { Instantiate(holdingItem, hoveringOverPosition, Quaternion.identity) }; // place block
 
 		}
-		else placedBlock = Instantiate(holdingItem, hoveringOverPosition, Quaternion.identity); // place block
+		else placedBlocks = new List<GameObject>() { Instantiate(holdingItem, hoveringOverPosition, Quaternion.identity) }; // place block
 		InventoryScript.decrementSlot(InventoryScript.getSelectedSlot()); // remove the block from the inventory
-		placedBlock.name = placedBlock.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
 
-        return placedBlock;
+        foreach (GameObject block in placedBlocks)
+        {
+			block.name = block.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
+		}
+
+
+        return placedBlocks;
 	}
 
 	private void createHighlight(Vector2 position)
@@ -236,7 +246,10 @@ public class PlaceBlockScript : MonoBehaviour
      */
     public void checkIfHoldingPlaceableItem(string itemName)
     {
-		holdingItem = Resources.Load<GameObject>("Prefabs\\Blocks\\" +  itemName);
+        // special case if the player is holding a bed. because there isnt a bed block, but rather a bedUpper and bedLower blocks
+        if(itemName.Equals("Bed")) holdingItem = Resources.Load<GameObject>("Prefabs\\Blocks\\BedUpperLeft");
+		else holdingItem = Resources.Load<GameObject>("Prefabs\\Blocks\\" +  itemName);
+
         if (holdingItem == null) // didn't find the block, so the block isn't placeable
 		{
             holdingItemIsPlaceable = false;
@@ -260,13 +273,23 @@ public class PlaceBlockScript : MonoBehaviour
         //if (RoundedMousePos == hoveringOverPosition && transform.position == prevPosition) return; // if have not moved mouse nor player, we know we dont need to create a new hoverTexture
 		removeHighlight();
 		holdingItem.transform.position = RoundedMousePos;
+        if (holdingItem.name.Equals("Bed")) // special case where the block takes up more that one-block-space
+        {
+            Debug.Log("holding bed");
+            if (checkIfLongBlockPlaceable(holdingItem))
+            {
+                Debug.Log("can place bed");
+                createHighlight(RoundedMousePos);
+            }
+            return;
+        }
 
 		if (checkIfPlaceable(holdingItem)) // if its placeable, then display the hoverTexture
         {
             // if its a no float type then there must be a block below in order to place it
             if (holdingItem.tag.Equals("NoFloatType"))
             {
-                if (breakBlockScript.isBlockBelowBlock(holdingItem, true, true)) createHighlight(RoundedMousePos);
+                if (breakBlockScript.isBlockBelowBlock(holdingItem.transform.position, true, true)) createHighlight(RoundedMousePos);
 			}
 			else createHighlight(RoundedMousePos);
         }
@@ -341,7 +364,7 @@ public class PlaceBlockScript : MonoBehaviour
 		}
         else if (checkIfBlockInPosition()) return false;
 
-		// Create a collision filter to only include colliders in the default layer
+		// Create a collision filter to only include colliders in the following layers
 		ContactFilter2D filter = new ContactFilter2D();
 		filter.SetLayerMask(LayerMask.GetMask("BackBackground") | LayerMask.GetMask("BackgroundVisual"));
 
@@ -350,13 +373,34 @@ public class PlaceBlockScript : MonoBehaviour
         return false;
 	}
 
-    private bool isBlockNextToBlock(GameObject futureBlockPos)
+    private bool checkIfLongBlockPlaceable(GameObject futureBlockPos)
+    {
+        if (!checkIfPlaceable(futureBlockPos)) return false;
+        bool placeLeft = head.position.x < futureBlockPos.transform.position.x; // if this is true then we need to rotate the bed right when placing it
+
+        // if were placing the bed on the left side of the player
+        if (placeLeft)
+        {
+            // if there is a block on the left side of futureBlockPos (i.e. no space for the whole bed in this position)
+			if(breakBlockScript.isBlockOnLeftSideOfBlock(futureBlockPos.transform.position, false, true)) return false;
+            return true;
+		}
+		else // if were placing the bed on the right side of the player
+		{
+			// if there is a block on the right side of futureBlockPos (i.e. no space for the whole bed in this position)
+			if (breakBlockScript.isBlockOnRightSideOfBlock(futureBlockPos.transform.position, false, true)) return false;
+			return true;
+		}
+    }
+
+
+	private bool isBlockNextToBlock(GameObject futureBlockPos)
     {
         // if its a front background block then we dont check if there is a block above, because torches, grass, flowers, etc. cant float below a block
-        if(!FrontBackgroundBlocks.isFrontBackgroundBlock(holdingItem.name) && breakBlockScript.isBlockAboveBlock(futureBlockPos, true, true)) return true;
-        if(breakBlockScript.isBlockOnRightSideOfBlock(futureBlockPos, true, true)) return true;
-        if(breakBlockScript.isBlockBelowBlock(futureBlockPos, true, true)) return true;
-        if(breakBlockScript.isBlockOnLeftSideOfBlock(futureBlockPos, true, true)) return true;
+        if(!FrontBackgroundBlocks.isFrontBackgroundBlock(holdingItem.name) && breakBlockScript.isBlockAboveBlock(futureBlockPos.transform.position, true, true)) return true;
+        if(breakBlockScript.isBlockOnRightSideOfBlock(futureBlockPos.transform.position, true, true)) return true;
+        if(breakBlockScript.isBlockBelowBlock(futureBlockPos.transform.position, true, true)) return true;
+        if(breakBlockScript.isBlockOnLeftSideOfBlock(futureBlockPos.transform.position, true, true)) return true;
         return false;
     }
     /**
@@ -377,66 +421,6 @@ public class PlaceBlockScript : MonoBehaviour
         return hit.collider == null;
 	}
 
-	// checks if the block is placeable in the cursor position
-	/*
-    private bool checkIfPlaceable(GameObject futureBlockPos)
-    {
-		SpriteRenderer blockRenderer = futureBlockPos.GetComponent<SpriteRenderer>();
-
-		// if player is below the mousePosition
-		if (breakBlockScript.isPlayerBelowBlock(blockRenderer))
-		{
-            if(breakBlockScript.isBlockAboveBlock(futureBlockPos, true)) return true;
-
-			if (breakBlockScript.isPlayerOnRightSideOfBlock(blockRenderer)) // right side
-			{
-				if (breakBlockScript.isBlockOnLeftSideOfBlock(futureBlockPos, true)) return true;
-
-			}
-			else if (breakBlockScript.isPlayerOnLeftSideOfBlock(blockRenderer)) // left side
-			{
-				if (breakBlockScript.isBlockOnRightSideOfBlock(futureBlockPos, true)) return true;
-            }
-            else
-            {
-                if (breakBlockScript.isBlockOnRightSideOfBlock(futureBlockPos, true) || breakBlockScript.isBlockOnLeftSideOfBlock(futureBlockPos, true)) return true;
-            }
-		}
-
-        // if player is above the mousePosition
-        else if (breakBlockScript.isPlayerAboveBlock(blockRenderer))
-        {
-			if (breakBlockScript.isBlockBelowBlock(futureBlockPos, true)) return true;
-
-			if (breakBlockScript.isPlayerOnRightSideOfBlock(blockRenderer)) // right side
-            {
-				if (breakBlockScript.isBlockOnLeftSideOfBlock(futureBlockPos, true)) return true;
-			}
-			else if (breakBlockScript.isPlayerOnLeftSideOfBlock(blockRenderer)) // left side
-			{
-				if (breakBlockScript.isBlockOnRightSideOfBlock(futureBlockPos, true)) return true;
-			}
-            else
-            {
-				if (breakBlockScript.isBlockOnRightSideOfBlock(futureBlockPos, true) || breakBlockScript.isBlockOnLeftSideOfBlock(futureBlockPos, true)) return true;
-			}
-		}
-		else // if player head is on the same level as the mousePosition
-		{
-			if (breakBlockScript.isBlockAboveBlock(futureBlockPos, true) || breakBlockScript.isBlockBelowBlock(futureBlockPos, true)) return true;
-
-			if (breakBlockScript.isPlayerOnRightSideOfBlock(blockRenderer))
-			{
-				if (breakBlockScript.isBlockOnLeftSideOfBlock(futureBlockPos, true)) return true;
-			}
-			else if (breakBlockScript.isPlayerOnLeftSideOfBlock(blockRenderer))
-			{
-				if (breakBlockScript.isBlockOnRightSideOfBlock(futureBlockPos, true)) return true;
-			}
-		}
-        return false;
-	}
-    */
 	/**
      * returns true if one of these conditions is true:
      *   a) there is a block below which is in the BackBackground layer
