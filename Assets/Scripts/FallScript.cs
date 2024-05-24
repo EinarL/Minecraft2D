@@ -18,15 +18,6 @@ public class FallScript : MonoBehaviour
     {
         groundCheck = transform.Find("GroundCheck");
 		blockScript = GetComponent<BlockScript>();
-		/*
-		IEnumerator f()
-		{
-			yield return new WaitForSeconds(0.5f);
-			fall();
-		}
-
-		StartCoroutine(f());
-		*/
 	}
 
 	void Update()

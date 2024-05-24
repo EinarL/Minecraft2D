@@ -45,6 +45,16 @@ public class DayProcessScript : MonoBehaviour
 		//StartCoroutine(checkIfSunIsHigh());
 		starRenderers = stars.GetComponentsInChildren<SpriteRenderer>();
 
+
+		isDay = false;
+		if (!isDay) spriteRenderer.sprite = moonTexture;
+		float angleInDegrees = angle * Mathf.Rad2Deg;
+		if (angleInDegrees <= 170f && angleInDegrees >= 10f && !isDay)
+		{
+			sunLight.intensity = 0.2f;
+			mainCamera.backgroundColor = nightColor;
+		}
+
 		if (dataService.exists("day-time.json"))
 		{
 			// returns: new object[] { angle, isDay, isTransitioningToDay, transitionProcess, prevAngle, hasResetVariables, starTransitionProcess };
@@ -58,7 +68,7 @@ public class DayProcessScript : MonoBehaviour
 			starTransitionProcess = Convert.ToSingle(timeInfo[6]);
 
 			if (!isDay) spriteRenderer.sprite = moonTexture;
-			float angleInDegrees = angle * Mathf.Rad2Deg;
+			angleInDegrees = angle * Mathf.Rad2Deg;
 			if(angleInDegrees <= 170f && angleInDegrees >= 10f && !isDay)
 			{
 				sunLight.intensity = 0.2f;
@@ -98,6 +108,7 @@ public class DayProcessScript : MonoBehaviour
 		{
 			if (!hasResetVariables)
 			{
+				Debug.Log("Reset variables");
 				isTransitioningToDay = !isTransitioningToDay;
 				prevAngle = 170f;
 				transitionProcess = 0f;
@@ -146,6 +157,18 @@ public class DayProcessScript : MonoBehaviour
 		}
 	}
 
+	public void setTimeToDay()
+	{
+		angle = 0.53f;
+		isDay = true;
+		spriteRenderer.sprite = sunTexture;
+		isTransitioningToDay = true;
+		sunLight.intensity = 1f;
+		mainCamera.backgroundColor = dayColor;
+		UpdateStarsOpacity(0f);
+		hasResetVariables = false; // this will refresh the variables in the Update() function
+	}
+
 	/**
 	 * returns the data that is neccessary to save to save the time of day
 	 */
@@ -184,5 +207,10 @@ public class DayProcessScript : MonoBehaviour
 	public bool isDaytime()
 	{
 		return isDay;
+	}
+
+	public bool canSleep()
+	{
+		return !isDay;
 	}
 }

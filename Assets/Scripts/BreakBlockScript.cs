@@ -14,7 +14,6 @@ public class BreakBlockScript : MonoBehaviour
     private Camera cam;
     public GameObject hoverTexture; // hovering over block texture
     public Tilemap tilemap;
-    private PlayerControllerScript playerControllerScript;
 	private spawnChunkScript scScript;
 	private Transform stevePosition; // get distance from this transform to the blockPos to check if the distance in within range of mining/placing blocks
     private Transform headPosition;
@@ -26,7 +25,6 @@ public class BreakBlockScript : MonoBehaviour
     private float miningRange = 6;
     private bool isBreaking = false; // is in the process of breaking a block
 
-    private AnimationClip punchRight;
 	private Transform head; // steve's head
 	private Transform torso;
 
@@ -38,19 +36,9 @@ public class BreakBlockScript : MonoBehaviour
         stevePosition = transform.Find("MiningPlacingRange");
         headPosition = transform.Find("Head");
         anim = GetComponent<Animator>();
-        playerControllerScript = GameObject.Find("SteveContainer").transform.GetComponent<PlayerControllerScript>();
 		scScript = GameObject.Find("Main Camera").GetComponent<spawnChunkScript>();
 		head = transform.Find("Head").transform;
 		torso = transform.Find("Torso").transform;
-
-		foreach (AnimationClip clip in anim.runtimeAnimatorController.animationClips)
-        {
-            if (clip.name.Equals("punch"))
-            {
-                punchRight = clip;
-                break;
-            }
-        }
     }
 
     // Update is called once per frame
@@ -84,7 +72,7 @@ public class BreakBlockScript : MonoBehaviour
      * Highlights the block that the mouse is hovering over, but only if the block is:
      *      a) within the players range to place/break blocks
      *      b) reachable from the player, i.e. not behind another block
-     *      c) player is not in the UI, e.g. in inventory
+     *      c) player is not in the UI, e.g. in inventory, nor sleeping
      */
     private void highlightBlock()
     {
@@ -94,7 +82,7 @@ public class BreakBlockScript : MonoBehaviour
             Tile highlightedTile = highlightedBlock as Tile;
             Vector2 tilePos = getRoundedMousePosition();
 			// if not hovering over any block or block not within range nor reachable
-			if (highlightedTile == null || !isBlockWithinRange(tilePos) || !isTileReachable(tilePos) || InventoryScript.getIsInUI())
+			if (highlightedTile == null || !isBlockWithinRange(tilePos) || !isTileReachable(tilePos) || InventoryScript.getIsInUI() || anim.GetBool("isSleeping"))
 			{
 				removeHighlighting();
 				return;
@@ -109,7 +97,7 @@ public class BreakBlockScript : MonoBehaviour
         {
             GameObject highlightedGameObject = highlightedBlock as GameObject;
 			// if not hovering over any block or block not within range or (block is fallType and is falling)
-			if (highlightedGameObject == null || !isBlockWithinRange(highlightedGameObject.transform.position) || !isBlockReachable(highlightedGameObject) || InventoryScript.getIsInUI() || (highlightedGameObject.gameObject.tag.Equals("FallType") && highlightedGameObject.gameObject.GetComponent<FallScript>().isFallingDown()))
+			if (highlightedGameObject == null || !isBlockWithinRange(highlightedGameObject.transform.position) || !isBlockReachable(highlightedGameObject) || InventoryScript.getIsInUI() || anim.GetBool("isSleeping") || (highlightedGameObject.gameObject.tag.Equals("FallType") && highlightedGameObject.gameObject.GetComponent<FallScript>().isFallingDown()))
 			{
 				removeHighlighting();
 				return;
@@ -369,73 +357,6 @@ public class BreakBlockScript : MonoBehaviour
 		return hitBlock;
 	}
 
-
-	/**
-     * checks if a block is reachable from the player, i.e. not behind another block
-     * 
-     * note: maybe which to raycast
-     */
-	/*
-	public bool isBlockReachable(GameObject block)
-    {
-
-        SpriteRenderer blockRenderer = block.GetComponent<SpriteRenderer>();
-        // if player head is on the same level as the block
-        if (!isPlayerAboveBlock(blockRenderer) && !isPlayerBelowBlock(blockRenderer))
-        {
-            if (isPlayerOnRightSideOfBlock(blockRenderer))
-            {
-                if (isBlockOnRightSideOfBlock(block)) return false;
-            }
-            else if (isPlayerOnLeftSideOfBlock(blockRenderer))
-            {
-                if (isBlockOnLeftSideOfBlock(block)) return false;
-            }
-        }
-
-        // if player is on left side of the block
-        if (isPlayerOnLeftSideOfBlock(blockRenderer))
-        {
-            if (isPlayerBelowBlock(blockRenderer)) // below block
-            {
-                if (isBlockOnLeftSideOfBlock(block) && isBlockBelowBlock(block)) return false;
-                
-            }
-            if (isPlayerAboveBlock(blockRenderer)) // above block
-			{
-                if (isBlockOnLeftSideOfBlock(block) && isBlockAboveBlock(block)) return false;
-            }
-        }
-
-        // if player is on the right side of the block
-        if (isPlayerOnRightSideOfBlock(blockRenderer))
-        {
-            if (isPlayerBelowBlock(blockRenderer)) // below block
-            {
-                if (isBlockOnRightSideOfBlock(block) && isBlockBelowBlock(block)) return false;
-            }
-            if (isPlayerAboveBlock(blockRenderer)) // above block
-            {
-                if (isBlockOnRightSideOfBlock(block) && isBlockAboveBlock(block)) return false;
-            }
-        }
-
-        // if player is on the same x, i.e. above or below the block
-        if(!isPlayerOnRightSideOfBlock(blockRenderer) && !isPlayerOnLeftSideOfBlock(blockRenderer))
-        {
-            if (isPlayerBelowBlock(blockRenderer)) // below block
-            {
-                if (isBlockBelowBlock(block)) return false;
-            }
-            if (isPlayerAboveBlock(blockRenderer)) // above block
-            {
-                if(isBlockAboveBlock(block)) return false;
-            }
-        }
-
-        return true;
-    }
-    */
 	public bool isPlayerOnRightSideOfBlock(SpriteRenderer block)
     {
         return headPosition.transform.position.x > block.transform.position.x + block.bounds.size.x/2;
@@ -462,9 +383,9 @@ public class BreakBlockScript : MonoBehaviour
     // checks if there is a block on the right side of GameObject block (right next to it)
     // bool includeBackBackground: true if you want to check if there is a block on the right side with layer: BackBackground or Default/foreground
     //                             if its false then you're only checking if there is a Default layer block next to it
-    public bool isBlockOnRightSideOfBlock(GameObject block, bool includeBackBackground = false, bool includeFrontBackground = false)
+    public bool isBlockOnRightSideOfBlock(Vector2 blockPos, bool includeBackBackground = false, bool includeFrontBackground = false)
     {
-        Vector2 rightBlockPosition = new Vector2(block.transform.position.x + block.GetComponent<SpriteRenderer>().bounds.size.x, block.transform.position.y);
+        Vector2 rightBlockPosition = new Vector2(blockPos.x + 1, blockPos.y);
         int mask = LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap");
         if (includeBackBackground) mask |= LayerMask.GetMask("BackBackground"); // add BackBackground
         if (includeFrontBackground)
@@ -480,9 +401,9 @@ public class BreakBlockScript : MonoBehaviour
 		return Physics2D.OverlapCircle(rightBlockPosition, 0.1f, mask);
 	}
 
-	public bool isBlockOnLeftSideOfBlock(GameObject block, bool includeBackBackground = false, bool includeFrontBackground = false)
+	public bool isBlockOnLeftSideOfBlock(Vector2 blockPos, bool includeBackBackground = false, bool includeFrontBackground = false)
 	{
-		Vector2 leftBlockPosition = new Vector2(block.transform.position.x - block.GetComponent<SpriteRenderer>().bounds.size.x, block.transform.position.y);
+		Vector2 leftBlockPosition = new Vector2(blockPos.x - 1, blockPos.y);
 		int mask = LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap");
 		if (includeBackBackground) mask |= LayerMask.GetMask("BackBackground"); // add BackBackground
 		if (includeFrontBackground)
@@ -498,9 +419,9 @@ public class BreakBlockScript : MonoBehaviour
 		return Physics2D.OverlapCircle(leftBlockPosition, 0.1f, mask);
 	}
 	// checks if there is a block above GameObject block (right up against it)
-	public bool isBlockAboveBlock(GameObject block, bool includeBackBackground = false, bool includeFrontBackground = false)
+	public bool isBlockAboveBlock(Vector2 blockPos, bool includeBackBackground = false, bool includeFrontBackground = false)
 	{
-		Vector2 aboveBlockPosition = new Vector2(block.transform.position.x, block.transform.position.y + block.GetComponent<SpriteRenderer>().bounds.size.y);
+		Vector2 aboveBlockPosition = new Vector2(blockPos.x, blockPos.y + 1);
 		int mask = LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap");
 		if (includeBackBackground) mask |= LayerMask.GetMask("BackBackground"); // add BackBackground
 		if (includeFrontBackground)
@@ -516,9 +437,9 @@ public class BreakBlockScript : MonoBehaviour
 		return Physics2D.OverlapCircle(aboveBlockPosition, 0.1f, mask);
 	}
 
-	public bool isBlockBelowBlock(GameObject block, bool includeBackBackground = false, bool includeFrontBackground = false)
+	public bool isBlockBelowBlock(Vector2 blockPos, bool includeBackBackground = false, bool includeFrontBackground = false)
 	{
-		Vector2 belowBlockPosition = new Vector2(block.transform.position.x, block.transform.position.y - block.GetComponent<SpriteRenderer>().bounds.size.y);
+		Vector2 belowBlockPosition = new Vector2(blockPos.x, blockPos.y - 1);
 		int mask = LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap");
 		if (includeBackBackground) mask |= LayerMask.GetMask("BackBackground"); // add BackBackground
 		if (includeFrontBackground)

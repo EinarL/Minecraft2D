@@ -1,4 +1,2 @@
 
 when you get the items from the tombstone back it is possible that the amount of some items will be one too many if the player doesnt have the inventory for all of the stuff that the tombstone was storing.
-
-you can place many frontBackground blocks at the same position

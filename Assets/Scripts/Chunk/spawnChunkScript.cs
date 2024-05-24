@@ -682,7 +682,7 @@ public class spawnChunkScript : MonoBehaviour
 		return false;
     }
     /**
-     * when spawning in a chunk that has already spawned before we need to:
+     * when spawning in either a new chunk or a chunk that has already spawned before we need to:
      *      * check if its daytime, then despawn mobs that are above ground
      *      * maybe spawn in new animals
      *      

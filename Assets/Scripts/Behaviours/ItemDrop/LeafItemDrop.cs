@@ -14,7 +14,7 @@ public class LeafItemDrop : ItemDropBehaviour
 	}
 
 
-	public override List<GameObject> dropItem(string gameObjectName, ToolInstance usingTool)
+	public override List<GameObject> dropItem(string gameObjectName, ToolInstance usingTool, Vector2 blockPosition = default)
 	{
 		// TODO: if usingTool is a shear, then drop the leaf block
 

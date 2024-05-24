@@ -12,7 +12,7 @@ public class SnowDrop : ItemDropBehaviour
 	}
 
 
-	public override List<GameObject> dropItem(string gameObjectName, ToolInstance usingTool)
+	public override List<GameObject> dropItem(string gameObjectName, ToolInstance usingTool, Vector2 blockPosition = default)
 	{
 		GameObject itemToDrop = Resources.Load("Prefabs\\ItemContainer") as GameObject;
 		itemToDrop.transform.Find("Item").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Textures\\ItemTextures\\SnowBall"); // change item texture to the block we were breaking

@@ -10,7 +10,7 @@ public class DropNothing : ItemDropBehaviour
 
 	}
 
-	public override List<GameObject> dropItem(string gameObjectaName, ToolInstance usingTool)
+	public override List<GameObject> dropItem(string gameObjectaName, ToolInstance usingTool, Vector2 blockPosition = default)
 	{
 		return null;
 	}

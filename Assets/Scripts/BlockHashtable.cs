@@ -58,7 +58,12 @@ public static class BlockHashtable
 			{ 28, getBlockTileWithName("SnowyGrassBlock")},
 			{ 29, getBlockTileWithName("SnowBlock")},
 			{ 30, getBlockTileWithName("LogSpruce")},
-			{ 31, getBlockTileWithName("LeavesSpruce")}
+			{ 31, getBlockTileWithName("LeavesSpruce")},
+			{ 36, getBlockTileWithName("PlankSpruce")},
+			{ 37, getBlockTileWithName("BedUpperLeft")},
+			{ 38, getBlockTileWithName("BedLowerLeft")},
+			{ 39, getBlockTileWithName("BedUpperRight")},
+			{ 40, getBlockTileWithName("BedLowerRight")}
 		};
 		// id's in blockTiles and blocks hashtable need to be the same for each block
 		blocks = new Hashtable()
@@ -98,12 +103,18 @@ public static class BlockHashtable
 			{ 33, getBlockWithName("MushroomBrown")},
 			{ 34, getBlockWithName("MushroomRed")},
 			{ 35, getBlockWithName("SnowBlockThin")},
+			{ 36, getBlockWithName("PlankSpruce")},
+			{ 37, getBlockWithName("BedUpperLeft")},
+			{ 38, getBlockWithName("BedLowerLeft")},
+			{ 39, getBlockWithName("BedUpperRight")},
+			{ 40, getBlockWithName("BedLowerRight")},
 		};
 
 		// contains behaviours for blocks that need special functionality upon placing the block, e.g. torches need to be rotated to be placed on right/left wall
 		placeBlockBehaviours = new Hashtable()
 		{
-			{"Torch", new PlaceTorch()}
+			{"Torch", new PlaceTorch()},
+			{"BedUpperLeft", new PlaceBed()}
 		};
 
 		// maps blocks to which index in the placeBlockAudio list is the place block sound for the block
@@ -125,7 +136,11 @@ public static class BlockHashtable
 			{"Sand", 4}, // 4 is sand
 			{"Cactus", 5}, // 5 is cloth
 			{"Wool", 5},
-			{"SnowBlock", 5}
+			{"SnowBlock", 5},
+			{"BedUpperLeft", 5},
+			{"BedLowerLeft", 5},
+			{"BedUpperRight", 5},
+			{"BedLowerRight", 5},
 		};
 
 		foreach(DictionaryEntry entry in blocks) // create the opposite type of hashtable, i.e. block to ID
