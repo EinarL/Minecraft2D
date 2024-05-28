@@ -50,7 +50,7 @@ public class BreakBlockScript : MonoBehaviour
         if(hoveringOverBlock != null) // if the mouse is hovering over a block
         {
 			
-			if (Input.GetMouseButtonDown(1)) // if right click
+			if (Input.GetMouseButtonDown(1) && !Input.GetKey(KeyCode.LeftControl)) // if right click
             {
                 if(hoveringOverBlock is GameObject) ((GameObject)hoveringOverBlock).GetComponent<BlockScript>().rightClick(); // call right click method on the block
                 else if (hoveringOverBlock != null) // if its a tile
@@ -424,16 +424,8 @@ public class BreakBlockScript : MonoBehaviour
 		Vector2 aboveBlockPosition = new Vector2(blockPos.x, blockPos.y + 1);
 		int mask = LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap");
 		if (includeBackBackground) mask |= LayerMask.GetMask("BackBackground"); // add BackBackground
-		if (includeFrontBackground)
-		{
-			int frontBackgroundMask = LayerMask.GetMask("FrontBackground");
-			Collider2D blockHit = Physics2D.OverlapCircle(aboveBlockPosition, 0.1f, frontBackgroundMask);
-			if (blockHit != null) // if hit block on frontBackground
-			{
-				blockHit.name = blockHit.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
-				if (FrontBackgroundBlocks.isFrontBackgroundBlockPlaceableNextTo(blockHit.name)) return true; // if you can place a block next to this block
-			}
-		}
+		if (includeFrontBackground) mask |= LayerMask.GetMask("FrontBackground"); // add FrontBackground
+
 		return Physics2D.OverlapCircle(aboveBlockPosition, 0.1f, mask);
 	}
 
@@ -453,5 +445,18 @@ public class BreakBlockScript : MonoBehaviour
 			}
 		}
 		return Physics2D.OverlapCircle(belowBlockPosition, 0.1f, mask);
+	}
+
+	public bool isHoveredBlockRightClickable()
+	{
+		if(hoveringOverBlock == null) return false;
+		if (hoveringOverBlock is GameObject) return ((GameObject)hoveringOverBlock).GetComponent<BlockScript>().isRightClickable();
+		else if (hoveringOverBlock != null) // if its a tile
+		{
+			spawnGameObjectInsteadOfTile(new Vector3Int((int)(prevTilePosition.x - .5f), (int)(prevTilePosition.y - .5f)));
+			hoveringOverBlock = getHoveredBlock();
+			if (hoveringOverBlock is GameObject) return ((GameObject)hoveringOverBlock).GetComponent<BlockScript>().isRightClickable();
+		}
+		return false;
 	}
 }

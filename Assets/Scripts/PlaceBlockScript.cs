@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using static Unity.Collections.AllocatorManager;
+using static UnityEngine.UI.Image;
 
 
 /**
@@ -85,6 +86,10 @@ public class PlaceBlockScript : MonoBehaviour
             {
                 didPress = false;
                 holdRightClickTimer = 0;
+
+                // check if the hovered block is right clickable, then dont place block
+                if (breakBlockScript.isHoveredBlockRightClickable() && !Input.GetKey(KeyCode.LeftControl)) return;
+                
 				// if the block to be placed is a NoFloatType && we can only place the float type block in the foreground
 				if (holdingItem.tag.Equals("NoFloatType"))
                 {
@@ -246,8 +251,9 @@ public class PlaceBlockScript : MonoBehaviour
      */
     public void checkIfHoldingPlaceableItem(string itemName)
     {
-        // special case if the player is holding a bed. because there isnt a bed block, but rather a bedUpper and bedLower blocks
+        // special case if the player is holding a bed. because there isnt a bed block, but rather a bedUpper and bedLower blocks (similar for doors)
         if(itemName.Equals("Bed")) holdingItem = Resources.Load<GameObject>("Prefabs\\Blocks\\BedUpperLeft");
+		else if (itemName.StartsWith("Door"))holdingItem = Resources.Load<GameObject>("Prefabs\\Blocks\\Door" + itemName.Replace("Door", "") + "TopRight");
 		else holdingItem = Resources.Load<GameObject>("Prefabs\\Blocks\\" +  itemName);
 
         if (holdingItem == null) // didn't find the block, so the block isn't placeable
@@ -273,16 +279,23 @@ public class PlaceBlockScript : MonoBehaviour
         //if (RoundedMousePos == hoveringOverPosition && transform.position == prevPosition) return; // if have not moved mouse nor player, we know we dont need to create a new hoverTexture
 		removeHighlight();
 		holdingItem.transform.position = RoundedMousePos;
-        if (holdingItem.name.Equals("Bed")) // special case where the block takes up more that one-block-space
+        if (holdingItem.name.Equals("BedUpperLeft")) // special case where the block takes up more that one-block-space
         {
-            Debug.Log("holding bed");
             if (checkIfLongBlockPlaceable(holdingItem))
             {
-                Debug.Log("can place bed");
                 createHighlight(RoundedMousePos);
             }
             return;
         }
+
+		if (holdingItem.name.StartsWith("Door")) // special case where the block takes up also the space above it
+		{
+			if (checkIfTallBlockPlaceable(holdingItem))
+			{
+				createHighlight(RoundedMousePos);
+			}
+			return;
+		}
 
 		if (checkIfPlaceable(holdingItem)) // if its placeable, then display the hoverTexture
         {
@@ -376,7 +389,7 @@ public class PlaceBlockScript : MonoBehaviour
     private bool checkIfLongBlockPlaceable(GameObject futureBlockPos)
     {
         if (!checkIfPlaceable(futureBlockPos)) return false;
-        bool placeLeft = head.position.x < futureBlockPos.transform.position.x; // if this is true then we need to rotate the bed right when placing it
+        bool placeLeft = head.position.x > futureBlockPos.transform.position.x; // if this is true then we need to rotate the bed right when placing it
 
         // if were placing the bed on the left side of the player
         if (placeLeft)
@@ -392,6 +405,14 @@ public class PlaceBlockScript : MonoBehaviour
 			return true;
 		}
     }
+
+	private bool checkIfTallBlockPlaceable(GameObject futureBlockPos)
+	{
+		if (!checkIfPlaceable(futureBlockPos)) return false;
+		// if there is a block above futureBlockPos (i.e. no space for the whole door in this position)
+		if (breakBlockScript.isBlockAboveBlock(futureBlockPos.transform.position, false, true)) return false;
+		return true;
+	}
 
 
 	private bool isBlockNextToBlock(GameObject futureBlockPos)

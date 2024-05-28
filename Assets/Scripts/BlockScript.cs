@@ -41,7 +41,7 @@ public class BlockScript : MonoBehaviour
         // initialize break behaviour
         breakBehaviour = BlockBehaviourData.getBreakBehaviour(gameObject.name);
 		itemDropBehaviour = BlockBehaviourData.getItemDropBehaviour(gameObject.name, transform.position);
-		rightClickBehaviour = BlockBehaviourData.getRightClickBehaviour(gameObject.name, transform.position);
+		rightClickBehaviour = BlockBehaviourData.getRightClickBehaviour(gameObject, transform.position);
 
 		Transform audioParent = GameObject.Find("Audio").transform;
 
@@ -84,6 +84,11 @@ public class BlockScript : MonoBehaviour
 	{
 		if (rightClickBehaviour == null) return;
 		rightClickBehaviour.rightClickBlock();
+	}
+
+	public bool isRightClickable()
+	{
+		return rightClickBehaviour != null;
 	}
 
 	/**
@@ -161,8 +166,7 @@ public class BlockScript : MonoBehaviour
 	private void dropItems()
 	{
 		List<GameObject> itemsToDrop;
-		if(gameObject.name.StartsWith("Bed")) itemsToDrop = itemDropBehaviour.dropItem(gameObject.name, toolBreakingWith, transform.position);
-		else itemsToDrop = itemDropBehaviour.dropItem(gameObject.name, toolBreakingWith); // get items to drop
+		itemsToDrop = itemDropBehaviour.dropItem(gameObject.name, toolBreakingWith, transform.position); // get items to drop
 		if (itemsToDrop != null)
 		{
 			foreach (GameObject item in itemsToDrop)
@@ -192,45 +196,6 @@ public class BlockScript : MonoBehaviour
 			else backgroundBlockID = BlockHashtable.getBackgroundVisualBlock(gameObject.name);
 			bool added = SpawningChunkData.addBackgroundVisualBlock(transform.position.x, transform.position.y, backgroundBlockID); // add the background block to the data
 			if (added) scScript.instantiateTile(backgroundBlockID, transform.position.x, transform.position.y, true); // instantiate the tile
-		}
-	}
-	/**
-	 * Turns tiles that are next to this block into gameObjects
-	 */
-	private void turnTilesToGameObjects()
-	{
-		Vector3Int blockPos = new Vector3Int((int)(transform.position.x -.5f), (int)(transform.position.y -.5f));
-
-		Vector3Int upperTilePos = new Vector3Int(blockPos.x, blockPos.y + 1); // up
-		if (tilemap.HasTile(upperTilePos)) // if there is a tile above this block
-		{
-			TileBase tile = tilemap.GetTile(upperTilePos);
-			scScript.spawnGameObjectInsteadOfTile(tile, upperTilePos); // place gameObject at tiles position
-			tilemap.SetTile(upperTilePos, null); // remove tile
-		}
-
-		Vector3Int rightTilePos = new Vector3Int(blockPos.x + 1, blockPos.y); // right
-		if (tilemap.HasTile(rightTilePos)) // if there is a tile above this block
-		{
-			TileBase tile = tilemap.GetTile(rightTilePos);
-			scScript.spawnGameObjectInsteadOfTile(tile, rightTilePos); // place gameObject at tiles position
-			tilemap.SetTile(rightTilePos, null); // remove tile
-		}
-
-		Vector3Int bottomTilePos = new Vector3Int(blockPos.x, blockPos.y - 1); // down
-		if (tilemap.HasTile(bottomTilePos)) // if there is a tile above this block
-		{
-			TileBase tile = tilemap.GetTile(bottomTilePos);
-			scScript.spawnGameObjectInsteadOfTile(tile, bottomTilePos); // place gameObject at tiles position
-			tilemap.SetTile(bottomTilePos, null); // remove tile
-		}
-
-		Vector3Int leftTilePos = new Vector3Int(blockPos.x - 1, blockPos.y); // left
-		if (tilemap.HasTile(leftTilePos)) // if there is a tile above this block
-		{
-			TileBase tile = tilemap.GetTile(leftTilePos);
-			scScript.spawnGameObjectInsteadOfTile(tile, leftTilePos); // place gameObject at tiles position
-			tilemap.SetTile(leftTilePos, null); // remove tile
 		}
 	}
 

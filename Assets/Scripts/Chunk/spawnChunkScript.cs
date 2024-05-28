@@ -87,7 +87,8 @@ public class spawnChunkScript : MonoBehaviour
 		// if we need to render more chunks (for the camera size change)
 		if (amountOfChunksToRender < newAmountOfChunksToRender)
         {
-            int diff = Math.Abs(amountOfChunksToRender - newAmountOfChunksToRender);
+			int diff = Math.Abs(amountOfChunksToRender - newAmountOfChunksToRender);
+
             for(int i = 1; i <= diff/2; i++)
             {
                 renderChunk(rendered - (chunkSize * i)); // spawn left chunk
@@ -99,12 +100,10 @@ public class spawnChunkScript : MonoBehaviour
         else if(amountOfChunksToRender > newAmountOfChunksToRender) // if we need to render fewer chunks (because of the camera size change)
 		{
 			int diff = Math.Abs(amountOfChunksToRender - newAmountOfChunksToRender);
-            for(int i = 1; i <= diff/2; i++)
+			for (int i = 1; i <= diff/2; i++)
             {
-                unrenderChunk(rendered); //despawn left chunk
-                unrenderChunk(rendered + chunkSize * (amountOfChunksToRender-1)); // despawn right chunk
-                rendered += chunkSize;
-                amountOfChunksToRender--;
+                unrenderChunk(rendered + (chunkSize * (i - 1))); //despawn left chunk
+                unrenderChunk(rendered + chunkSize * (amountOfChunksToRender-1) + (chunkSize*(i-1))); // despawn right chunk
             }
             amountOfChunksToRender = newAmountOfChunksToRender;
             rendered = getChunkNumber();
@@ -114,7 +113,8 @@ public class spawnChunkScript : MonoBehaviour
 		int leftMostChunkToRender = getChunkNumber();
         if (leftMostChunkToRender != rendered) // if we need to load a chunk
         {
-            if (leftMostChunkToRender == rendered + chunkSize) // need to load chunk rendered + 4*chunkSize (rightmost chunk)
+
+			if (leftMostChunkToRender == rendered + chunkSize) // need to load chunk rendered + 4*chunkSize (rightmost chunk)
 			{
 				renderChunk(rendered + amountOfChunksToRender * chunkSize);
                 unrenderChunk(rendered); // unrender leftmost chunk
@@ -555,7 +555,7 @@ public class spawnChunkScript : MonoBehaviour
         {
             for(int j = 0; j <=  SpawningChunkData.maxBuildHeight + Math.Abs(lowestBlockPos); j++)
             {
-                if (tilemap.HasTile(tilePos)) tilemap.SetTile(tilePos, null); // if tile exists, then remove tile
+                tilemap.SetTile(tilePos, null); // if tile exists, then remove tile
 				if (backgroundVisualTiles.HasTile(tilePos)) backgroundVisualTiles.SetTile(tilePos, null); // the same, but for background visual tiles
 				tilePos.y--;
             }

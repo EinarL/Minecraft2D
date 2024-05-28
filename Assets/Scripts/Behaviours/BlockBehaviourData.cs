@@ -43,7 +43,15 @@ public static class BlockBehaviourData
 		{ "BedUpperLeft", new BreakWoodInstantly() },
 		{ "BedUpperRight", new BreakWoodInstantly() },
 		{ "BedLowerLeft", new BreakWoodInstantly() },
-		{ "BedLowerRight", new BreakWoodInstantly() }
+		{ "BedLowerRight", new BreakWoodInstantly() },
+		{ "DoorOakTopLeft", new BreakWood() },
+		{ "DoorOakTopRight", new BreakWood() },
+		{ "DoorOakBottomLeft", new BreakWood() },
+		{ "DoorOakBottomRight", new BreakWood() },
+		{ "DoorOakTopSideLeft", new BreakWood() },
+		{ "DoorOakTopSideRight", new BreakWood() },
+		{ "DoorOakBottomSideLeft", new BreakWood() },
+		{ "DoorOakBottomSideRight", new BreakWood() },
 	};
 
 	private static Hashtable itemDropBehaviours = new Hashtable()
@@ -68,6 +76,14 @@ public static class BlockBehaviourData
 		{ "BedLowerLeft", new BedDrop(false)},
 		{ "BedUpperRight", new BedDrop(false)},
 		{ "BedLowerRight", new BedDrop(true)},
+		{ "DoorOakTopLeft", new DoorDrop(false) },
+		{ "DoorOakTopRight", new DoorDrop(false) },
+		{ "DoorOakBottomLeft", new DoorDrop(true) },
+		{ "DoorOakBottomRight", new DoorDrop(true) },
+		{ "DoorOakTopSideLeft", new DoorDrop(false) },
+		{ "DoorOakTopSideRight", new DoorDrop(false) },
+		{ "DoorOakBottomSideLeft", new DoorDrop(true) },
+		{ "DoorOakBottomSideRight", new DoorDrop(true) },
 	};
 
 	private static Hashtable rightClickBehaviours = new Hashtable()
@@ -143,11 +159,12 @@ public static class BlockBehaviourData
 		return dropBehaviour as ItemDropBehaviour;
 	}
 
-	public static RightClickBlockBehaviour getRightClickBehaviour(string blockName, Vector2 blockPos)
+	public static RightClickBlockBehaviour getRightClickBehaviour(GameObject block, Vector2 blockPos)
 	{
-		if (blockName.StartsWith("BedUpper") || blockName.StartsWith("BedLower")) return new SleepBehaviour(blockName, blockPos); // if its a bed
+		if (block.name.StartsWith("BedUpper") || block.name.StartsWith("BedLower")) return new SleepBehaviour(block.name, blockPos); // if its a bed
+		if (block.name.StartsWith("Door")) return new OpenDoorBehaviour(block, blockPos); // if its a door
 
-		RightClickBlockBehaviour rcBehaviour = rightClickBehaviours[blockName] as RightClickBlockBehaviour;
+		RightClickBlockBehaviour rcBehaviour = rightClickBehaviours[block.name] as RightClickBlockBehaviour;
 		return rcBehaviour;
 	}
 }

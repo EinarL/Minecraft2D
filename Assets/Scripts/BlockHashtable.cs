@@ -63,7 +63,15 @@ public static class BlockHashtable
 			{ 37, getBlockTileWithName("BedUpperLeft")},
 			{ 38, getBlockTileWithName("BedLowerLeft")},
 			{ 39, getBlockTileWithName("BedUpperRight")},
-			{ 40, getBlockTileWithName("BedLowerRight")}
+			{ 40, getBlockTileWithName("BedLowerRight")},
+			{ 41, getBlockTileWithName("DoorOakTopRight")},
+			{ 42, getBlockTileWithName("DoorOakBottomRight")},
+			{ 43, getBlockTileWithName("DoorOakTopSideRight")},
+			{ 44, getBlockTileWithName("DoorOakBottomSideRight")},
+			{ 45, getBlockTileWithName("DoorOakTopLeft")},
+			{ 46, getBlockTileWithName("DoorOakBottomLeft")},
+			{ 47, getBlockTileWithName("DoorOakTopSideLeft")},
+			{ 48, getBlockTileWithName("DoorOakBottomSideLeft")},
 		};
 		// id's in blockTiles and blocks hashtable need to be the same for each block
 		blocks = new Hashtable()
@@ -108,13 +116,22 @@ public static class BlockHashtable
 			{ 38, getBlockWithName("BedLowerLeft")},
 			{ 39, getBlockWithName("BedUpperRight")},
 			{ 40, getBlockWithName("BedLowerRight")},
+			{ 41, getBlockWithName("DoorOakTopRight")},
+			{ 42, getBlockWithName("DoorOakBottomRight")},
+			{ 43, getBlockWithName("DoorOakTopSideRight")},
+			{ 44, getBlockWithName("DoorOakBottomSideRight")},
+			{ 45, getBlockWithName("DoorOakTopLeft")},
+			{ 46, getBlockWithName("DoorOakBottomLeft")},
+			{ 47, getBlockWithName("DoorOakTopSideLeft")},
+			{ 48, getBlockWithName("DoorOakBottomSideLeft")},
 		};
 
 		// contains behaviours for blocks that need special functionality upon placing the block, e.g. torches need to be rotated to be placed on right/left wall
 		placeBlockBehaviours = new Hashtable()
 		{
 			{"Torch", new PlaceTorch()},
-			{"BedUpperLeft", new PlaceBed()}
+			{"BedUpperLeft", new PlaceBed()},
+			{"DoorOakTopRight", new PlaceDoor()}
 		};
 
 		// maps blocks to which index in the placeBlockAudio list is the place block sound for the block
@@ -125,6 +142,14 @@ public static class BlockHashtable
 			{"LogOak", 0},
 			{"LogSpruce", 0},
 			{"CraftingTable", 0},
+			{"DoorOakTopRight", 0},
+			{"DoorOakBottomRight", 0},
+			{"DoorOakTopSideRight", 0},
+			{"DoorOakBottomSideRight", 0},
+			{"DoorOakTopLeft", 0},
+			{"DoorOakBottomLeft", 0},
+			{"DoorOakTopSideLeft", 0},
+			{"DoorOakBottomSideLeft", 0},
 			{"Torch", 0},
 			{"Dirt", 1}, // 1 is dirt
 			{"SaplingOak", 1}, // 3 is grass
