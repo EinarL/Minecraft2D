@@ -38,3 +38,7 @@ add fall damage for entities
 have the furnace texture to be the lit furnace when the furnace is turned on
 
 store chunks in region files, about 300 chunks or so in a region.
+
+make mobs not be able to move when dead
+
+make spruce be able to be used in the furnace

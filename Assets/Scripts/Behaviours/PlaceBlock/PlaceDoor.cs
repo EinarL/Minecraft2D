@@ -24,6 +24,19 @@ public class PlaceDoor : PlaceBlockBehaviour
 				doorBottomBlockID = 44;
 			}
 		}
+		else if (blockToPlace.gameObject.name.Contains("Spruce")) // placing spruce door
+		{
+			if (placeLeftSide)
+			{
+				doorTopBlockID = 55;
+				doorBottomBlockID = 56;
+			}
+			else
+			{
+				doorTopBlockID = 51;
+				doorBottomBlockID = 52;
+			}
+		}
 
 		GameObject doorTop = GameObject.Instantiate(BlockHashtable.getBlockByID(doorTopBlockID), new Vector2(blockToPlace.transform.position.x, blockToPlace.transform.position.y + 1), Quaternion.identity); // place top door block
 		GameObject doorBottom = GameObject.Instantiate(BlockHashtable.getBlockByID(doorBottomBlockID), blockToPlace.transform.position, Quaternion.identity); // place bottom door block

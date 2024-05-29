@@ -40,8 +40,9 @@ public class PlayerControllerScript : MonoBehaviour
     private HealthbarScript healthbarScript;
     private HungerbarScript hungerbarScript;
     private SleepScript sleepScript;
+	private IDataService dataService = new JsonDataService();
 
-    private bool isRunning = false;
+	private bool isRunning = false;
 
     private float horizontalMove = 0;
     // Start is called before the first frame update
@@ -66,6 +67,14 @@ public class PlayerControllerScript : MonoBehaviour
 		healthbarScript = GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>();
 		hungerbarScript = GameObject.Find("Canvas").transform.Find("Hungerbar").GetComponent<HungerbarScript>();
 		sleepScript = GameObject.Find("Canvas").transform.Find("SleepTint").GetComponent<SleepScript>();
+
+		if (dataService.exists("player-position.json")) // if there is a saved player position, then teleport the player to that position
+		{
+			float[] playerPosition = dataService.loadData<float[]>("player-position.json");
+
+			transform.position = new Vector2(playerPosition[0], playerPosition[1]);
+            Debug.Log(transform.position);
+		}
 	}
 
 	// Update is called once per frame
@@ -286,9 +295,9 @@ public class PlayerControllerScript : MonoBehaviour
         fellFrom = float.NegativeInfinity;
     }
 
-    public void teleportToSpawn()
+    public void teleportToSpawn(Vector2 pos)
     {
-        gameObject.transform.position = new Vector2(0,0);
+        gameObject.transform.position = pos;
     }
 
 	public void die()

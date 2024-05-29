@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: -4347543958987324741}
   - component: {fileID: 2825443802950459595}
   m_Layer: 0
-  m_Name: DoorOakBottomSideLeft
+  m_Name: DoorSpruceTopSideLeft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -66,7 +66,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.22261167, y: -0.0020024776}
+  m_Offset: {x: 0.22152591, y: -0.004822135}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -77,7 +77,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.5595875, y: 1.015995}
+  m_Size: {x: 0.5577135, y: 1.0103557}
   m_EdgeRadius: 0
 --- !u!114 &-4347543958987324741
 MonoBehaviour:
@@ -132,7 +132,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 277d70516d0b4994586385cb288b24e3, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9950774c1fd8e9a45a5a7a53ee1cabad, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

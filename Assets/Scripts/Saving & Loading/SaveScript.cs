@@ -16,6 +16,7 @@ public class SaveScript : MonoBehaviour
 	private HungerbarScript hungerbarScript;
 	private DayProcessScript dayProcessScript;
 	private static IDataService dataService = new JsonDataService();
+	private Transform steve;
 
 	// Start is called before the first frame update
 	void Start()
@@ -24,6 +25,7 @@ public class SaveScript : MonoBehaviour
 		healthbarScript = GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>();
 		hungerbarScript = GameObject.Find("Canvas").transform.Find("Hungerbar").GetComponent<HungerbarScript>();
 		dayProcessScript = GameObject.Find("CM vcam").transform.Find("SunAndMoonTexture").GetComponent<DayProcessScript>();
+		steve = GameObject.Find("SteveContainer").transform;
 	}
 
     // Update is called once per frame
@@ -44,6 +46,12 @@ public class SaveScript : MonoBehaviour
 			if (!dataService.saveData("day-time.json", dayProcessScript.getDataToSave()))
 			{
 				Debug.LogError("Could not save day time file :(");
+			}
+
+			// save player position
+			if(!dataService.saveData("player-position.json", new float[] { steve.position.x, steve.position.y }))
+			{
+				Debug.LogError("Could not save player position :(");
 			}
 		}
 	}

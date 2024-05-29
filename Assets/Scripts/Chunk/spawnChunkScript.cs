@@ -47,6 +47,7 @@ public class spawnChunkScript : MonoBehaviour
     private OpenFurnaceScript openFurnaceScript;
     private SunLightMovementScript sunLightMovementScript;
     private DayProcessScript dayProcessScript;
+	private IDataService dataService = new JsonDataService();
 
 	// Start is called before the first frame update
 	void Start()
@@ -62,14 +63,20 @@ public class spawnChunkScript : MonoBehaviour
 		chunkSize = (int)(SpawningChunkData.blockSize * SpawningChunkData.blocksInChunk);
         SpawningChunkData.setRightMostY(defaultStartSpawnY);
 		SpawningChunkData.setLeftMostY(defaultStartSpawnY);
-        rendered = -2 * chunkSize;
 
-		// spawn in the chunks at "camera x position": -20, -10, 0, 10
-		renderChunk(0);
-        renderChunk(-10);
-        renderChunk(-20);
-        renderChunk(10);
+        if (dataService.exists("player-position.json")) // if there is a saved player position
+        {
+            float[] playerPosition = dataService.loadData<float[]>("player-position.json");
+
+			loadSpawn(new Vector2(playerPosition[0], playerPosition[1]));
+        }
+        else
+        {
+            loadSpawn(new Vector2(0, 0));
+        }
     }
+
+
 
     // Update is called once per frame
     void Update()
@@ -146,7 +153,19 @@ public class spawnChunkScript : MonoBehaviour
 		StartCoroutine(putSoftZoneBackToNormal());
 	}
 
-    private Biome decideBiome()
+	public void loadSpawn(Vector2 playerPos)
+	{
+		transform.position = playerPos;
+		amountOfChunksToRender = 4;
+		rendered = getChunkNumber(playerPos.x);
+		// spawn in the chunks at "camera x position", default spawn is: -20, -10, 0, 10
+		renderChunk(rendered + SpawningChunkData.blocksInChunk * 2);
+		renderChunk(rendered + SpawningChunkData.blocksInChunk);
+		renderChunk(rendered);
+		renderChunk(rendered + SpawningChunkData.blocksInChunk * 3);
+	}
+
+	private Biome decideBiome()
     {
 
         Biome currentBiome = spawnChunkStrategy;
@@ -195,6 +214,27 @@ public class spawnChunkScript : MonoBehaviour
         }
 
         return (int)closeToChunkNumber;
+	}
+
+	int getChunkNumber(float xPos)
+	{
+		float closeToChunkNumber = xPos - (chunkSize * amountOfChunksToRender / 2); // round this number to the closest 10
+		bool isNegative = closeToChunkNumber < 0;
+
+		float remainder = Math.Abs(closeToChunkNumber) % chunkSize;
+
+		if (remainder < 5)
+		{
+			if (isNegative) closeToChunkNumber += remainder;
+			else closeToChunkNumber -= remainder;
+		}
+		else
+		{
+			if (isNegative) closeToChunkNumber = closeToChunkNumber - SpawningChunkData.blocksInChunk + remainder;
+			else closeToChunkNumber += SpawningChunkData.blocksInChunk - remainder;
+		}
+
+		return (int)closeToChunkNumber;
 	}
 
 	/**
@@ -481,6 +521,11 @@ public class spawnChunkScript : MonoBehaviour
 		}
         else
         {
+            if (41 <= blockID && blockID <= 56) // if its a door
+            {
+                instantiateBlock(blockID, xPos, yPos);
+                return tilePos;
+            }
 			tilePos = tilemap.WorldToCell(new Vector2(xPos, yPos));
 
 			Tile tile = BlockHashtable.getTileByID(blockID);

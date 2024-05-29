@@ -55,17 +55,19 @@ public class RespawnButtonScript : MonoBehaviour
 		vcam.m_Lens.OrthographicSize = 5; // reset zoom back to default
 		float prevSoftZoneWidth = vcam.GetCinemachineComponent<CinemachineFramingTransposer>().m_SoftZoneWidth;
 		vcam.GetCinemachineComponent<CinemachineFramingTransposer>().m_SoftZoneWidth = 0f;
-		mainCam.transform.position = new Vector2(0, mainCam.transform.position.y);
 
-		// send steve to spawnpoint
-		playerControllerScript.teleportToSpawn(); // TODO: teleport steve to a saved spawnpoint, because it will be different when beds are implemented
-		// render chunks at spawnpoint
-		scScript.renderChunk(0);
-		scScript.renderChunk(-10);
-		scScript.renderChunk(-20);
-		scScript.renderChunk(10);
-		
+		Vector2 spawnPoint = new Vector2(0,0);
+		if (dataService.exists("spawn.json"))
+		{
+			float[] sp = dataService.loadData<float[]>("spawn.json");
+			spawnPoint = new Vector2(sp[0], sp[1]);
+		}
 
+		mainCam.transform.position = spawnPoint;
+
+		playerControllerScript.teleportToSpawn(spawnPoint); // teleport steve to spawn
+
+		scScript.loadSpawn(spawnPoint); // render chunks at spawnpoint
 
 		// reset health and hunger
 		healthbarScript.setFullHealth();
@@ -82,9 +84,7 @@ public class RespawnButtonScript : MonoBehaviour
 	}
 
 	private void createTombstone()
-	{
-		GameObject tombstone = Resources.Load<GameObject>("Prefabs\\Blocks\\Tombstone");
-
+	{ 
 		Vector2 deathPos = playerControllerScript.gameObject.transform.position;
 		float roundedXPos = (int)deathPos.x;
 

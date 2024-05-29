@@ -52,6 +52,14 @@ public static class BlockBehaviourData
 		{ "DoorOakTopSideRight", new BreakWood() },
 		{ "DoorOakBottomSideLeft", new BreakWood() },
 		{ "DoorOakBottomSideRight", new BreakWood() },
+		{ "DoorSpruceTopLeft", new BreakWood() },
+		{ "DoorSpruceTopRight", new BreakWood() },
+		{ "DoorSpruceBottomLeft", new BreakWood() },
+		{ "DoorSpruceBottomRight", new BreakWood() },
+		{ "DoorSpruceTopSideLeft", new BreakWood() },
+		{ "DoorSpruceTopSideRight", new BreakWood() },
+		{ "DoorSpruceBottomSideLeft", new BreakWood() },
+		{ "DoorSpruceBottomSideRight", new BreakWood() },
 	};
 
 	private static Hashtable itemDropBehaviours = new Hashtable()
@@ -84,6 +92,14 @@ public static class BlockBehaviourData
 		{ "DoorOakTopSideRight", new DoorDrop(false) },
 		{ "DoorOakBottomSideLeft", new DoorDrop(true) },
 		{ "DoorOakBottomSideRight", new DoorDrop(true) },
+		{ "DoorSpruceTopLeft", new DoorDrop(false, "Spruce") },
+		{ "DoorSpruceTopRight", new DoorDrop(false, "Spruce") },
+		{ "DoorSpruceBottomLeft", new DoorDrop(true, "Spruce") },
+		{ "DoorSpruceBottomRight", new DoorDrop(true, "Spruce") },
+		{ "DoorSpruceTopSideLeft", new DoorDrop(false, "Spruce") },
+		{ "DoorSpruceTopSideRight", new DoorDrop(false, "Spruce") },
+		{ "DoorSpruceBottomSideLeft", new DoorDrop(true, "Spruce") },
+		{ "DoorSpruceBottomSideRight", new DoorDrop(true, "Spruce") },
 	};
 
 	private static Hashtable rightClickBehaviours = new Hashtable()

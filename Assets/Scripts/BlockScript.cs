@@ -31,15 +31,14 @@ public class BlockScript : MonoBehaviour
 		gameObject.name = gameObject.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
 		scScript = GameObject.Find("Main Camera").GetComponent<spawnChunkScript>();
 		tilemap = GameObject.Find("Grid").transform.Find("Tilemap").GetComponent<Tilemap>();
+
+		breakAnimationObject = Resources.Load("Prefabs\\BreakBlockAnimation") as GameObject;
+		// initialize break behaviour
+		breakBehaviour = BlockBehaviourData.getBreakBehaviour(gameObject.name);
 	}
 	// Start is called before the first frame update
 	void Start()
     {
-
-
-		breakAnimationObject = Resources.Load("Prefabs\\BreakBlockAnimation") as GameObject;
-        // initialize break behaviour
-        breakBehaviour = BlockBehaviourData.getBreakBehaviour(gameObject.name);
 		itemDropBehaviour = BlockBehaviourData.getItemDropBehaviour(gameObject.name, transform.position);
 		rightClickBehaviour = BlockBehaviourData.getRightClickBehaviour(gameObject, transform.position);
 

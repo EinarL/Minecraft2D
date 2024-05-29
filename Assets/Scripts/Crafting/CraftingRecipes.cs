@@ -45,6 +45,14 @@ public static class CraftingRecipes
 			new object[] { "PlankOak", new Vector2(1, 2) },
 		}, new InventorySlot("DoorOak", 1)
 		},
+		new object[]{ "PlankSpruce", new object[] {
+			new object[] { "PlankSpruce", new Vector2(1, 0) },
+			new object[] { "PlankSpruce", new Vector2(0, 1) },
+			new object[] { "PlankSpruce", new Vector2(1, 1) },
+			new object[] { "PlankSpruce", new Vector2(0, 2) },
+			new object[] { "PlankSpruce", new Vector2(1, 2) },
+		}, new InventorySlot("DoorSpruce", 1)
+		},
 
 		// wooden tools
 		new object[]{ "Stick", new object[] {
