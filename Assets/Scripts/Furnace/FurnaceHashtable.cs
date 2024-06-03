@@ -9,9 +9,11 @@ public static class FurnaceHashtable
 	// the items in this table can be placed in the bottom slot in the furnace to burn the item in the top slot
 	private static Hashtable burnableItems = new Hashtable() {
 		{"Coal", 7.69f },   // higher burn time means the item is better at burning stuff
-		{"CharCoal", 7.96 },
+		{"Charcoal", 7.96f },
 		{"PlankOak", 3.85f }, // 4 items worth
+		{"PlankSpruce", 3.85f },
 		{"LogOak", 5.77f }, // 6 items worth
+		{"LogSpruce", 5.77f },
 		{"CraftingTable", 5.77f},
 		{"Stick", 1.93f}, // 2 items worth
 		{"WoodAxe", 5.77f},
@@ -23,6 +25,7 @@ public static class FurnaceHashtable
 	// the items in this hashtable are the items that can be burned in the top slot of the furnace
 	private static Hashtable furnaceItems = new Hashtable() {
 		{ "LogOak", "Charcoal"}, // {item that burns, the result item}
+		{ "LogSpruce", "Charcoal"},
 		{ "Cobblestone", "Stone"},
 		{ "MuttonRaw", "MuttonCooked"},
 		{ "PorkchopRaw", "PorkchopCooked"},

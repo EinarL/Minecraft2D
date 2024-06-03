@@ -20,6 +20,7 @@ public class PlayerInventory : MonoBehaviour
     private GameObject torchLight;
     private PlaceBlockScript placeBlockScript;
 	private Animator anim;
+    private AudioClip pickupItemSound;
 
 	private float pickupRange = 1; // can pick up items from within this range
 
@@ -33,6 +34,7 @@ public class PlayerInventory : MonoBehaviour
 		anim = GetComponent<Animator>();
 		InventoryScript.initializeInventory();
         Craft.initializeCrafting();
+        pickupItemSound = Resources.Load<AudioClip>("Sounds\\Random\\pop");
 	}
 
     // Update is called once per frame
@@ -120,7 +122,8 @@ public class PlayerInventory : MonoBehaviour
 
         if (didPickup)
         {
-            // make the item shoot towards the player and then destroy it when it hits the player's collider
+            // TODO: make the item shoot towards the player and then destroy it when it hits the player's collider
+            AudioSource.PlayClipAtPoint(pickupItemSound, transform.position);
             Destroy(itemContainer);
         }
     }

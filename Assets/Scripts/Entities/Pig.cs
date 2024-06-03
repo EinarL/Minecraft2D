@@ -13,19 +13,6 @@ public class Pig : Animal
 		StartCoroutine(decideIfMakeNoise());
 	}
 
-
-	/**
-	 * drops loot and destroys the gameobject
-	 */
-	public override IEnumerator destroyEntity()
-	{
-		yield return new WaitForSeconds(2f);
-
-		// particle effect?
-		dropLoot();
-		Destroy(gameObject);
-	}
-
 	public override void takeDamage(float damage, float playerXPos)
 	{
 		if (anim.GetBool("isDead")) return;
@@ -37,7 +24,7 @@ public class Pig : Animal
 		}
 	}
 
-	private void dropLoot()
+	protected override void dropLoot()
 	{
 		dropItem("PorkchopRaw");
 	}

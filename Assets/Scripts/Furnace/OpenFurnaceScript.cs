@@ -59,11 +59,9 @@ public class OpenFurnaceScript : MonoBehaviour
 				// start coroutines
 				if(newFurance.getFireProgress() > 0)
 				{
-					Debug.Log("STARTING FIRE COROUTINE!");
 					StartCoroutine(newFurance.cookCoroutine());
 					if (newFurance.getIsBurnableInTopSlot())
 					{
-						Debug.Log("STARTING ARROW COROUTINE!");
 						StartCoroutine(newFurance.arrowCoroutine());
 					}
 				}

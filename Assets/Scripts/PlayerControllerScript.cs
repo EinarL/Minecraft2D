@@ -73,7 +73,6 @@ public class PlayerControllerScript : MonoBehaviour
 			float[] playerPosition = dataService.loadData<float[]>("player-position.json");
 
 			transform.position = new Vector2(playerPosition[0], playerPosition[1]);
-            Debug.Log(transform.position);
 		}
 	}
 

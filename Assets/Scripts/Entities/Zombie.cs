@@ -4,21 +4,10 @@ using UnityEngine;
 
 public class Zombie : Mob
 {
-	/**
-	 * drops loot and destroys the gameobject
-	 */
-	public override IEnumerator destroyEntity()
-	{
-		yield return new WaitForSeconds(2f);
 
-		// particle effect?
-		dropLoot();
-		Destroy(gameObject);
-	}
-
-	private void dropLoot()
+	protected override void dropLoot()
 	{
-		//dropItem("RottenFlesh");
+		dropItem("RottenFlesh");
 	}
 
 	public override void die()

@@ -24,6 +24,10 @@ public class PlaceBlockScript : MonoBehaviour
     private BreakBlockScript breakBlockScript;
     public Tilemap backgroundVisualTiles;
     private AudioSource placeBlockAudioSource;
+    private Animator anim;
+
+    private RightClickItemBehaviour rightClickItemBehaviour = null;
+    private bool isHoldingRightClick = false;
 
     private GameObject hoverGrid = null; // this is the grid that gets placed where mouse is
     private Vector2 hoveringOverPosition; // the position that the mouse is hovering over, rounded to a potential block position
@@ -43,6 +47,7 @@ public class PlaceBlockScript : MonoBehaviour
         hoverTexture = breakBlockScript.hoverTexture;
         head = transform.Find("Head").transform;
         torso = transform.Find("Torso").transform;
+        anim = GetComponent<Animator>();
         backgroundVisualTiles = GameObject.Find("Grid").transform.Find("BackgroundVisualTiles").GetComponent<Tilemap>();
         placeBlockAudioSource = GameObject.Find("Audio").transform.Find("BreakBlockSound").GetComponent<AudioSource>();
 	}
@@ -50,6 +55,20 @@ public class PlaceBlockScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (rightClickItemBehaviour != null)
+        {
+            if (Input.GetMouseButton(1) && !isHoldingRightClick) // begin holding/clicking right click
+            {
+                rightClickItemBehaviour.rightClickItem();
+                isHoldingRightClick = true;
+            }
+            else if (Input.GetMouseButtonUp(1) && isHoldingRightClick) // stop holding right click
+            {
+                rightClickItemBehaviour.stopHoldingRightClick();
+                isHoldingRightClick = false;
+            }
+        }
+        else isHoldingRightClick = false;
 
         if (holdingItemIsPlaceable)
         {
@@ -205,14 +224,23 @@ public class PlaceBlockScript : MonoBehaviour
 		}
 		else placedBlocks = new List<GameObject>() { Instantiate(holdingItem, hoveringOverPosition, Quaternion.identity) }; // place block
 		InventoryScript.decrementSlot(InventoryScript.getSelectedSlot()); // remove the block from the inventory
+        playPlaceBlockAnimation();
 
-        foreach (GameObject block in placedBlocks)
+		foreach (GameObject block in placedBlocks)
         {
 			block.name = block.name.Replace("(Clone)", "").Trim(); // remove (Clone) from object name
 		}
 
 
         return placedBlocks;
+	}
+
+    private void playPlaceBlockAnimation()
+    {
+		bool facingRight = anim.GetBool("isFacingRight");
+
+		if (facingRight) anim.Play("fightFrontArm");
+		else anim.Play("fightBackArm");
 	}
 
 	private void createHighlight(Vector2 position)
@@ -258,11 +286,15 @@ public class PlaceBlockScript : MonoBehaviour
 
         if (holdingItem == null) // didn't find the block, so the block isn't placeable
 		{
+            // the block/item might have a rightClickItemBehaviour though so we have to check that
+            rightClickItemBehaviour = BlockBehaviourData.getRightClickItemBehaviour(itemName);
+
             holdingItemIsPlaceable = false;
             removeHighlight();
-			return; 
+			return;
         }
         holdingItemIsPlaceable = true;
+        rightClickItemBehaviour = null;
 	}
 
     // checks if we can place the block on the Default/foreground layer, if so it calls createHighlight()

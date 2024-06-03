@@ -50,7 +50,6 @@ public class FurnaceLogic
 		furnaceBottomSlot = newItem;
 		if (isCooking()) return false; // already cooking, dont need to start cooking again
 		burnTime = FurnaceHashtable.getBurnTime(furnaceBottomSlot.itemName);
-		Debug.Log("burn time: " + burnTime);
 		if (burnTime != -1) // if the item can burn
 		{
 			isBurnableInBottomSlot = true;
@@ -108,7 +107,6 @@ public class FurnaceLogic
 		if (isCookCoroutineRunning) yield break;
 		while (isCooking())
 		{
-			Debug.Log("FIRE PROGRESS: " + fireProgress);
 			isCookCoroutineRunning = true;
 			yield return new WaitForSeconds(burnTime);
 			fireProgress -= .1f;

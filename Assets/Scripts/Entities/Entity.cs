@@ -119,7 +119,16 @@ public abstract class Entity : MonoBehaviour
 	/**
 	 * drops loot and destroys the gameobject
 	 */
-	public abstract IEnumerator destroyEntity();
+	public virtual IEnumerator destroyEntity()
+	{
+		yield return new WaitForSeconds(2f);
+
+		// particle effect?
+		dropLoot();
+		Destroy(gameObject);
+	}
+
+	protected abstract void dropLoot();
 
 	/**
 	 * drops item from the entity, called when the entity dies

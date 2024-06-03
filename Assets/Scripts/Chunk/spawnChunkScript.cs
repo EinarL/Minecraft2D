@@ -321,7 +321,7 @@ public class spawnChunkScript : MonoBehaviour
         }
         if (snowParticleSystems.ContainsKey(chunkPos)) // destroy the snow particle system if there is one in this chunk
         {
-            Destroy(snowParticleSystems[chunkPos]);
+            Destroy(snowParticleSystems[chunkPos].gameObject);
             snowParticleSystems.Remove(chunkPos);
         }
 

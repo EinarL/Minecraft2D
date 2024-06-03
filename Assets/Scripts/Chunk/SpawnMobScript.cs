@@ -8,9 +8,10 @@ public static class SpawnMobScript
 
 	private static float mobSpawnChance = 15f; // x% chance to spawn in each chunk
 	private static float mobCaveSpawnChance = 5f; // x% chance to spawn in each vertical line in a chunk (which is 10 per chunk)
-	private static string[] mobs = new string[] { "Zombie" };
+	private static string[] mobs = new string[] { "Zombie", "Spider" };
 	private static Dictionary<string, int> mobMaxClusterSize = new Dictionary<string, int>(){ // {mob, how many of them can spawn in a cluster}
-		{"Zombie", 3}
+		{"Zombie", 3},
+		{"Spider", 2}
 	};
 
 	// runs on saved chunks (also new)
@@ -29,7 +30,7 @@ public static class SpawnMobScript
 				float yPos = getYValueBasedOnX(xPos, verticalLineHeights);
 				mobsToSpawn.Add(new object[] { xPos, yPos, mobName });
 			}
-			Debug.Log("spawning " + mobCount + " zombies");
+			//Debug.Log("spawning " + mobCount + " zombies");
 		}
 		return mobsToSpawn;
 	}

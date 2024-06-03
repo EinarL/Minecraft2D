@@ -18,7 +18,15 @@ public class SunLightMovementScript : MonoBehaviour
     {
         playerPos = GameObject.Find("SteveContainer").transform;
         StartCoroutine(followPlayer());
-    }
+
+        IEnumerator adjustSunPositionAtStart()
+        {
+            yield return new WaitForSeconds(0.1f);
+			transform.position = new Vector2(playerPos.position.x, 1940 + playerPos.position.y + 3);
+		}
+		StartCoroutine(adjustSunPositionAtStart());
+
+	}
 
     public void addChunkHeight(float[] heights)
     {
@@ -38,7 +46,6 @@ public class SunLightMovementScript : MonoBehaviour
 
     private void adjustSunHeight(int lowestChunkHeight)
     {
-        
         targetHeight = 1940 + lowestChunkHeight + 3;
         if(adjustHeightCoroutine == null)
         {

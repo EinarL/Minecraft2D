@@ -137,6 +137,12 @@ public static class BlockBehaviourData
 	private static object[] prevStepSound = new object[] { "dirt", 4 };
 
 
+	// what happens when right clicking items in your hotbar, e.g. for snowballs, bows, etc.
+	private static Hashtable rightClickItemBehaviours = new Hashtable() {
+		{"Snowball", new RightClickSnowball() }
+	};
+
+
 	private static Hashtable stepSoundPitches = new Hashtable()
 	{
 		{ "Sand", new float[]{.9f, 1 } } // {block name, {walking sound pitch, running sound pitch}}
@@ -173,6 +179,11 @@ public static class BlockBehaviourData
 		// blocks like tombstones and chests need their block positions passed in so we need to do a special case here
 		if (dropBehaviour.Equals("Tombstone")) return new TombstoneDrop(blockPos);
 		return dropBehaviour as ItemDropBehaviour;
+	}
+
+	public static RightClickItemBehaviour getRightClickItemBehaviour(string itemName)
+	{
+		return rightClickItemBehaviours[itemName] as RightClickItemBehaviour;
 	}
 
 	public static RightClickBlockBehaviour getRightClickBehaviour(GameObject block, Vector2 blockPos)

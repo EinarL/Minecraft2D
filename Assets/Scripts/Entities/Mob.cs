@@ -5,13 +5,13 @@ using UnityEngine;
 
 public abstract class Mob : Entity
 {
-	private AudioClip[] hurtSounds = new AudioClip[2]; // the sound that the mob makes when it takes damage
-	private AudioClip deathSound;
+	protected AudioClip[] hurtSounds = new AudioClip[2]; // the sound that the mob makes when it takes damage
+	protected AudioClip deathSound;
 	protected bool isHunting = false; // this is true when the mob is hunting the player
 	
-	private int huntPlayerWithinRange = 20; // can see player from within this radius, does not apply to y axis, only x
-	private int huntPlayerWithinYAxis = 5; // if the enemy is x blocks above/below the player then it wont see the player
-	protected float canHurtPlayerWithin = 2; // can damage the player when its within x blocks, applies to x axis
+	protected int huntPlayerWithinRange = 20; // can see player from within this radius, does not apply to y axis, only x
+	protected int huntPlayerWithinYAxis = 5; // if the enemy is x blocks above/below the player then it wont see the player
+	protected float canHurtPlayerWithin = 2f; // can damage the player when its within x blocks, applies to x axis
 	protected int damage = 6; // how much the mob damages the player when it hits him, 1 heart is 2 hp
 	protected bool isDamageCoroutineRunning = false;
 
@@ -19,7 +19,7 @@ public abstract class Mob : Entity
 	protected HealthbarScript healthbarScript; // script for the health of the player
 
 	// Start is called before the first frame update
-	void Start()
+	protected void Start()
 	{
 		initializeEntity();
 		initializeAudio();
@@ -27,9 +27,10 @@ public abstract class Mob : Entity
 		playerPos = GameObject.Find("SteveContainer").transform;
 		healthbarScript = GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>();
 		StartCoroutine(checkIfHuntPlayer());
+		health = 20;
 	}
 
-	private new void Update()
+	protected new void Update()
 	{
 		base.Update();
 		if (isHunting) huntPlayer();
@@ -38,7 +39,7 @@ public abstract class Mob : Entity
 	/**
 	 * checks if the player is close, if so then it starts hunting the player
 	 */
-	private IEnumerator checkIfHuntPlayer()
+	protected virtual IEnumerator checkIfHuntPlayer()
 	{
 		while (true)
 		{
@@ -48,14 +49,14 @@ public abstract class Mob : Entity
 		}
 	}
 
-	private void startHunting()
+	protected void startHunting()
 	{
 		isHunting = true;
 		StopCoroutine(walkingCoroutine); // stop roaming
 		isWalking = false;
 	}
 
-	private void stopHunting()
+	protected void stopHunting()
 	{
 		isHunting = false;
 		anim.SetBool("isWalking", false);
@@ -64,7 +65,7 @@ public abstract class Mob : Entity
 	/**
 	 * returns true if the player is in the range of the mobs visibility
 	 */
-	private bool isPlayerInRange()
+	protected virtual bool isPlayerInRange()
 	{
 		float distance = Vector2.Distance(playerPos.position, transform.position);
 
@@ -142,6 +143,12 @@ public abstract class Mob : Entity
 		base.takeDamage(damage, playerXPos);
 		if(health > 0) makeHurtNoise();
 		else makeDeathNoise();
+	}
+
+	public override void die()
+	{
+		base.die();
+		isHunting = false;
 	}
 
 	private void makeDeathNoise()
