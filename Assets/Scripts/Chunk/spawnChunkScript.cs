@@ -74,7 +74,7 @@ public class spawnChunkScript : MonoBehaviour
         {
             loadSpawn(new Vector2(0, 0));
         }
-    }
+	}
 
 
 
@@ -120,7 +120,6 @@ public class spawnChunkScript : MonoBehaviour
 		int leftMostChunkToRender = getChunkNumber();
         if (leftMostChunkToRender != rendered) // if we need to load a chunk
         {
-
 			if (leftMostChunkToRender == rendered + chunkSize) // need to load chunk rendered + 4*chunkSize (rightmost chunk)
 			{
 				renderChunk(rendered + amountOfChunksToRender * chunkSize);
@@ -136,7 +135,7 @@ public class spawnChunkScript : MonoBehaviour
                 Debug.LogWarning("Warning! leftMostChunkToRender isn't a chunk away from rendered; rendered = " + rendered + ", leftMostChunkToRender = " + leftMostChunkToRender);
             }
             rendered = leftMostChunkToRender;
-        }
+		}
     }
 
     /**
@@ -248,15 +247,17 @@ public class spawnChunkScript : MonoBehaviour
      */
 	public void renderChunk(int chunkStart)
     {
-        ChunkData chunkData;
+		ChunkData chunkData;
 
 		bool fromRight = false;
 		if (chunkStart < transform.position.x) fromRight = true;
 
+
+
 		// if chunk has been rendered, then render the saved chunk
 		if (SaveChunk.exists(chunkStart))
-        {
-			chunkData = SaveChunk.load(chunkStart);
+        {		
+		    chunkData = SaveChunk.load(chunkStart);
             if (fromRight) SpawningChunkData.prevVerticalLineLeft = getPrevVerticalLineFromChunk(false, chunkData.getChunkData());
             else SpawningChunkData.prevVerticalLineRight = getPrevVerticalLineFromChunk(true, chunkData.getChunkData());
 		}
@@ -301,6 +302,9 @@ public class spawnChunkScript : MonoBehaviour
      */
     public void unrenderChunk(int chunkPos)
     {
+
+
+
 		// Create a collision filter to only include colliders in these layers
 		ContactFilter2D filter = new ContactFilter2D();
 		filter.SetLayerMask(LayerMask.GetMask("Default") | LayerMask.GetMask("FrontBackground") | LayerMask.GetMask("BackBackground") | LayerMask.GetMask("BackgroundVisual") | LayerMask.GetMask("Entity") | LayerMask.GetMask("Item"));
@@ -309,17 +313,24 @@ public class spawnChunkScript : MonoBehaviour
 		List<Collider2D> results = getCollidersWithinChunk(chunkPos, filter);
 
         List<object[]> entities = new List<object[]>();
+		List<GameObject> toDestroy = new List<GameObject>();
 
-        foreach (Collider2D collider in results)
+		foreach (Collider2D collider in results)
         {
             // add entites in this chunk to the list
             if (collider.gameObject.layer == 10)
             {
                 entities.Add(new object[] { collider.gameObject.transform.position.x, collider.gameObject.transform.position.y, collider.gameObject.name });
             }
-            Destroy(collider.gameObject);
-        }
-        if (snowParticleSystems.ContainsKey(chunkPos)) // destroy the snow particle system if there is one in this chunk
+			toDestroy.Add(collider.gameObject);
+		}
+		foreach (GameObject obj in toDestroy)
+		{
+			Destroy(obj);
+		}
+
+
+		if (snowParticleSystems.ContainsKey(chunkPos)) // destroy the snow particle system if there is one in this chunk
         {
             Destroy(snowParticleSystems[chunkPos].gameObject);
             snowParticleSystems.Remove(chunkPos);
@@ -330,12 +341,19 @@ public class spawnChunkScript : MonoBehaviour
         ChunkData chunkToRemove = SpawningChunkData.getChunkByChunkPos(chunkPos);
 		if (chunkToRemove != null) sunLightMovementScript.removeChunkHeight(chunkToRemove.getVerticalLineHeights()); // for sun position adjustment
 
-		// TODO: implement so it saves dropped item also (maybe not tho?)
 		SpawningChunkData.removeAndSaveChunkByChunkPosition(chunkPos); // save
 
-        // remove tiles
-        removeTilesInChunk(chunkPos);
+		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+		stopwatch.Start();
 
+		// remove tiles
+		removeTilesInChunk(chunkPos);
+
+
+		stopwatch.Stop();
+
+		// Print the elapsed time
+		Debug.Log($"unrender chunk: {stopwatch.ElapsedMilliseconds} ms");
 	}
 
     private List<Collider2D> getCollidersWithinChunk(int chunkPos, ContactFilter2D filter)
@@ -592,7 +610,7 @@ public class spawnChunkScript : MonoBehaviour
 
 		return false;
 	}
-
+	/*
     private void removeTilesInChunk(int chunkPos)
     {
         Vector3Int tilePos = new Vector3Int(chunkPos, SpawningChunkData.maxBuildHeight); // upper leftmost tile in chunk
@@ -608,6 +626,29 @@ public class spawnChunkScript : MonoBehaviour
             tilePos.x++;
 		}
     }
+    */
+
+	private void removeTilesInChunk(int chunkPos)
+	{
+		// Define the area of the chunk
+		Vector3Int chunkStartPos = new Vector3Int(chunkPos, SpawningChunkData.maxBuildHeight, 0);
+		Vector3Int chunkEndPos = new Vector3Int(chunkPos + SpawningChunkData.blocksInChunk, lowestBlockPos, 0);
+
+		// Create a bounds object to represent the area of the chunk
+		BoundsInt chunkBounds = new BoundsInt(chunkStartPos, chunkEndPos);
+
+		// Create an empty array to clear the chunk
+		TileBase[] emptyTiles = new TileBase[chunkBounds.size.x * chunkBounds.size.y];
+
+		// Clear the main tilemap
+		tilemap.SetTilesBlock(chunkBounds, emptyTiles);
+
+		// Clear the background visual tiles
+		if (backgroundVisualTiles != null)
+		{
+			backgroundVisualTiles.SetTilesBlock(chunkBounds, emptyTiles);
+		}
+	}
 
 
 	// lighting
