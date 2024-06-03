@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
@@ -23,7 +24,9 @@ public static class SpawningChunkData
 	private static int dontGoDownRight = 0;
 	private static int dontGoUpLeft = 0;
 	private static int dontGoUpRight = 0;
-	private static List<ChunkData> renderedChunks = new List<ChunkData>(); // these are the chunks that are currently rendered
+
+	private static Dictionary<int, ChunkData> renderedChunks = new Dictionary<int, ChunkData>(); // these are the chunks that are currently rendered
+
 	public static int blocksInChunk = 10; // width of chunk, in blocks
 	public static int maxBuildHeight = 80;
 	public static float blockSize = 1;
@@ -37,14 +40,11 @@ public static class SpawningChunkData
 	 */ 
 	public static void updateChunkData(float x, float y, int newBlockID, string layer = "Default")
 	{
-		ChunkData correspondingChunk = null;
-		foreach(ChunkData chunk in renderedChunks)
+		ChunkData correspondingChunk = renderedChunks[xPosToChunkPos(x)];
+		if(correspondingChunk == null)
 		{
-			if (chunk.getChunkPosition() < x && chunk.getChunkPosition() + blocksInChunk > x) // if the blocks x position is in this chunk
-			{
-				correspondingChunk = chunk;
-				break;
-			}
+			Debug.LogError("Didn't find the chunk for a block at x position: " + x);
+			return;
 		}
 
 		switch (layer)
@@ -65,6 +65,16 @@ public static class SpawningChunkData
 		}
 	}
 
+	/**
+	 * given an x position of a block/entity, it tells which chunk the block/entity belongs to
+	 */
+	private static int xPosToChunkPos(float x)
+	{
+		// Calculate the chunk position by dividing the x position by the chunk width (10 blocks) and rounding down
+		int chunkPos = Mathf.FloorToInt(x / 10);
+
+		return chunkPos * 10; // Multiply by 10 to get the actual chunk position
+	}
 	/**
 	 * gets in a blocks position in the world and returns the indexes for the chunkArray for this block position. 
 	 */
@@ -88,59 +98,47 @@ public static class SpawningChunkData
 		return new float[] { x, y };
 	}
 
-	public static void addRenderedChunk(ChunkData chunk)
+	public static void addRenderedChunk(ChunkData chunk, bool rightChunk)
 	{
-		// we know that the chunk being added is either the rightmost or leftmost, so its position is either lower or higher than all the other chunks
-		if(renderedChunks.Count > 0 )
+		if (rightChunk)
 		{
-			bool rightChunk = renderedChunks[0].getChunkPosition() < chunk.getChunkPosition(); // is the new chunk the rightmost chunk?
-			if(rightChunk) 
-			{
-				rightMostChunkEdge = chunk.getChunkPosition() + blocksInChunk;
-				rightMostY = chunk.getStartHeight();
-			}
-			else
-			{
-				leftMostChunkEdge = chunk.getChunkPosition();
-				leftMostY = chunk.getStartHeight();
-			}
+			rightMostChunkEdge = chunk.getChunkPosition() + blocksInChunk;
+			rightMostY = chunk.getStartHeight();
 		}
 		else
 		{
-			rightMostChunkEdge = chunk.getChunkPosition() + blocksInChunk;
 			leftMostChunkEdge = chunk.getChunkPosition();
+			leftMostY = chunk.getStartHeight();
 		}
 
-		renderedChunks.Add(chunk);
+		renderedChunks[chunk.getChunkPosition()] = chunk;
 	}
 
 	public static void removeAndSaveChunkByChunkPosition(int chunkPos)
 	{
-		for (int i = 0; i < renderedChunks.Count; i++)
+		ChunkData chunkToSave = renderedChunks[chunkPos];
+		if(chunkToSave == null)
 		{
-			if (renderedChunks[i].getChunkPosition() == chunkPos)
-			{
-				SaveChunk.save(renderedChunks[i]); // save chunk
-				renderedChunks.RemoveAt(i);
-
-				// we know that the chunk being removed is either the rightmost or leftmost, so its position is either lower or higher than all the other chunks
-				if (renderedChunks.Count == 0) // if this happens, then we are in the process of unrendering all chunks
-				{
-					leftMostChunkEdge = -20; // TODO: need to change this number when i implement spawning elsewhere
-				}
-				else if(chunkPos < renderedChunks[0].getChunkPosition()) // if we removed the leftmost chunk
-				{
-					leftMostChunkEdge = chunkPos + blocksInChunk;
-				}
-				else // if we removed the rightmost chunk
-				{
-					rightMostChunkEdge = chunkPos;
-				}
-
-                return;
-			}
+			Debug.LogError("Did not find a chunk with chunkPosition: " + chunkPos);
+			return;
 		}
-		Debug.LogError("Did not find a chunk with chunkPosition: " + chunkPos);
+
+		Task.Run(() => { SaveChunk.save(chunkToSave); }); // save chunk
+		renderedChunks.Remove(chunkPos);
+
+		// we know that the chunk being removed is either the rightmost or leftmost, so its x position is either lower or higher than all the other chunks
+		if (renderedChunks.Count == 0) // if this happens, then we are in the process of unrendering all chunks
+		{
+			leftMostChunkEdge = -20; // TODO: need to change this number when i implement spawning elsewhere
+		}
+		else if(!renderedChunks.ContainsKey(chunkPos + 10)) // if we removed the leftmost chunk
+		{
+			leftMostChunkEdge = chunkPos + blocksInChunk;
+		}
+		else // if we removed the rightmost chunk
+		{
+			rightMostChunkEdge = chunkPos;
+		}
 	}
 	/**
 	 * Saves the entites in the chunk, and overwrites the old saved entities
@@ -158,27 +156,18 @@ public static class SpawningChunkData
 
 	public static ChunkData getChunkByChunkPos(int chunkPos)
 	{
-		for (int i = 0; i < renderedChunks.Count; i++)
-		{
-			if (renderedChunks[i].getChunkPosition() == chunkPos)
-			{
-				return renderedChunks[i];
-			}
-		}
-		return null;
+		return renderedChunks[chunkPos];
 	}
 	// returns true if it added the block
 	public static bool addBackgroundVisualBlock(float x, float y, int blockID)
 	{
-		foreach (ChunkData chunk in renderedChunks)
+		ChunkData correspondingChunk = renderedChunks[xPosToChunkPos(x)];
+		if (correspondingChunk == null)
 		{
-			if (chunk.getChunkPosition() < x && chunk.getChunkPosition() + blocksInChunk > x) // we found the chunk that the block is in
-			{
-				return chunk.addBackgroundVisualBlock(x, y, blockID);
-			}
+			Debug.LogError("Didn't find the chunk for a block at x position: " + x);
+			return false;
 		}
-		Debug.LogError("Unable to find the chunk to place the background visual block in");
-		return false;
+		return correspondingChunk.addBackgroundVisualBlock(x, y, blockID);
 	}
 
 	/**
@@ -188,20 +177,13 @@ public static class SpawningChunkData
 	 */
 	public static float getVerticalLineHeight(float x)
 	{
-		foreach (ChunkData chunk in renderedChunks)
+		ChunkData correspondingChunk = renderedChunks[xPosToChunkPos(x)];
+		if (correspondingChunk == null)
 		{
-			if (chunk.getChunkPosition() < x && chunk.getChunkPosition() + blocksInChunk > x) // we found the chunk that the block is in
-			{
-				return chunk.getVerticalLineHeight(Mathf.Abs((int)x) % 10);
-			}
+			Debug.LogError("Didn't find the chunk for a block at x position: " + x);
+			return -1;
 		}
-
-		return -1;
-	}
-
-	public static List<ChunkData> getRenderedChunks()
-	{
-		return renderedChunks;
+		return correspondingChunk.getVerticalLineHeight(Mathf.Abs((int)x) % 10);
 	}
 
 	public static int getLeftMostChunkEdge()

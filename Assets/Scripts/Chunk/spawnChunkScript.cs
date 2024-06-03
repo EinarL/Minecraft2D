@@ -247,18 +247,18 @@ public class spawnChunkScript : MonoBehaviour
      */
 	public void renderChunk(int chunkStart)
     {
+
 		ChunkData chunkData;
 
 		bool fromRight = false;
 		if (chunkStart < transform.position.x) fromRight = true;
 
-
-
 		// if chunk has been rendered, then render the saved chunk
 		if (SaveChunk.exists(chunkStart))
         {		
 		    chunkData = SaveChunk.load(chunkStart);
-            if (fromRight) SpawningChunkData.prevVerticalLineLeft = getPrevVerticalLineFromChunk(false, chunkData.getChunkData());
+
+			if (fromRight) SpawningChunkData.prevVerticalLineLeft = getPrevVerticalLineFromChunk(false, chunkData.getChunkData());
             else SpawningChunkData.prevVerticalLineRight = getPrevVerticalLineFromChunk(true, chunkData.getChunkData());
 		}
         else
@@ -278,8 +278,10 @@ public class spawnChunkScript : MonoBehaviour
             }
 		}
         sunLightMovementScript.addChunkHeight(chunkData.getVerticalLineHeights());
-        SpawningChunkData.addRenderedChunk(chunkData);
+        SpawningChunkData.addRenderedChunk(chunkData, !fromRight);
 		renderSavedChunk(chunkData, !fromRight);
+
+
 	}
 
     /**
@@ -302,9 +304,6 @@ public class spawnChunkScript : MonoBehaviour
      */
     public void unrenderChunk(int chunkPos)
     {
-
-
-
 		// Create a collision filter to only include colliders in these layers
 		ContactFilter2D filter = new ContactFilter2D();
 		filter.SetLayerMask(LayerMask.GetMask("Default") | LayerMask.GetMask("FrontBackground") | LayerMask.GetMask("BackBackground") | LayerMask.GetMask("BackgroundVisual") | LayerMask.GetMask("Entity") | LayerMask.GetMask("Item"));
@@ -329,31 +328,21 @@ public class spawnChunkScript : MonoBehaviour
 			Destroy(obj);
 		}
 
-
 		if (snowParticleSystems.ContainsKey(chunkPos)) // destroy the snow particle system if there is one in this chunk
         {
             Destroy(snowParticleSystems[chunkPos].gameObject);
             snowParticleSystems.Remove(chunkPos);
         }
 
-        SpawningChunkData.overwriteEntities(chunkPos, entities); // save entities
-		openFurnaceScript.saveFurnaces(); // save furnaces
-        ChunkData chunkToRemove = SpawningChunkData.getChunkByChunkPos(chunkPos);
+		SpawningChunkData.overwriteEntities(chunkPos, entities); // save entities
+
+		ChunkData chunkToRemove = SpawningChunkData.getChunkByChunkPos(chunkPos);
 		if (chunkToRemove != null) sunLightMovementScript.removeChunkHeight(chunkToRemove.getVerticalLineHeights()); // for sun position adjustment
 
 		SpawningChunkData.removeAndSaveChunkByChunkPosition(chunkPos); // save
 
-		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-		stopwatch.Start();
-
 		// remove tiles
 		removeTilesInChunk(chunkPos);
-
-
-		stopwatch.Stop();
-
-		// Print the elapsed time
-		Debug.Log($"unrender chunk: {stopwatch.ElapsedMilliseconds} ms");
 	}
 
     private List<Collider2D> getCollidersWithinChunk(int chunkPos, ContactFilter2D filter)
@@ -610,44 +599,31 @@ public class spawnChunkScript : MonoBehaviour
 
 		return false;
 	}
-	/*
-    private void removeTilesInChunk(int chunkPos)
-    {
-        Vector3Int tilePos = new Vector3Int(chunkPos, SpawningChunkData.maxBuildHeight); // upper leftmost tile in chunk
-        for(int i = 0; i < SpawningChunkData.blocksInChunk; i++)
-        {
-            for(int j = 0; j <=  SpawningChunkData.maxBuildHeight + Math.Abs(lowestBlockPos); j++)
-            {
-                tilemap.SetTile(tilePos, null); // if tile exists, then remove tile
-				if (backgroundVisualTiles.HasTile(tilePos)) backgroundVisualTiles.SetTile(tilePos, null); // the same, but for background visual tiles
-				tilePos.y--;
-            }
-            tilePos.y = SpawningChunkData.maxBuildHeight;
-            tilePos.x++;
-		}
-    }
-    */
 
 	private void removeTilesInChunk(int chunkPos)
 	{
-		// Define the area of the chunk
-		Vector3Int chunkStartPos = new Vector3Int(chunkPos, SpawningChunkData.maxBuildHeight, 0);
-		Vector3Int chunkEndPos = new Vector3Int(chunkPos + SpawningChunkData.blocksInChunk, lowestBlockPos, 0);
+		// Define the bounds of the chunk
+		int chunkWidth = SpawningChunkData.blocksInChunk;
+		int chunkHeight = SpawningChunkData.maxBuildHeight + Mathf.Abs(lowestBlockPos);
 
-		// Create a bounds object to represent the area of the chunk
-		BoundsInt chunkBounds = new BoundsInt(chunkStartPos, chunkEndPos);
+		// Top-left corner of the chunk
+		Vector3Int topLeft = new Vector3Int(chunkPos, SpawningChunkData.maxBuildHeight, 0);
+		// Bottom-right corner of the chunk
+		Vector3Int bottomRight = new Vector3Int(chunkPos + chunkWidth - 1, -Mathf.Abs(lowestBlockPos), 0);
 
-		// Create an empty array to clear the chunk
-		TileBase[] emptyTiles = new TileBase[chunkBounds.size.x * chunkBounds.size.y];
+		// Define the bounds
+		BoundsInt bounds = new BoundsInt(topLeft.x, bottomRight.y, 0, chunkWidth, chunkHeight, 1);
 
-		// Clear the main tilemap
-		tilemap.SetTilesBlock(chunkBounds, emptyTiles);
+		// Clear the area in the tilemap and backgroundVisualTiles
+		clearArea(tilemap, bounds);
+		clearArea(backgroundVisualTiles, bounds);
+	}
 
-		// Clear the background visual tiles
-		if (backgroundVisualTiles != null)
-		{
-			backgroundVisualTiles.SetTilesBlock(chunkBounds, emptyTiles);
-		}
+
+	private void clearArea(Tilemap tMap, BoundsInt bounds)
+	{
+		TileBase[] emptyTiles = new TileBase[bounds.size.x * bounds.size.y];
+		tMap.SetTilesBlock(bounds, emptyTiles);
 	}
 
 
