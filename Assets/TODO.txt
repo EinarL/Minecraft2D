@@ -15,8 +15,6 @@ change how ores spawn
 
 furnaces sometimes cant be accessed due to FrontBacgroundBlocks being on the same block
 
-finish implementing charcoal
-
 dont have the sky/background as blue below bedrock, rather black
 
 change it so that you can place frontBackgroundBlocks where players and entities are
@@ -38,7 +36,3 @@ add fall damage for entities
 have the furnace texture to be the lit furnace when the furnace is turned on
 
 store chunks in region files, about 300 chunks or so in a region.
-
-make mobs not be able to move when dead
-
-make spruce be able to be used in the furnace

@@ -5,24 +5,29 @@ using UnityEngine;
 /**
  * this script is responsible for moving the sunlight (the 2D spotlight) with the player and move it up
  * and down depending on the height of the landscape.
+ * 
+ * also moves the void (a black colored gameobject) with the x axis of the player
  */
 public class SunLightMovementScript : MonoBehaviour
 {
     private Transform playerPos;
     private List<float> chunkLowestHeights = new List<float>(); // lowest vertical line height for each chunk that is rendered
     private Coroutine adjustHeightCoroutine;
+    private Transform minecraftVoid;
     private int targetHeight = 1940;
 
     // Start is called before the first frame update
     void Start()
     {
         playerPos = GameObject.Find("SteveContainer").transform;
+        minecraftVoid = GameObject.Find("Void").transform;
         StartCoroutine(followPlayer());
 
         IEnumerator adjustSunPositionAtStart()
         {
             yield return new WaitForSeconds(0.1f);
 			transform.position = new Vector2(playerPos.position.x, 1940 + playerPos.position.y + 3);
+            minecraftVoid.position = new Vector2(playerPos.position.x, minecraftVoid.position.y);
 		}
 		StartCoroutine(adjustSunPositionAtStart());
 
@@ -59,7 +64,8 @@ public class SunLightMovementScript : MonoBehaviour
         while (true)
         {
             transform.position = new Vector2(playerPos.position.x, transform.position.y);
-            yield return new WaitForSeconds(2f);
+			minecraftVoid.position = new Vector2(playerPos.position.x, minecraftVoid.position.y);
+			yield return new WaitForSeconds(2f);
         }
     }
 
