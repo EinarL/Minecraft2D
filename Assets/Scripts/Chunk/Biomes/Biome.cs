@@ -299,7 +299,6 @@ public abstract class Biome
 			startBlockIndex++;
 		}
 
-
 		// now spawn in the rest, i.e. stone, ores and etc.
 		while (startBlockIndex < verticalLine.Length - 1) // place stone, ores, etc. up until the last block
 		{
@@ -342,15 +341,15 @@ public abstract class Biome
 			}
 
 
-			GameObject aboveGameObject = BlockHashtable.getBlockByID(verticalLine[startBlockIndex - 1]);
-			if (aboveGameObject != null)
-			{
-				// if the block next to this one is an ore, then maybe spawn that same ore again
-				if (prevLineOreSpawns[startBlockIndex] != null) verticalLine[startBlockIndex] = OreSpawnScript.chanceAtSpawningSameOre((int)prevLineOreSpawns[startBlockIndex]);
-				else if (aboveGameObject.gameObject.tag == "Ore") verticalLine[startBlockIndex] = OreSpawnScript.chanceAtSpawningSameOre(verticalLine[startBlockIndex - 1]); // if the above block is an ore
-				else verticalLine[startBlockIndex] = OreSpawnScript.spawnOre(blockIndexToYPosition(startBlockIndex));
-			}
-			else verticalLine[startBlockIndex] = 3;
+			int aboveBlockID = verticalLine[startBlockIndex - 1];
+
+			// if the block next to this one is an ore, then maybe spawn that same ore again
+			if (prevLineOreSpawns[startBlockIndex] != null) verticalLine[startBlockIndex] = OreSpawnScript.chanceAtSpawningSameOre((int)prevLineOreSpawns[startBlockIndex]);
+			else if (OreSpawnScript.oreIDs.Contains(aboveBlockID)) verticalLine[startBlockIndex] = OreSpawnScript.chanceAtSpawningSameOre(verticalLine[startBlockIndex - 1]); // if the above block is an ore
+			else if (prevVerticalLine != null && prevVerticalLine[startBlockIndex] == 57) startBlockIndex = GravelSpawnScript.decideIfContinueSpawnGravel(verticalLine, prevVerticalLine, startBlockIndex);
+			else verticalLine[startBlockIndex] = OreSpawnScript.spawnOre(blockIndexToYPosition(startBlockIndex)); // maybe spawn ores, otherwise stone
+
+			if (verticalLine[startBlockIndex] == 3) startBlockIndex = GravelSpawnScript.decideIfSpawnGravel(verticalLine, startBlockIndex); // maybe spawn gravel
 
 			startBlockIndex++;
 		}

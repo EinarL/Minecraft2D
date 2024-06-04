@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2582265499619180002
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9123264204120984978}
+  m_Layer: 0
+  m_Name: GroundCheck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9123264204120984978
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2582265499619180002}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.507, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7240743291764089392}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4839058183190948766
 GameObject:
   m_ObjectHideFlags: 0
@@ -12,10 +43,10 @@ GameObject:
   - component: {fileID: 6552947374267214321}
   - component: {fileID: -1488470632656384627}
   - component: {fileID: -4347543958987324741}
-  - component: {fileID: 1509597346780524350}
+  - component: {fileID: 4519461105150682683}
   m_Layer: 0
-  m_Name: IronOre
-  m_TagString: Ore
+  m_Name: Gravel
+  m_TagString: FallType
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -29,10 +60,11 @@ Transform:
   m_GameObject: {fileID: 4839058183190948766}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1993.5, y: -22.5, z: 0}
+  m_LocalPosition: {x: 9.5, y: -1.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 9123264204120984978}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &6552947374267214321
@@ -76,7 +108,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 655330e4e12514b40ae589d9b026ad91, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3617e17bcc5a562418f98f2716904d71, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -144,7 +176,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55f6639fcc9550e459f39a84e2ea739c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1509597346780524350
+--- !u!114 &4519461105150682683
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -153,6 +185,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 4839058183190948766}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 02b2bcde6a3e4894cbd94b354e64d8fe, type: 3}
+  m_Script: {fileID: 11500000, guid: 43f4123b96d03e54ba6aecbe5da09b64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

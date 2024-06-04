@@ -7,6 +7,7 @@ public static class BlockBehaviourData
 
 	private static Hashtable digBehaviours = new Hashtable() { // hashtable that holds the class for the different block sounds and speed when breaking them
 		{ "Dirt", new BreakDirt() },
+		{ "Gravel", new BreakDirt() },
 		{ "LogOak", new BreakWood() },
 		{ "LogSpruce", new BreakWood() },
 		{ "LeavesOak", new BreakLeaves() },
@@ -100,6 +101,7 @@ public static class BlockBehaviourData
 		{ "DoorSpruceTopSideRight", new DoorDrop(false, "Spruce") },
 		{ "DoorSpruceBottomSideLeft", new DoorDrop(true, "Spruce") },
 		{ "DoorSpruceBottomSideRight", new DoorDrop(true, "Spruce") },
+		{ "Gravel", new GravelDrop() },
 	};
 
 	private static Hashtable rightClickBehaviours = new Hashtable()

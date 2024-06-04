@@ -6,11 +6,11 @@ public static class CaveSpawnScript
 {
 	private static int[] caveStartHeights = new int[] { 3,4 }; // min and max height that the cave can start with
 	private static int[] caveMaxHeights = new int[] { 2, 10 }; // min and max height that the cave can have
-	private static float caveSpawnChance = 0.1f;
+	private static float caveSpawnChance = 0.4f;
 	private static int caveSpawnsAboveY = -40; // caves will only be above this y value
 	private static int[] caveOffset = new int[] { 0, 4 }; // how differently placed in the y value the next part of the cave will be 
 	private static int[] caveHeightDifference = new int[] { -2, 2 }; // how different the height in the cave can be
-	private static float stopSpawningChance = 30f; // odds that a cave will stop spawning, the cave height will also need to be small for it to be able to stop spawning
+	private static float stopSpawningChance = 15f; // odds that a cave will stop spawning, the cave height will also need to be small for it to be able to stop spawning
 
 
 	/**
@@ -56,6 +56,8 @@ public static class CaveSpawnScript
 			if (rand < 20) // 20% chance that the cave offset might go up or down
 			{
 				offset = Random.Range(caveOffset[0], caveOffset[1] + 1);
+				if (offset == 0 && Random.value < 0.8f) offset = 1; // we want the cave to go 2 blocks up/down rarely, so we will cancel it like 80% of the time
+				if (offset == 4 && Random.value < 0.8f) offset = 3;
 				if (offset > 2 && caveY < caveSpawnsAboveY) offset = 1; // if the cave was going down and the cave is lower than the y value its supposed to spawn in, then go up
 			}
 		}

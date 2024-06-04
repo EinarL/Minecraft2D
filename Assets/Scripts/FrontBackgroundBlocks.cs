@@ -27,7 +27,8 @@ public static class FrontBackgroundBlocks
 
 	private static HashSet<string> fallTypes = new HashSet<string>()
 	{
-		{"Sand"}
+		{"Sand"},
+		{"Gravel"}
 	};
 
 	public static bool isFallType(string blockName)

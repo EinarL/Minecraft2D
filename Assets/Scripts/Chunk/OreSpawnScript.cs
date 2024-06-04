@@ -4,6 +4,8 @@ using UnityEngine;
 
 public static class OreSpawnScript
 {
+	public static readonly HashSet<int> oreIDs = new HashSet<int>() {12, 13, 5 };
+
 
 	private static int coalSpawnsAboveY = -40; // the y value where coal spawns only above this y value
 
