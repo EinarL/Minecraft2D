@@ -123,7 +123,8 @@ public static class SpawningChunkData
 			return;
 		}
 
-		Task.Run(() => { SaveChunk.save(chunkToSave); }); // save chunk
+		//Task.Run(() => { SaveChunk.save(chunkToSave); }); // save chunk
+		SaveChunk.save(chunkToSave);
 		renderedChunks.Remove(chunkPos);
 
 		// we know that the chunk being removed is either the rightmost or leftmost, so its x position is either lower or higher than all the other chunks
@@ -131,7 +132,7 @@ public static class SpawningChunkData
 		{
 			leftMostChunkEdge = -20; // TODO: need to change this number when i implement spawning elsewhere
 		}
-		else if(!renderedChunks.ContainsKey(chunkPos + 10)) // if we removed the leftmost chunk
+		else if(renderedChunks.ContainsKey(chunkPos + blocksInChunk)) // if we removed the leftmost chunk
 		{
 			leftMostChunkEdge = chunkPos + blocksInChunk;
 		}
@@ -145,7 +146,7 @@ public static class SpawningChunkData
 	 */
 	public static void overwriteEntities(int chunkPos, List<object[]> entities)
 	{
-		ChunkData correspondingChunk = getChunkByChunkPos(chunkPos);
+		ChunkData correspondingChunk = renderedChunks[chunkPos];
 		if(correspondingChunk == null)
 		{
 			Debug.LogError("Did not find a chunk with chunkPosition: " + chunkPos);

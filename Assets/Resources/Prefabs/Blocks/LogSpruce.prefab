@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: -1488470632656384627}
   - component: {fileID: -4347543958987324741}
   - component: {fileID: 8520510133934361041}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: LogSpruce
   m_TagString: Tree
   m_Icon: {fileID: 0}
@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 4839058183190948766}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 74.5, y: -2.5, z: 0}
+  m_LocalPosition: {x: 209.5, y: -4.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

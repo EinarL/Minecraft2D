@@ -2,16 +2,10 @@ using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Unity.Jobs;
-using Unity.Mathematics;
-using Unity.VisualScripting;
-using UnityEditor.VersionControl;
+
+using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Tilemaps;
-using static Unity.Collections.AllocatorManager;
 
 public class spawnChunkScript : MonoBehaviour
 {
@@ -123,7 +117,7 @@ public class spawnChunkScript : MonoBehaviour
 			if (leftMostChunkToRender == rendered + chunkSize) // need to load chunk rendered + 4*chunkSize (rightmost chunk)
 			{
 				renderChunk(rendered + amountOfChunksToRender * chunkSize);
-                unrenderChunk(rendered); // unrender leftmost chunk
+				unrenderChunk(rendered); // unrender leftmost chunk
 			}
 			else if (leftMostChunkToRender == rendered - chunkSize) // need to load chunk rendered - chunkSize (leftmost chunk)
             {
@@ -245,18 +239,16 @@ public class spawnChunkScript : MonoBehaviour
      *            needs to be true when rendering the leftmost chunk, and false when
      *            rendering the rightmost chunk
      */
-	public void renderChunk(int chunkStart)
+	public async void renderChunk(int chunkStart)
     {
-
 		ChunkData chunkData;
 
-		bool fromRight = false;
-		if (chunkStart < transform.position.x) fromRight = true;
+		bool fromRight = chunkStart < transform.position.x;
 
 		// if chunk has been rendered, then render the saved chunk
 		if (SaveChunk.exists(chunkStart))
-        {		
-		    chunkData = SaveChunk.load(chunkStart);
+        {
+            chunkData = await Task.Run(() => SaveChunk.load(chunkStart));
 
 			if (fromRight) SpawningChunkData.prevVerticalLineLeft = getPrevVerticalLineFromChunk(false, chunkData.getChunkData());
             else SpawningChunkData.prevVerticalLineRight = getPrevVerticalLineFromChunk(true, chunkData.getChunkData());
@@ -279,9 +271,8 @@ public class spawnChunkScript : MonoBehaviour
 		}
         sunLightMovementScript.addChunkHeight(chunkData.getVerticalLineHeights());
         SpawningChunkData.addRenderedChunk(chunkData, !fromRight);
+
 		renderSavedChunk(chunkData, !fromRight);
-
-
 	}
 
     /**
@@ -306,7 +297,7 @@ public class spawnChunkScript : MonoBehaviour
     {
 		// Create a collision filter to only include colliders in these layers
 		ContactFilter2D filter = new ContactFilter2D();
-		filter.SetLayerMask(LayerMask.GetMask("Default") | LayerMask.GetMask("FrontBackground") | LayerMask.GetMask("BackBackground") | LayerMask.GetMask("BackgroundVisual") | LayerMask.GetMask("Entity") | LayerMask.GetMask("Item"));
+		filter.SetLayerMask(LayerMask.GetMask("Default") | LayerMask.GetMask("FrontBackground") | LayerMask.GetMask("BackBackground") | LayerMask.GetMask("Entity") | LayerMask.GetMask("Item"));
 
 
 		List<Collider2D> results = getCollidersWithinChunk(chunkPos, filter);
@@ -315,12 +306,12 @@ public class spawnChunkScript : MonoBehaviour
 		List<GameObject> toDestroy = new List<GameObject>();
 
 		foreach (Collider2D collider in results)
-        {
-            // add entites in this chunk to the list
-            if (collider.gameObject.layer == 10)
-            {
-                entities.Add(new object[] { collider.gameObject.transform.position.x, collider.gameObject.transform.position.y, collider.gameObject.name });
-            }
+		{
+			// add entites in this chunk to the list
+			if (collider.gameObject.layer == 10)
+			{
+				entities.Add(new object[] { collider.gameObject.transform.position.x, collider.gameObject.transform.position.y, collider.gameObject.name });
+			}
 			toDestroy.Add(collider.gameObject);
 		}
 		foreach (GameObject obj in toDestroy)
@@ -334,12 +325,16 @@ public class spawnChunkScript : MonoBehaviour
             snowParticleSystems.Remove(chunkPos);
         }
 
-		SpawningChunkData.overwriteEntities(chunkPos, entities); // save entities
 
-		ChunkData chunkToRemove = SpawningChunkData.getChunkByChunkPos(chunkPos);
-		if (chunkToRemove != null) sunLightMovementScript.removeChunkHeight(chunkToRemove.getVerticalLineHeights()); // for sun position adjustment
+		Task.Run(() => SpawningChunkData.overwriteEntities(chunkPos, entities)); // save entities
 
-		SpawningChunkData.removeAndSaveChunkByChunkPosition(chunkPos); // save
+
+		Task.Run(() => {
+			ChunkData chunkToRemove = SpawningChunkData.getChunkByChunkPos(chunkPos);
+			if (chunkToRemove != null) sunLightMovementScript.removeChunkHeight(chunkToRemove.getVerticalLineHeights()); // for sun position adjustment
+		});
+
+		Task.Run(() => SpawningChunkData.removeAndSaveChunkByChunkPosition(chunkPos)); // save
 
 		// remove tiles
 		removeTilesInChunk(chunkPos);
@@ -363,7 +358,7 @@ public class spawnChunkScript : MonoBehaviour
      */
     void renderSavedChunk(ChunkData chunkData, bool goingRight)
     {
-        int[,] chunk = chunkData.getChunkData(); //  2d array of the contents of the chunk, each integer represents a block ID (0 = no block)
+		int[,] chunk = chunkData.getChunkData(); //  2d array of the contents of the chunk, each integer represents a block ID (0 = no block)
         List<float[]> frontBackgroundBlocks = chunkData.getFrontBackgroundBlocks(); // list of type {[x,y, blockID]}, blocks that go on the FrontBackground layer
 		List<float[]> backBackgroundBlocks = chunkData.getBackBackgroundBlocks(); // list of type {[x,y, blockID]}, blocks that go on the BackBackground layer
         List<float[]> backgroundVisualBlocks = chunkData.getBackgroundVisualBlocks();
@@ -372,47 +367,22 @@ public class spawnChunkScript : MonoBehaviour
         Hashtable prevOreSpawns = chunkData.getPrevOreSpawns();
         List<object[]> entities = editEntities(chunkData.getEntities(), chunkData);
 
-        List<Vector3Int> tilePositionsInChunk = new List<Vector3Int>(); // list of the tiles in the chunk
-
 		float xPos = chunkPos + SpawningChunkData.blockSize/ 2;
         float yPos = SpawningChunkData.maxBuildHeight - SpawningChunkData.blockSize/ 2;
-        for(int x = 0; x < chunk.GetLength(0); x++) // spawn blocks on the "Default" layer
-        {
-            for(int y = 0; y < chunk.GetLength(1); y++)
-            {
-                Vector3Int spawnedTilePos = instantiateTile(chunk[x, y], xPos + SpawningChunkData.blockSize * x, yPos - SpawningChunkData.blockSize * y);
-                if(spawnedTilePos != new Vector3Int(-100, -100)) tilePositionsInChunk.Add(spawnedTilePos);
-                //instantiateBlock(chunk[x,y], xPos + SpawningChunkData.blockSize* x, yPos - SpawningChunkData.blockSize* y); // (blockID, xPos, yPos, layer)
-            }
-        }
+
+        renderDefaultLayer(chunk, xPos, yPos);
+
 		// if this chunk is in a tundra biome, then randomly add snow on top of the topmost blocks
 		if (chunkData.getBiome().Equals("Tundra"))
 		{
-			List<float[]> snow = generateSnow(chunkData);
-			foreach (float[] block in snow) // spawn the thin snow blocks and add them to the chunk data
-			{
-				chunkData.changeBlock(block[0], block[1], (int)block[2], "FrontBackground");
-				instantiateBlock((int)block[2], block[0], block[1], "FrontBackground");
-			}
-            // spawn the falling snow at y=chunkYposition + x
-            snowParticleSystems[chunkPos] = Instantiate(snowParticleSystem, new Vector2(chunkPos + 5, height + 60), Quaternion.Euler(90f, 0f, 0f));
-
-		}
-		foreach (float[] block in frontBackgroundBlocks) // spawn blocks on the "FrontBackground" layer
-		{
-            instantiateBlock((int)block[2], block[0], block[1], "FrontBackground");
-        }
-
-		foreach (float[] block in backBackgroundBlocks) // spawn blocks on the "BackBackground" layer
-		{
-			instantiateBlock((int)block[2], block[0], block[1], "BackBackground");
-		}
-        foreach (float[] block in backgroundVisualBlocks)
-        {
-			instantiateTile((int)block[2], block[0], block[1], true);
+			renderSnow(chunkData, chunk, frontBackgroundBlocks, chunkPos, height);
 		}
 
-        if (goingRight)
+		StartCoroutine(renderOtherLayers(new List<float[]>(frontBackgroundBlocks), backBackgroundBlocks)); // renders the blocks on the frontBackground and BackBackground
+
+		renderBackgroundVisualLayer(backgroundVisualBlocks);
+
+		if (goingRight)
         {
             SpawningChunkData.setRightMostY(height);
 			SpawningChunkData.setPrevSpawnedOresRight(prevOreSpawns);
@@ -423,23 +393,100 @@ public class spawnChunkScript : MonoBehaviour
 			SpawningChunkData.setPrevSpawnedOresLeft(prevOreSpawns);
 		}
 
-        // spawn entities in the chunk
-        spawnEntities(entities);
-
-        // check what tiles are exposed to air and turn them into GameObjects
-        //changeTilesToGameObjects(tilePositionsInChunk);
+		// spawn entities in the chunk
+		StartCoroutine(spawnEntities(entities));
+	}
 
 
-        // add lighting to the blocks
-        //addLightingToBlocks(chunkPos);
+	private async void renderSnow(ChunkData chunkData, int[,] chunk, List<float[]> frontBackgroundBlocks ,int chunkPos, float height)
+	{
+		List<float[]> snow = await Task.Run(() => generateSnow(chunk, frontBackgroundBlocks, chunkPos));
+		foreach (float[] block in snow) // spawn the thin snow blocks and add them to the chunk data
+		{
+			chunkData.changeBlock(block[0], block[1], (int)block[2], "FrontBackground");
+			instantiateBlock((int)block[2], block[0], block[1], "FrontBackground");
+		}
+		// spawn the falling snow at y=chunkYposition + x
+		snowParticleSystems[chunkPos] = Instantiate(snowParticleSystem, new Vector2(chunkPos + 5, height + 60), Quaternion.Euler(90f, 0f, 0f));
 
-    }
-    // returns a list of SnowBlockThin that will be on the tundra chunk
-    private List<float[]> generateSnow(ChunkData chunkData)
+	}
+
+	/**
+	 * renders blocks on frontBackground and backBackground layer
+	 * 
+	 * front- and backBackground blocks are a list of float[] where each float[] contains 3 values, {blockID, xPos, yPos}
+	 */
+	private IEnumerator renderOtherLayers(List<float[]> frontBackgroundBlocks, List<float[]> backBackgroundBlocks)
+	{
+		int i = 0;
+		foreach (float[] block in frontBackgroundBlocks)
+		{
+			instantiateBlock((int)block[2], block[0], block[1], "FrontBackground");
+			i++;
+			if (i % 5 == 0) yield return null;
+		}
+
+		foreach (float[] block in backBackgroundBlocks)
+		{
+			instantiateBlock((int)block[2], block[0], block[1], "BackBackground");
+			i++;
+			if (i % 5 == 0) yield return null;
+		}
+	}
+
+
+    private async void renderDefaultLayer(int[,] chunk, float xPos, float yPos)
     {
-		int[,] chunk = chunkData.getChunkData();
-		List<float[]> frontBackgroundBlocks = chunkData.getFrontBackgroundBlocks();
+		TileBase[] tiles = new TileBase[chunk.GetLength(0) * chunk.GetLength(1)];
+		Vector3Int[] tilePositions = new Vector3Int[chunk.GetLength(0) * chunk.GetLength(1)];
 
+		await Task.Run(() =>
+		{
+			int index = 0;
+			for (int x = 0; x < chunk.GetLength(0); x++) // spawn blocks on the "Default" layer
+			{
+				for (int y = 0; y < chunk.GetLength(1); y++)
+				{
+					if (41 <= chunk[x, y] && chunk[x, y] <= 56) // if its a door
+					{
+						instantiateBlock(chunk[x, y], xPos + SpawningChunkData.blockSize * x, yPos - SpawningChunkData.blockSize * y);
+						tiles[index] = null;
+					}
+					else
+					{
+						tiles[index] = BlockHashtable.getTileByID(chunk[x, y]);
+					}
+					tilePositions[index] = new Vector3Int((int)(xPos + SpawningChunkData.blockSize * x - 0.5f), (int)(yPos - SpawningChunkData.blockSize * y - 0.5f));
+					index++;
+				}
+			}
+		});
+
+        tilemap.SetTiles(tilePositions, tiles);
+	}
+
+	private async void renderBackgroundVisualLayer(List<float[]> backgroundVisualBlocks)
+	{
+		TileBase[] tiles = new TileBase[backgroundVisualBlocks.Count];
+		Vector3Int[] tilePositions = new Vector3Int[backgroundVisualBlocks.Count];
+		await Task.Run(() =>
+		{
+			int index = 0;
+			foreach (float[] block in backgroundVisualBlocks)
+			{
+				tiles[index] = BlockHashtable.getTileByID((int)block[2]);
+				tilePositions[index] = new Vector3Int((int)(block[0] - 0.5f), (int)(block[1] - 0.5f));
+				index++;
+			}
+		});
+
+		backgroundVisualTiles.SetTiles(tilePositions, tiles);
+	}
+
+
+	// returns a list of SnowBlockThin that will be on the tundra chunk
+	private List<float[]> generateSnow(int[,] chunk, List<float[]> frontBackgroundBlocks, int chunkPos)
+    {
         List<float[]> thinSnowBlocksToAdd = new List<float[]>();
 		for (int i = 0; i < SpawningChunkData.blocksInChunk; i++)
         {
@@ -451,7 +498,7 @@ public class spawnChunkScript : MonoBehaviour
                 {
                     index++;
                 }
-                Vector2 snowPosition = new Vector2(chunkData.getChunkPosition() + i + 0.5f, blockIndexToYPosition(index - 1));
+                Vector2 snowPosition = new Vector2(chunkPos + i + 0.5f, blockIndexToYPosition(index - 1));
                 bool doAdd = true;
                 foreach (float[] block in frontBackgroundBlocks)
                 {
@@ -469,11 +516,12 @@ public class spawnChunkScript : MonoBehaviour
         return thinSnowBlocksToAdd;
     }
 
-    private void spawnEntities(List<object[]> entities)
+    private IEnumerator spawnEntities(List<object[]> entities)
     {
         foreach (object[] entity in entities)
         {
             Instantiate(Resources.Load<GameObject>("Prefabs\\Entities\\" + entity[2]), new Vector2((float)entity[0], (float)entity[1] + 1), Quaternion.identity);
+			yield return null;
         }
     }
 
@@ -489,20 +537,10 @@ public class spawnChunkScript : MonoBehaviour
             return;
 		}
 
-        Sprite dirtTexture = null;
-		if (blockID == 2) // grass block
-        {
-			dirtTexture = BlockHashtable.getBlockByID(2).GetComponent<SpriteRenderer>().sprite;
-			BlockHashtable.getBlockByID(2).GetComponent<SpriteRenderer>().sprite = grassTexture;
-		}
-        else if (blockID == 28) // snowy grass block
-        {
-			dirtTexture = BlockHashtable.getBlockByID(28).GetComponent<SpriteRenderer>().sprite;
-			BlockHashtable.getBlockByID(28).GetComponent<SpriteRenderer>().sprite = snowyGrassTexture;
-		}
-		GameObject spawnedBlock = Instantiate(BlockHashtable.getBlockByID(blockID), new Vector3(xPos, yPos, 0), transform.rotation);
-		if (blockID == 2) BlockHashtable.getBlockByID(2).GetComponent<SpriteRenderer>().sprite = dirtTexture;
-		else if (blockID == 28) BlockHashtable.getBlockByID(28).GetComponent<SpriteRenderer>().sprite = dirtTexture;
+		GameObject spawnedBlock = Instantiate(BlockHashtable.getBlockByID(blockID), new Vector3(xPos, yPos, 0), transform.rotation); // create block
+
+		if (blockID == 2) spawnedBlock.GetComponent<SpriteRenderer>().sprite = grassTexture; // grass block
+		else if (blockID == 28) spawnedBlock.GetComponent<SpriteRenderer>().sprite = snowyGrassTexture; // snowy grass block
 		spawnedBlock.layer = LayerMask.NameToLayer(layer);
 
         if (layer.Equals("BackBackground"))
@@ -543,28 +581,6 @@ public class spawnChunkScript : MonoBehaviour
         return tilePos;
     }
 
-    private void changeTilesToGameObjects(List<Vector3Int> tilePositions)
-    {
-        List<Vector3Int> tilesToReplace = new List<Vector3Int>();
-
-        foreach (Vector3Int tilePos in tilePositions)
-        {
-            if (isTileExposedToAir(tilePos)) // if exposed to air then we need to change the tile into a gameobject
-            {
-                tilesToReplace.Add(tilePos);
-			}
-            
-        }
-
-        foreach(Vector3Int tilePos in tilesToReplace)
-        {
-			TileBase tile = tilemap.GetTile(tilePos);
-			spawnGameObjectInsteadOfTile(tile, tilePos); // place gameObject at tiles position
-
-			tilemap.SetTile(tilePos, null); // remove tile
-		}
-    }
-
     public void spawnGameObjectInsteadOfTile(TileBase tile, Vector3Int tilePos)
     {
         if(tile.name == "GrassBlock")
@@ -579,26 +595,6 @@ public class spawnChunkScript : MonoBehaviour
 		}
 		instantiateBlock(BlockHashtable.getIDByBlockName(tile.name), tilePos.x + .5f, tilePos.y + .5f);
     }
-
-    private bool isTileExposedToAir(Vector3Int tilePos)
-    {
-		Vector3Int aboveTilePos = new Vector3Int(tilePos.x, tilePos.y + 1, tilePos.z);
-        if (!tilemap.HasTile(aboveTilePos)) return true;
-
-        if (tilePos.y != lowestBlockPos) // if its not the lowest block in the chunk
-        {
-			Vector3Int belowTilePos = new Vector3Int(tilePos.x, tilePos.y - 1, tilePos.z);
-			if (!tilemap.HasTile(belowTilePos)) return true;
-		}
-
-		Vector3Int rightTilePos = new Vector3Int(tilePos.x + 1, tilePos.y, tilePos.z);
-		if (!tilemap.HasTile(rightTilePos)) return true;
-
-		Vector3Int leftTilePos = new Vector3Int(tilePos.x - 1, tilePos.y, tilePos.z);
-		if (!tilemap.HasTile(leftTilePos)) return true;
-
-		return false;
-	}
 
 	private void removeTilesInChunk(int chunkPos)
 	{
@@ -615,135 +611,44 @@ public class spawnChunkScript : MonoBehaviour
 		BoundsInt bounds = new BoundsInt(topLeft.x, bottomRight.y, 0, chunkWidth, chunkHeight, 1);
 
 		// Clear the area in the tilemap and backgroundVisualTiles
-		clearArea(tilemap, bounds);
-		clearArea(backgroundVisualTiles, bounds);
+		StartCoroutine(clearArea(tilemap, bounds));
+		StartCoroutine(clearArea(backgroundVisualTiles, bounds));
 	}
 
 
-	private void clearArea(Tilemap tMap, BoundsInt bounds)
+	private IEnumerator clearArea(Tilemap tMap, BoundsInt bounds)
+	{
+		int width = bounds.size.x;
+		int height = bounds.size.y;
+
+		int batchSize = 100; // Adjust batch size as needed
+		for (int y = 0; y < height; y++)
+		{
+			for (int x = 0; x < width; x += batchSize)
+			{
+				int remainingWidth = Mathf.Min(batchSize, width - x);
+				BoundsInt batchBounds = new BoundsInt(bounds.x + x, bounds.y + y, 0, remainingWidth, 1, 1);
+
+				tMap.SetTilesBlock(batchBounds, new TileBase[remainingWidth]);
+
+				// Yield to allow frame to update
+				yield return null;
+			}
+		}
+	}
+
+
+	/**
+	 * 
+	 * 	private IEnumerator clearArea(Tilemap tMap, BoundsInt bounds)
 	{
 		TileBase[] emptyTiles = new TileBase[bounds.size.x * bounds.size.y];
 		tMap.SetTilesBlock(bounds, emptyTiles);
 	}
-
-
-	// lighting
+	 * 
+	 */
 
 	/**
-     * goes through all the blocks on the Default layer in the chunk and for every block that 
-     * is exposed to air, it will call putLightingOnBlock which adds lighting on the block.
-     */
-	private void addLightingToBlocks(int chunkPos)
-    {
-		ContactFilter2D filter = new ContactFilter2D();
-		filter.SetLayerMask(LayerMask.GetMask("Default"));
-
-		List<Collider2D> blocks = getCollidersWithinChunk(chunkPos, filter);
-
-        // could remove this by setting the prefabs initially to black
-		foreach (Collider2D block in blocks)
-        {
-            block.gameObject.GetComponent<BlockLighting>().setStage();
-        }
-
-
-		foreach (Collider2D block in blocks)
-        {
-            if (isExposedToAir(block.gameObject, chunkPos))
-            {
-                putLightingOnBlock(block.gameObject);
-            }
-        }
-    }
-    /**
-     * uses BFS to add lighting to the block and the surrounding blocks
-     */
-    private void putLightingOnBlock(GameObject block)
-	{
-		HashSet<int> visitedHashSet = new HashSet<int>(); // if a gameObject.instanceID is in this, then it is visited
-
-		LinkedList<object[]> queue = new LinkedList<object[]>(); // {[BlockLighting, int stage], [BlockLighting, int stage], ...}
-
-		// Mark the current block as visited and enqueue it
-		visitedHashSet.Add(block.GetInstanceID());
-		queue.AddLast(new object[] { block.GetComponent<BlockLighting>(), 0 });
-
-		while (queue.Any())
-		{
-			// Dequeue a vertex
-			object[] s = queue.First();
-			queue.RemoveFirst();
-
-            BlockLighting sScript = (BlockLighting)s[0];
-            int sStage = (int)s[1];
-
-
-
-
-
-            // only go on neighbors if their value is supposed to be 3 or less
-            
-            Debug.Log(sScript.getStage());
-			if (sStage < 3 && sScript.getStage() > sStage)
-			{
-				// Get all adjacent vertices of the
-				// dequeued vertex s.
-				// If an adjacent has not been visited,
-				// then mark it visited and enqueue it
-
-				List<BlockLighting> neighbors = sScript.getNeighbors();
-                Debug.Log("Has " +  neighbors.Count + " neighbors!");
-				foreach (BlockLighting n in neighbors)
-				{
-					if (!visitedHashSet.Contains(n.gameObject.GetInstanceID())) // if not visited
-					{
-						visitedHashSet.Add(n.gameObject.GetInstanceID());
-						queue.AddLast(new object[] { n, sStage + 1 });
-					}
-				}
-			}
-
-			if (sScript.getStage() > sStage) // only change its stage if its darker than s[1]
-			{
-				sScript.setStage(sStage);
-			}
-
-		}
-	}
-
-    /**
-     * checks if the block is exposed to air
-     */
-	private bool isExposedToAir(GameObject block, int chunkPos)
-    {
-		int mask = LayerMask.GetMask("Default");
-
-		// check above block
-		Vector2 aboveBlockPosition = new Vector2(block.transform.position.x, block.transform.position.y + block.GetComponent<SpriteRenderer>().bounds.size.y);
-        if (!Physics2D.OverlapCircle(aboveBlockPosition, 0.1f, mask)) return true;
-
-        // check below block
-		Vector2 belowBlockPosition = new Vector2(block.transform.position.x, block.transform.position.y - block.GetComponent<SpriteRenderer>().bounds.size.y);
-        if (!Physics2D.OverlapCircle(belowBlockPosition, 0.1f, mask)) return true;
-
-        if (block.transform.position.x != chunkPos + SpawningChunkData.blocksInChunk - .5f) // if its not the rightmost block in the chunk
-        {
-            // check right side
-            Vector2 rightBlockPosition = new Vector2(block.transform.position.x + block.GetComponent<SpriteRenderer>().bounds.size.x, block.transform.position.y);
-            if (!Physics2D.OverlapCircle(rightBlockPosition, 0.1f, mask)) return true; // if there is not a block to the right
-        }
-
-        if(block.transform.position.x != chunkPos + .5f) // if it is not the block on the leftmost side of the chunk
-        {
-			// check left side
-			Vector2 leftBlockPosition = new Vector2(block.transform.position.x - block.GetComponent<SpriteRenderer>().bounds.size.x, block.transform.position.y);
-			if (!Physics2D.OverlapCircle(leftBlockPosition, 0.1f, mask)) return true;
-		}
-
-
-		return false;
-    }
-    /**
      * when spawning in either a new chunk or a chunk that has already spawned before we need to:
      *      * check if its daytime, then despawn mobs that are above ground
      *      * maybe spawn in new animals
@@ -752,7 +657,7 @@ public class spawnChunkScript : MonoBehaviour
      * adds/removes entities from it.
      * 
      */
-    private List<object[]> editEntities(List<object[]> chunkEntities, ChunkData chunkData)
+	private List<object[]> editEntities(List<object[]> chunkEntities, ChunkData chunkData)
     {
         List<object[]> entities = new List<object[]>();
 		if (dayProcessScript.isDaytime()) // if its daytime then we want to remove the mobs, if they're above ground
