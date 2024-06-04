@@ -71,7 +71,7 @@ public abstract class Animal : Entity
 			faceDirection();
 
 			isRunning = true;
-			isWalking = true; // this bool makes the animal 
+			isWalking = true; 
 			anim.SetFloat("movementSpeed", 1.4f); // make animation faster
 			anim.SetBool("isWalking", true);
 			StartCoroutine(decideIfChangeDirectionWhenRunning());
@@ -152,6 +152,7 @@ public abstract class Animal : Entity
 				{
 					yield return new WaitForSeconds(3f); // Wait for 3 seconds before checking again
 					justWalked = false;
+					isWalking = false;
 				}
 				if(!isRunning) stopWalking();
 			}

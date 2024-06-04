@@ -12,7 +12,7 @@ public class spawnChunkScript : MonoBehaviour
 	private static System.Random random = new System.Random();
 
 	private int chunkSize;
-    private int amountOfChunksToRender = 4; // amount of chunks to be rendered at the same time
+    private int amountOfChunksToRender = 10; // amount of chunks to be rendered at the same time
     private float defaultStartSpawnY = -2.5f; // the default height of the vertical line that is to be spawned
 
     public Sprite grassTexture;
@@ -38,7 +38,6 @@ public class spawnChunkScript : MonoBehaviour
 	// it hits 0, then a new random chunk gets generated
 	private int biomeLength; 
 
-    private OpenFurnaceScript openFurnaceScript;
     private SunLightMovementScript sunLightMovementScript;
     private DayProcessScript dayProcessScript;
 	private IDataService dataService = new JsonDataService();
@@ -46,7 +45,6 @@ public class spawnChunkScript : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
     {
-		openFurnaceScript = GameObject.Find("Canvas").transform.Find("InventoryParent").GetComponent<OpenFurnaceScript>();
 		sunLightMovementScript = GameObject.Find("Sun").GetComponent<SunLightMovementScript>();
         dayProcessScript = GameObject.Find("CM vcam").transform.Find("SunAndMoonTexture").GetComponent<DayProcessScript>();
 
@@ -78,12 +76,11 @@ public class spawnChunkScript : MonoBehaviour
         if (pauseChunkRendering) return;
         if(needsReset) // TODO: we will probably have use the x variable for the spawn point in the future, for calculating the rendered variable
 		{
-			rendered = -2 * chunkSize; // getChunkNumber()
-			amountOfChunksToRender = 4;
+			rendered = -5 * chunkSize; // getChunkNumber()
             cam.orthographicSize = 5f;
             needsReset = false;
 		}
-
+		/*
         int newAmountOfChunksToRender = getAmountOfChunksToRender();
 		// if we need to render more chunks (for the camera size change)
 		if (amountOfChunksToRender < newAmountOfChunksToRender)
@@ -109,7 +106,7 @@ public class spawnChunkScript : MonoBehaviour
             amountOfChunksToRender = newAmountOfChunksToRender;
             rendered = getChunkNumber();
 		}
-
+		*/
 		// check if we need to render a new chunk (because of movement left or right)
 		int leftMostChunkToRender = getChunkNumber();
         if (leftMostChunkToRender != rendered) // if we need to load a chunk
@@ -149,13 +146,18 @@ public class spawnChunkScript : MonoBehaviour
 	public void loadSpawn(Vector2 playerPos)
 	{
 		transform.position = playerPos;
-		amountOfChunksToRender = 4;
 		rendered = getChunkNumber(playerPos.x);
-		// spawn in the chunks at "camera x position", default spawn is: -20, -10, 0, 10
-		renderChunk(rendered + SpawningChunkData.blocksInChunk * 2);
-		renderChunk(rendered + SpawningChunkData.blocksInChunk);
-		renderChunk(rendered);
+		// spawn in the chunks at "camera x position"
+		renderChunk(rendered + SpawningChunkData.blocksInChunk * 5);
+		renderChunk(rendered + SpawningChunkData.blocksInChunk * 4);
 		renderChunk(rendered + SpawningChunkData.blocksInChunk * 3);
+		renderChunk(rendered + SpawningChunkData.blocksInChunk * 6);
+		renderChunk(rendered + SpawningChunkData.blocksInChunk * 2);
+		renderChunk(rendered + SpawningChunkData.blocksInChunk * 7);
+		renderChunk(rendered + SpawningChunkData.blocksInChunk * 1);
+		renderChunk(rendered + SpawningChunkData.blocksInChunk * 8);
+		renderChunk(rendered);
+		renderChunk(rendered + SpawningChunkData.blocksInChunk * 9);
 	}
 
 	private Biome decideBiome()
@@ -176,6 +178,7 @@ public class spawnChunkScript : MonoBehaviour
         return newBiome; // newBiome
     }
 
+	/*
 	public int getAmountOfChunksToRender()
 	{
 		int size = (int)cam.orthographicSize;
@@ -186,6 +189,7 @@ public class spawnChunkScript : MonoBehaviour
 		if (size <= 11) return 8;
 		return 10;
 	}
+	*/
 
 	// gets the x position of the leftmost chunk to be rendered
 	int getChunkNumber()
@@ -637,17 +641,6 @@ public class spawnChunkScript : MonoBehaviour
 		}
 	}
 
-
-	/**
-	 * 
-	 * 	private IEnumerator clearArea(Tilemap tMap, BoundsInt bounds)
-	{
-		TileBase[] emptyTiles = new TileBase[bounds.size.x * bounds.size.y];
-		tMap.SetTilesBlock(bounds, emptyTiles);
-	}
-	 * 
-	 */
-
 	/**
      * when spawning in either a new chunk or a chunk that has already spawned before we need to:
      *      * check if its daytime, then despawn mobs that are above ground
@@ -741,11 +734,6 @@ public class spawnChunkScript : MonoBehaviour
 	public int getAmountOfChunksRendered()
     {
         return amountOfChunksToRender;
-    }
-
-    public void setAmountOfChunksToRender(int num)
-    {
-        amountOfChunksToRender = num;
     }
 
 	private int convertWorldXPosToChunkIndex(float x)
