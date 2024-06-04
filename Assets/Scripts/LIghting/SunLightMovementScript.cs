@@ -12,15 +12,17 @@ public class SunLightMovementScript : MonoBehaviour
 {
     private Transform playerPos;
     private List<float> chunkLowestHeights = new List<float>(); // lowest vertical line height for each chunk that is rendered
-    private Coroutine adjustHeightCoroutine;
     private Transform minecraftVoid;
     private int targetHeight = 1940;
+    private bool isChangeSunHeightCoroutineRunning = false;
+    private CoroutineManager cManager;
 
-    // Start is called before the first frame update
-    void Start()
+	// Start is called before the first frame update
+	void Start()
     {
         playerPos = GameObject.Find("SteveContainer").transform;
         minecraftVoid = GameObject.Find("Void").transform;
+        cManager = GameObject.Find("EventSystem").GetComponent<CoroutineManager>();
         StartCoroutine(followPlayer());
 
         IEnumerator adjustSunPositionAtStart()
@@ -52,9 +54,9 @@ public class SunLightMovementScript : MonoBehaviour
     private void adjustSunHeight(int lowestChunkHeight)
     {
         targetHeight = 1940 + lowestChunkHeight + 3;
-        if(adjustHeightCoroutine == null)
+        if(!isChangeSunHeightCoroutineRunning)
         {
-            adjustHeightCoroutine = StartCoroutine(changeSunHeight());
+            cManager.enqueueCoroutine(changeSunHeight());
         }
 	}
 
@@ -71,6 +73,7 @@ public class SunLightMovementScript : MonoBehaviour
 
     private IEnumerator changeSunHeight()
     {
+        isChangeSunHeightCoroutineRunning = true;
         while (transform.position.y + 0.2f < targetHeight || transform.position.y - 0.2f > targetHeight)
         {
             if(targetHeight > transform.position.y)
@@ -84,8 +87,8 @@ public class SunLightMovementScript : MonoBehaviour
 			
 			yield return new WaitForSeconds(0.01f);
         }
-        adjustHeightCoroutine = null;
-    }
+		isChangeSunHeightCoroutineRunning = false;
+	}
 
 	private float getLowestHeight(float[] heights)
 	{
