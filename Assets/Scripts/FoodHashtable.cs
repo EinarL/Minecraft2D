@@ -15,7 +15,9 @@ public static class FoodHashtable
 		{"MuttonCooked", 8},
 		{"PorkchopRaw", 1},
 		{"PorkchopCooked", 8},
-		{"RottenFlesh", 1}
+		{"RottenFlesh", 1},
+		{"ChickenRaw", 1},
+		{"ChickenCooked", 6}
 	};
 	// returns the amount of food bars the food adds, returns -1 if it's not a food
 	public static int getFoodAddition(string foodName)

@@ -88,7 +88,7 @@ public abstract class Animal : Entity
 
 
 
-	public void run()
+	public virtual void run()
 	{
 		if (!isPathBlocked())
 		{

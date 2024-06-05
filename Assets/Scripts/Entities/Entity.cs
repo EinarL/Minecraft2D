@@ -52,7 +52,8 @@ public abstract class Entity : MonoBehaviour
 					direction = new Vector3(direction.x * -1, 0, 0);
 					faceDirection();
 				}
-				rb.velocity = new Vector2(direction.x * speed, rb.velocity.y);
+				if(!isBlockInPath())rb.velocity = new Vector2(direction.x * speed, rb.velocity.y);
+				else rb.velocity = new Vector2(0, rb.velocity.y);
 
 			}
 			else // if path is blocked
@@ -156,7 +157,7 @@ public abstract class Entity : MonoBehaviour
 		return false;
 	}
 
-	public void jump()
+	public virtual void jump()
 	{
 		rb.velocity = new Vector2(rb.velocity.x, jumpPower);
 	}

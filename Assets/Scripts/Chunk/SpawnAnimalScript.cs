@@ -11,7 +11,7 @@ public static class SpawnAnimalScript // Animal
 	private static int[] animalClusterSize = new int[] { 5, 10}; // will spawn animal cluster in a range from x1 to x2 blocks
 	private static int spawningProcess = 0; // how much is left of spawning the animal cluster (0 is finished)
 	private static string spawningAnimal = null; // what animal we are spawning in the cluster
-	private static string[] animals = new string[] { "Sheep", "Pig" };
+	private static string[] animals = new string[] { "Sheep", "Pig", "Chicken" };
 
 	//  this algorithm is used for when we are spawning in a new chunk 
 	public static object[] decideIfSpawnAnimal(float xPos, float yPos)
@@ -26,7 +26,6 @@ public static class SpawnAnimalScript // Animal
 		{
 			spawningProcess = random.Next(animalClusterSize[0], animalClusterSize[1] + 1); // get random size for cluster
 			spawningAnimal = animals[random.Next(0, animals.Length)]; // get random animal	
-			if (spawningAnimal == null) Debug.LogError("spawningAnimal is null");
 			return new object[] { xPos, yPos, spawningAnimal };
 		}
 

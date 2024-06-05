@@ -1,4 +1,2 @@
 
 when you get the items from the tombstone back it is possible that the amount of some items will be one too many if the player doesnt have the inventory for all of the stuff that the tombstone was storing.
-
-if the player is moving and zooming vigurously (which will render more/less chunks) the chunk spawning algorithm will on rare occasions skip a chunk.

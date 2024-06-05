@@ -30,7 +30,8 @@ public static class FurnaceHashtable
 		{ "MuttonRaw", "MuttonCooked"},
 		{ "PorkchopRaw", "PorkchopCooked"},
 		{ "Sand", "Glass"},
-		{ "IronOre", "IronIngot"}
+		{ "IronOre", "IronIngot"},
+		{ "ChickenRaw", "ChickenCooked"}
 	};
 	/**
 	 * returns the burnTime if the item is burnable, otherwise -1
