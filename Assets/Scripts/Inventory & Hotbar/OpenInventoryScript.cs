@@ -114,6 +114,7 @@ public class OpenInventoryScript : MonoBehaviour, IPointerClickHandler
 			itemScript.setPickupable(false); // cant pickup the item immediately
 			itemScript.addDropVelocity(steve.position); // shoot the item from the player
 			itemScript.tool = items.toolInstance; // add the tool info
+            itemScript.armor = items.armorInstance;
 		}
 
         if(items.Equals(heldItem)) setIsItemBeingHeld(false);

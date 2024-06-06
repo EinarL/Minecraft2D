@@ -123,9 +123,9 @@ public class ArmorScript : MonoBehaviour
      */
     public int getReducedDamage(int baseDamage)
     {
-        float damageReductionPercentage = 1 - (totalArmor / 20) * 0.8f;
+        float damageReductionPercentage = 1 - (totalArmor / 20f) * 0.8f;
 
-        return Mathf.RoundToInt(baseDamage * damageReductionPercentage);
+		return Mathf.RoundToInt(baseDamage * damageReductionPercentage);
     }
 
 

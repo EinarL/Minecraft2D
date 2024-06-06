@@ -25,6 +25,7 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
     private DurabilityBar durabilityBarScript;
     private GameObject outline; // the outline of the armor
     private ArmorScript armorScript;
+    private ArmorOutfitScript armorOutfitScript;
 
     // Start is called before the first frame update
     void Start()
@@ -33,8 +34,9 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
         itemImage = transform.Find("ItemImage").gameObject;
 		hoverTexture = transform.Find("HoverTexture").GetComponent<Image>();
         armorScript = GameObject.Find("Canvas").transform.Find("Armorbar").GetComponent<ArmorScript>();
+		armorOutfitScript = ArmorOutfitScript.Instance;
 
-        openInventoryScript = transform.parent.parent.parent.parent.GetComponent<OpenInventoryScript>();
+		openInventoryScript = transform.parent.parent.parent.parent.GetComponent<OpenInventoryScript>();
     }
     /**
      * gets called when the game starts if there is a saved armor.json file.
@@ -48,12 +50,11 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
         armorScript.addArmor(armor.armorInstance.armorPoints);
         updateSlot();
 		outline.SetActive(false);
+        updateArmorVisually();
 	}
 
 	/**
      * updates what is in the slot 
-     * 
-     * DurabilityItem tool: the tool/armor that is in this slot. this is null if there is no tool nor armor in the slot.
      */
 	public void updateSlot()
     {
@@ -143,7 +144,7 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
             updateSlot();
 			outline.SetActive(true);
 
-            
+            updateArmorVisually();
 		}
         else if(hasPickedUp) // if the player has picked up something
 		{
@@ -159,9 +160,108 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
             openInventoryScript.setIsItemBeingHeld(false);
             updateSlot();
 			outline.SetActive(false);
+
+			updateArmorVisually();
 		}
         
     }
+    /**
+     * this function calls another function in ArmorOutfitScript to show the armor on the player
+     */
+    private void updateArmorVisually()
+    {
+        if (itemInSlot.isEmpty()) // if we just removed an armor
+        {
+            switch (armorSlotType)
+            {
+                case ArmorType.Helmet:
+                    armorOutfitScript.removeHelmet();
+                    break;
+				case ArmorType.Chestplate:
+					armorOutfitScript.removeChestplate();
+					break;
+				case ArmorType.Leggings:
+					armorOutfitScript.removeLeggings();
+					break;
+				case ArmorType.Boots:
+					armorOutfitScript.removeBoots();
+					break;
+			}
+            return;
+        }
+		// if we get here then we just added an armor to this slot
+		switch (armorSlotType)
+		{
+			case ArmorType.Helmet:
+                switch (itemInSlot.armorInstance.getArmorMaterial())
+                {
+                    case ArmorMaterial.Leather:
+						// armorOutfitScript.addLeatherHelmet();
+						break;
+                    case ArmorMaterial.Iron:
+                        armorOutfitScript.addIronHelmet();
+                        break;
+                    case ArmorMaterial.Gold:
+						// armorOutfitScript.addGoldHelmet();
+						break;
+                    case ArmorMaterial.Diamond:
+						// armorOutfitScript.addDiamondHelmet();
+						break;
+                }
+				break;
+			case ArmorType.Chestplate:
+				switch (itemInSlot.armorInstance.getArmorMaterial())
+				{
+					case ArmorMaterial.Leather:
+						// armorOutfitScript.addLeatherChestplate();
+						break;
+					case ArmorMaterial.Iron:
+						armorOutfitScript.addIronChestplate();
+						break;
+					case ArmorMaterial.Gold:
+						// armorOutfitScript.addGoldChestplate();
+						break;
+					case ArmorMaterial.Diamond:
+						// armorOutfitScript.addDiamondChestplate();
+						break;
+				}
+				break;
+			case ArmorType.Leggings:
+				switch (itemInSlot.armorInstance.getArmorMaterial())
+				{
+					case ArmorMaterial.Leather:
+						// armorOutfitScript.addLeatherLeggings();
+						break;
+					case ArmorMaterial.Iron:
+						armorOutfitScript.addIronLeggings();
+						break;
+					case ArmorMaterial.Gold:
+						// armorOutfitScript.addGoldLeggings();
+						break;
+					case ArmorMaterial.Diamond:
+						// armorOutfitScript.addDiamondLeggings();
+						break;
+				}
+				break;
+			case ArmorType.Boots:
+				switch (itemInSlot.armorInstance.getArmorMaterial())
+				{
+					case ArmorMaterial.Leather:
+						// armorOutfitScript.addLeatherBoots();
+						break;
+					case ArmorMaterial.Iron:
+						armorOutfitScript.addIronBoots();
+						break;
+					case ArmorMaterial.Gold:
+						// armorOutfitScript.addGoldBoots();
+						break;
+					case ArmorMaterial.Diamond:
+						// armorOutfitScript.addDiamondBoots();
+						break;
+				}
+				break;
+		}
+	}
 
 	public void OnPointerEnter(PointerEventData eventData)
 	{

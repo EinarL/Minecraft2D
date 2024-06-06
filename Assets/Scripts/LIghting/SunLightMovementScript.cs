@@ -15,14 +15,14 @@ public class SunLightMovementScript : MonoBehaviour
     private Transform minecraftVoid;
     private int targetHeight = 1940;
     private bool isChangeSunHeightCoroutineRunning = false;
-    private CoroutineManager cManager;
+    private MainThreadDispatcher mainThreadDispatcher;
 
 	// Start is called before the first frame update
 	void Start()
     {
         playerPos = GameObject.Find("SteveContainer").transform;
         minecraftVoid = GameObject.Find("Void").transform;
-        cManager = GameObject.Find("EventSystem").GetComponent<CoroutineManager>();
+		mainThreadDispatcher = GameObject.Find("EventSystem").GetComponent<MainThreadDispatcher>();
         StartCoroutine(followPlayer());
 
         IEnumerator adjustSunPositionAtStart()
@@ -56,7 +56,7 @@ public class SunLightMovementScript : MonoBehaviour
         targetHeight = 1940 + lowestChunkHeight + 3;
         if(!isChangeSunHeightCoroutineRunning)
         {
-            cManager.enqueueCoroutine(changeSunHeight());
+			mainThreadDispatcher.enqueue(changeSunHeight());
         }
 	}
 

@@ -15,6 +15,7 @@ public class PlayerControllerScript : MonoBehaviour
     private Transform steve; // character
     private Transform head;
     private Transform holdingItemObject; // the object that displays which item the player is holding
+    private SpriteRenderer holdingItemObjectSpriteRenderer;
 	private Camera cam;
     private StepSoundScript stepSoundScript;
     private CapsuleCollider2D capCollider;
@@ -50,6 +51,7 @@ public class PlayerControllerScript : MonoBehaviour
     {
         steve = transform.Find("Steve");
         holdingItemObject = steve.Find("Arm Front").transform.Find("HoldingItemPosition").transform.Find("HoldingItem");
+		holdingItemObjectSpriteRenderer = holdingItemObject.GetComponent<SpriteRenderer>();
 		anim = steve.GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
 		stepSoundScript = steve.GetComponent<StepSoundScript>();
@@ -279,6 +281,9 @@ public class PlayerControllerScript : MonoBehaviour
         holdingItemObject.localScale = new Vector3(0.0622607f, 0.0622607f, 0.0622607f);
 
         holdingItemObject.parent = newParent;
+
+        if (frontHand) holdingItemObjectSpriteRenderer.sortingOrder = 12;
+        else holdingItemObjectSpriteRenderer.sortingOrder = 10;
 
 		anim.SetBool("isFacingRight", frontHand);
 	}

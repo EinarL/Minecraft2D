@@ -7,13 +7,13 @@ public class RightClickSnowball : RightClickItemBehaviour
 {
 	private Animator anim;
 	private Transform throwFromTransform;
-	private CoroutineManager cManager;
+	private MainThreadDispatcher mainThreadDispatcher;
 
 	public RightClickSnowball()
 	{
 		anim = GameObject.Find("SteveContainer").transform.Find("Steve").GetComponent<Animator>();
 		throwFromTransform = GameObject.Find("SteveContainer").transform.Find("ThrowFromPosition").transform;
-		cManager = GameObject.Find("EventSystem").GetComponent<CoroutineManager>();
+		mainThreadDispatcher = GameObject.Find("EventSystem").GetComponent<MainThreadDispatcher>();
 	}
 
 	public override void rightClickItem()
@@ -41,7 +41,7 @@ public class RightClickSnowball : RightClickItemBehaviour
 
 			InventoryScript.decrementSlot(theSlotThatTheSnowballIsIn); // remove the snowball from the inventory
 		}
-		cManager.startCoroutine(throwSnowball(InventoryScript.getSelectedSlot()));
+		mainThreadDispatcher.startCoroutine(throwSnowball(InventoryScript.getSelectedSlot()));
 
 		playThrowSound();
 	}

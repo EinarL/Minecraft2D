@@ -40,6 +40,7 @@ public class spawnChunkScript : MonoBehaviour
 
     private SunLightMovementScript sunLightMovementScript;
     private DayProcessScript dayProcessScript;
+	private MainThreadDispatcher mainThreadDispatcher;
 	private IDataService dataService = new JsonDataService();
 
 	// Start is called before the first frame update
@@ -47,8 +48,9 @@ public class spawnChunkScript : MonoBehaviour
     {
 		sunLightMovementScript = GameObject.Find("Sun").GetComponent<SunLightMovementScript>();
         dayProcessScript = GameObject.Find("CM vcam").transform.Find("SunAndMoonTexture").GetComponent<DayProcessScript>();
+		mainThreadDispatcher = GameObject.Find("EventSystem").GetComponent<MainThreadDispatcher>();
 
-	    BlockHashtable.initializeBlockHashtable();
+		BlockHashtable.initializeBlockHashtable();
         spawnChunkStrategy = decideBiome(); // dont do this if the biome is already decided, we need to save which biome was rendering when we quit the game
 
 		cam = Camera.main;
@@ -453,7 +455,10 @@ public class spawnChunkScript : MonoBehaviour
 				{
 					if (41 <= chunk[x, y] && chunk[x, y] <= 56) // if its a door
 					{
-						instantiateBlock(chunk[x, y], xPos + SpawningChunkData.blockSize * x, yPos - SpawningChunkData.blockSize * y); // TODO: make the main thread do this
+						int blockID = chunk[x, y];
+						float xBlockPos = xPos + SpawningChunkData.blockSize * x;
+						float yBlockPos = yPos - SpawningChunkData.blockSize * y;
+						mainThreadDispatcher.enqueue(() => instantiateBlock(blockID, xBlockPos, yBlockPos)); // make the main thread do this
 						tiles[index] = null;
 					}
 					else
