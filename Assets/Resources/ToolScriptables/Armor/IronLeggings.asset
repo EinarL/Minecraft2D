@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cbc65c94ddf6c9409b39a1b45149f8a, type: 3}
   m_Name: IronLeggings
   m_EditorClassIdentifier: 
-  armorType: 2
+  armorType: 0
   armorMaterial: 1
   armorPoints: 5
   durability: 235

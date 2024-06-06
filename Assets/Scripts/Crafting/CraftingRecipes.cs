@@ -318,6 +318,46 @@ public static class CraftingRecipes
 			new object[] { "IronIngot", new Vector2(2, 1) }
 		}, new InventorySlot( new ArmorInstance(getArmorScriptable("IronBoots")), "IronBoots")
 		},
+
+		// diamond helmet
+		new object[]{ "Diamond", new object[] {
+			new object[] { "Diamond", new Vector2(2, 0) },
+			new object[] { "Diamond", new Vector2(0, 1) },
+			new object[] { "Diamond", new Vector2(1, 1) },
+			new object[] { "Diamond", new Vector2(2, 1) }
+		}, new InventorySlot( new ArmorInstance(getArmorScriptable("DiamondHelmet")), "DiamondHelmet")
+		},
+
+		// diamond chestplate
+		new object[]{ "Diamond", new object[] {
+			new object[] { "Diamond", new Vector2(1, 0) },
+			new object[] { "Diamond", new Vector2(2, 0) },
+			new object[] { "Diamond", new Vector2(0, 1) },
+			new object[] { "Diamond", new Vector2(1, 1) },
+			new object[] { "Diamond", new Vector2(2, 1) },
+			new object[] { "Diamond", new Vector2(0, 2) },
+			new object[] { "Diamond", new Vector2(2, 2) }
+		}, new InventorySlot( new ArmorInstance(getArmorScriptable("DiamondChestplate")), "DiamondChestplate")
+		},
+
+		// diamond leggings
+		new object[]{ "Diamond", new object[] {
+			new object[] { "Diamond", new Vector2(2, 0) },
+			new object[] { "Diamond", new Vector2(0, 1) },
+			new object[] { "Diamond", new Vector2(2, 1) },
+			new object[] { "Diamond", new Vector2(0, 2) },
+			new object[] { "Diamond", new Vector2(1, 2) },
+			new object[] { "Diamond", new Vector2(2, 2) }
+		}, new InventorySlot( new ArmorInstance(getArmorScriptable("DiamondLeggings")), "DiamondLeggings")
+		},
+
+		// diamond boots
+		new object[]{ "Diamond", new object[] {
+			new object[] { "Diamond", new Vector2(2, 0) },
+			new object[] { "Diamond", new Vector2(0, 1) },
+			new object[] { "Diamond", new Vector2(2, 1) }
+		}, new InventorySlot( new ArmorInstance(getArmorScriptable("DiamondBoots")), "DiamondBoots")
+		},
 	};
 
 	public static List<object[]> getRecipesByLeftBottomMostItem(string itemName)

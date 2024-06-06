@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cbc65c94ddf6c9409b39a1b45149f8a, type: 3}
-  m_Name: IronBoots
+  m_Name: DiamondLeggings
   m_EditorClassIdentifier: 
-  armorType: 0
-  armorMaterial: 1
-  armorPoints: 2
-  durability: 210
+  armorType: 2
+  armorMaterial: 3
+  armorPoints: 6
+  durability: 330

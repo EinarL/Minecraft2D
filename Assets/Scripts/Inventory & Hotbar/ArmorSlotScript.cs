@@ -169,11 +169,17 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
             if (!pickedUpItem.isArmor()) return; // only allow armors in this slot
             if (pickedUpItem.armorInstance.getArmorType() != armorSlotType) return; // only allow chestplates if this is a chestplate slot, etc.
 
-            armorScript.addArmor(pickedUpItem.armorInstance.armorPoints); // add the armor points
+            if (!itemInSlot.isEmpty()) // if there is an armor in this slot, then we want to switch the items being held and the item in the slot
+            {
+				armorScript.removeArmor(itemInSlot.armorInstance.armorPoints); // remove armor points 
+                InventoryScript.setItemsPickedUp(new InventorySlot(itemInSlot.itemName, itemInSlot.toolInstance, itemInSlot.armorInstance, 1));
+				openInventoryScript.setIsItemBeingHeld(true);
+			}
+            else openInventoryScript.setIsItemBeingHeld(false);
+			armorScript.addArmor(pickedUpItem.armorInstance.armorPoints); // add the armor points
 
             itemInSlot.putItemOrToolInSlot(pickedUpItem.itemName, pickedUpItem.toolInstance, pickedUpItem.armorInstance, 1);
             
-            openInventoryScript.setIsItemBeingHeld(false);
             updateSlot();
 			outline.SetActive(false);
 
@@ -221,7 +227,7 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
 						// armorOutfitScript.addGoldHelmet();
 						break;
                     case ArmorMaterial.Diamond:
-						// armorOutfitScript.addDiamondHelmet();
+						armorOutfitScript.addDiamondHelmet();
 						break;
                 }
 				break;
@@ -238,7 +244,7 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
 						// armorOutfitScript.addGoldChestplate();
 						break;
 					case ArmorMaterial.Diamond:
-						// armorOutfitScript.addDiamondChestplate();
+						armorOutfitScript.addDiamondChestplate();
 						break;
 				}
 				break;
@@ -255,7 +261,7 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
 						// armorOutfitScript.addGoldLeggings();
 						break;
 					case ArmorMaterial.Diamond:
-						// armorOutfitScript.addDiamondLeggings();
+						armorOutfitScript.addDiamondLeggings();
 						break;
 				}
 				break;
@@ -272,7 +278,7 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
 						// armorOutfitScript.addGoldBoots();
 						break;
 					case ArmorMaterial.Diamond:
-						// armorOutfitScript.addDiamondBoots();
+						armorOutfitScript.addDiamondBoots();
 						break;
 				}
 				break;

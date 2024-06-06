@@ -21,6 +21,9 @@ public class ArmorOutfitScript
 	private Sprite[] ironArmorImages;
 	private Sprite[] ironLeggingsImages;
 
+	private Sprite[] diamondArmorImages;
+	private Sprite[] diamondLeggingsImages;
+
 	private static ArmorOutfitScript instance = null;
 
 	public static ArmorOutfitScript Instance
@@ -49,6 +52,9 @@ public class ArmorOutfitScript
 
 		ironArmorImages = Resources.LoadAll<Sprite>("Textures/Armor/iron_layer_1");
 		ironLeggingsImages = Resources.LoadAll<Sprite>("Textures/Armor/iron_layer_2");
+
+		diamondArmorImages = Resources.LoadAll<Sprite>("Textures/Armor/diamond_layer_1");
+		diamondLeggingsImages = Resources.LoadAll<Sprite>("Textures/Armor/diamond_layer_2");
 	}
 
 	public void removeHelmet()
@@ -97,6 +103,30 @@ public class ArmorOutfitScript
 	{
 		legFrontBoots.sprite = getSpriteWithName(ironArmorImages, "iron_layer_1_3");
 		legBackBoots.sprite = getSpriteWithName(ironArmorImages, "iron_layer_1_4");
+	}
+
+	public void addDiamondHelmet()
+	{
+		helmet.sprite = getSpriteWithName(diamondArmorImages, "diamond_layer_1_0");
+	}
+
+	public void addDiamondChestplate()
+	{
+		torsoChestplate.sprite = getSpriteWithName(diamondArmorImages, "diamond_layer_1_1");
+		armFrontChestplate.sprite = getSpriteWithName(diamondArmorImages, "diamond_layer_1_2");
+		armBackChestplate.sprite = getSpriteWithName(diamondArmorImages, "diamond_layer_1_2");
+	}
+
+	public void addDiamondLeggings()
+	{
+		legFrontLeggings.sprite = getSpriteWithName(diamondLeggingsImages, "diamond_layer_2_0");
+		legBackLeggings.sprite = getSpriteWithName(diamondLeggingsImages, "diamond_layer_2_1");
+	}
+
+	public void addDiamondBoots()
+	{
+		legFrontBoots.sprite = getSpriteWithName(diamondArmorImages, "diamond_layer_1_3");
+		legBackBoots.sprite = getSpriteWithName(diamondArmorImages, "diamond_layer_1_4");
 	}
 
 
