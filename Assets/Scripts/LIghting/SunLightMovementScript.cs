@@ -16,6 +16,7 @@ public class SunLightMovementScript : MonoBehaviour
     private int targetHeight = 1940;
     private bool isChangeSunHeightCoroutineRunning = false;
     private MainThreadDispatcher mainThreadDispatcher;
+    private bool adjustAtStart = true; // adjust the suns position at the start of the game
 
 	// Start is called before the first frame update
 	void Start()
@@ -25,13 +26,12 @@ public class SunLightMovementScript : MonoBehaviour
 		mainThreadDispatcher = GameObject.Find("EventSystem").GetComponent<MainThreadDispatcher>();
         StartCoroutine(followPlayer());
 
-        IEnumerator adjustSunPositionAtStart()
+        IEnumerator adjustPositionAtStart()
         {
             yield return new WaitForSeconds(0.1f);
-			transform.position = new Vector2(playerPos.position.x, 1940 + playerPos.position.y + 3);
             minecraftVoid.position = new Vector2(playerPos.position.x, minecraftVoid.position.y);
 		}
-		StartCoroutine(adjustSunPositionAtStart());
+		StartCoroutine(adjustPositionAtStart());
 
 	}
 
@@ -39,6 +39,11 @@ public class SunLightMovementScript : MonoBehaviour
     {
 		float lowHeight = getLowestHeight(heights);
 		chunkLowestHeights.Add(lowHeight);
+        if (adjustAtStart)
+        {
+			transform.position = new Vector2(playerPos.position.x, 1940 + lowHeight + 3);
+			adjustAtStart = false;
+        }
 	}
 
 	public void removeChunkHeight(float[] heights)

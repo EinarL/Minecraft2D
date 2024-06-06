@@ -6,8 +6,9 @@ public class Sheep : Animal
 {
 	private float eatChance = .2f;
 
-	void Start()
+	new void Start()
 	{
+		base.Start();
 		initializeEntity();
 		initializeAudio();
 		StartCoroutine(decideIfEat());

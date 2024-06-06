@@ -112,15 +112,36 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
         }   
 	}
 
-    public void updateDurabilityBar(ToolInstance tool)
+    public void updateDurabilityBar()
     {
         if (!hasDurabilityBar()) return;
 		durabilityBarScript.gameObject.SetActive(true);
 
-		durabilityBarScript.updateDurability(tool);
+		durabilityBarScript.updateDurability(itemInSlot.armorInstance);
 	}
 
-    /**
+    public void reduceArmorDurability()
+    {
+        if(itemInSlot.isEmpty()) return;
+        itemInSlot.armorInstance.reduceDurability();
+
+        if(itemInSlot.armorInstance.getDurability() <= 0) // if durability is 0, then break the armor
+        {
+            removeArmorFromSlot();
+        }
+        else updateDurabilityBar();
+    }
+
+    private void removeArmorFromSlot()
+    {
+		armorScript.removeArmor(itemInSlot.armorInstance.armorPoints);
+		itemInSlot.removeEverythingFromSlot();
+		updateSlot();
+		outline.SetActive(true);
+		updateArmorVisually();
+	}
+
+	/**
     * runs when player left clicks the item slot.
     * 
     * if the player hasnt picked up anything:
@@ -129,22 +150,17 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
     *   puts the items he has picked up in this slot (and)
     *   picks up the items in this slot, if any
     */
-    public void leftClickSlot()
+	public void leftClickSlot()
     {
         bool hasPickedUp = InventoryScript.getHasItemsPickedUp();
 
         if(!hasPickedUp && itemImage.activeSelf) // if the player hasnt picked up anything && there is an item in this slot
 		{
-			armorScript.removeArmor(itemInSlot.armorInstance.armorPoints); // remove the armor points
 			// pickup the items in this slot
 
 			InventoryScript.setItemsPickedUp(new InventorySlot(itemInSlot.itemName, itemInSlot.toolInstance, itemInSlot.armorInstance, itemInSlot.amount));
-			itemInSlot.removeEverythingFromSlot();
+            removeArmorFromSlot();
 			openInventoryScript.setIsItemBeingHeld(true);
-            updateSlot();
-			outline.SetActive(true);
-
-            updateArmorVisually();
 		}
         else if(hasPickedUp) // if the player has picked up something
 		{

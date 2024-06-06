@@ -225,8 +225,8 @@ public abstract class Entity : MonoBehaviour
 	{
 		while (true)
 		{
-			// if the entity is within 10 blocks on the y value, then it can make noise
-			if(Mathf.Abs(playerTransform.position.y - transform.position.y) <= 10)
+			// if the entity is within 10 blocks on the y value, then it can make noise && 30 block on the x axis
+			if(Mathf.Abs(playerTransform.position.y - transform.position.y) <= 10 && Mathf.Abs(playerTransform.position.x - transform.position.x) <= 30)
 			{
 				float rand = Random.value;
 				if (rand < makeNoiseChance) makeNoise();

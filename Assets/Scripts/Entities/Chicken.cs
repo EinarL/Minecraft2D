@@ -7,8 +7,9 @@ public class Chicken : Animal
 
 	protected AudioClip[] hurtSounds = new AudioClip[2];
 
-	void Start()
+	new void Start()
 	{
+		deadColliderSize = new Vector2(GetComponent<Collider2D>().offset.x, -0.02f);
 		health = 7;
 		jumpPower = 4.5f;
 		initializeEntity();
@@ -21,10 +22,6 @@ public class Chicken : Animal
 		if (anim.GetBool("isDead")) return;
 		base.takeDamage(damage, playerXPos);
 		makeHurtNoise();
-		if (health <= 0)
-		{
-			GetComponent<Collider2D>().offset = new Vector2(GetComponent<Collider2D>().offset.x, 0.05f);
-		}
 	}
 
 	protected void makeHurtNoise()

@@ -11,7 +11,12 @@ public abstract class Animal : Entity
 	private float runCounter = 0;
 	protected bool isRunning = false;
 	private float runningChangeDirectionChance = 0.6f;
+	protected Vector2 deadColliderSize; // the collider size of the animal when its dead
 
+	protected void Start()
+	{
+		deadColliderSize = new Vector2(GetComponent<Collider2D>().offset.x, 0.05f);
+	}
 
 	private new void Update()
 	{
@@ -82,7 +87,7 @@ public abstract class Animal : Entity
 			isRunning = false; // if dead
 
 			// prob need to make a takeDamage func in concrete class that does the height differently for all animals (or maybe just have a variable?)
-			GetComponent<Collider2D>().offset = new Vector2(GetComponent<Collider2D>().offset.x, 0.05f);
+			GetComponent<Collider2D>().offset = deadColliderSize;
 		}
 	}
 

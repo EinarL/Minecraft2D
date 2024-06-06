@@ -5,8 +5,9 @@ using UnityEngine;
 public class Pig : Animal
 {
 
-	void Start()
+	new void Start()
 	{
+		base.Start();
 		jumpPower = 11f;
 		initializeEntity();
 		initializeAudio();
