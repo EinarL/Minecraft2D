@@ -92,9 +92,9 @@ public static class InventoryScript
 		return didAddToInventory;
 	}
 
-	public static bool addToInventory(ToolInstance tool, string itemName)
+	public static bool addToInventory(ToolInstance tool, ArmorInstance armor, string itemName)
 	{
-		object[] ret = searchForSpot(tool, itemName); // [didAddToInventory, which slot it added the item to]
+		object[] ret = searchForSpot(tool, armor, itemName); // [didAddToInventory, which slot it added the item to]
 		bool didAddToInventory = (bool)ret[0];
 		int changedSlot = (int)ret[1];
 
@@ -144,16 +144,16 @@ public static class InventoryScript
 			return true;
 		}
 
-		if (itemsPickedUp.isTool())
+		if (itemsPickedUp.isTool() || itemsPickedUp.isArmor())
 		{
 			if (!inventory[slotNumber].isEmpty()) // if the slot is not empty
 			{
 				switchHeldItemsAndItemInSlot(slotNumber); // switch the items being held and the items in the slot
 				return true;
 			}
-			else // otherwise just put the held tool in the slot
+			else // otherwise just put the held tool/armor in the slot
 			{
-				inventory[slotNumber].putToolInSlot(itemsPickedUp.toolInstance, itemsPickedUp.itemName);
+				inventory[slotNumber].putItemOrToolInSlot(itemsPickedUp.itemName, itemsPickedUp.toolInstance, itemsPickedUp.armorInstance, 1);
 				updateSlotVisually(slotNumber);
 			}
 
@@ -206,9 +206,10 @@ public static class InventoryScript
 	{
 		string itemNameInSlot = inventory[slotNumber].itemName;
 		ToolInstance toolInSlot = inventory[slotNumber].toolInstance;
+		ArmorInstance armorInSlot = inventory[slotNumber].armorInstance;
 		int amountInSlot = inventory[slotNumber].amount;
-		inventory[slotNumber].putItemOrToolInSlot(itemsPickedUp.itemName, itemsPickedUp.toolInstance, itemsPickedUp.amount);
-		itemsPickedUp = new InventorySlot(itemNameInSlot, toolInSlot, amountInSlot);
+		inventory[slotNumber].putItemOrToolInSlot(itemsPickedUp.itemName, itemsPickedUp.toolInstance, itemsPickedUp.armorInstance, itemsPickedUp.amount);
+		itemsPickedUp = new InventorySlot(itemNameInSlot, toolInSlot, armorInSlot, amountInSlot);
 		updateSlotVisually(slotNumber);
 	}
 
@@ -232,9 +233,9 @@ public static class InventoryScript
 
 		if(inventory[selectedSlot].toolInstance == null)
 		{
-			Debug.LogError("breakToolBeingHeld but the player is not holding a tool, hes holding: " + inventory[selectedSlot].itemName);
+			Debug.LogError("breakToolBeingHeld() was executed but the player is not holding a tool, he's holding: " + inventory[selectedSlot].itemName);
+			return;
 		}
-
 
 		inventory[selectedSlot] = new InventorySlot();
 		updateSlotVisually(selectedSlot);
@@ -328,13 +329,13 @@ public static class InventoryScript
 	 * 
 	 * returns: true if it found a spot for the item, false otherwise; and the spot that it put the item in
 	 */
-	private static object[] searchForSpot(ToolInstance tool, string itemName)
+	private static object[] searchForSpot(ToolInstance tool, ArmorInstance armor, string itemName)
 	{
 		for(int i = 0; i < inventorySlots; i++)
 		{
 			if (inventory[i].isEmpty()) // if the slot is empty
 			{
-				inventory[i].putToolInSlot(tool, itemName);
+				inventory[i].putItemOrToolInSlot(itemName, tool, armor, 1);
 				return new object[] {true, i};
 			}
 
@@ -372,8 +373,8 @@ public static class InventoryScript
 
 	private static void updateSlotVisually(int slotNumber)
 	{
-		if (slotNumber < 9) hotbarScript.updateHotbarSlot(inventory[slotNumber].toolInstance, slotNumber); // update hotbar visually
-		inventorySlotScripts[slotNumber].updateSlot(inventory[slotNumber].toolInstance); // update inventory visually
+		if (slotNumber < 9) hotbarScript.updateHotbarSlot(inventory[slotNumber].toolInstance != null ? inventory[slotNumber].toolInstance : inventory[slotNumber].armorInstance, slotNumber); // update hotbar visually
+		inventorySlotScripts[slotNumber].updateSlot(inventory[slotNumber].toolInstance != null ? inventory[slotNumber].toolInstance : inventory[slotNumber].armorInstance); // update inventory visually
 	}
 
 	public static void updateHeldToolDurability(ToolInstance tool)

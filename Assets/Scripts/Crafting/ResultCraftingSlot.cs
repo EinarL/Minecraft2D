@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using Unity.VisualScripting;
 
 public class ResultCraftingSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, Slot
 {
@@ -61,6 +62,7 @@ public class ResultCraftingSlot : MonoBehaviour, IPointerEnterHandler, IPointerE
 	public void setItemInSlot(InventorySlot itemInSlot)
 	{
 		if(itemInSlot.isTool()) this.itemInSlot = new InventorySlot(itemInSlot.itemName, new ToolInstance(Resources.Load<Tool>("ToolScriptables\\" + itemInSlot.itemName)), itemInSlot.amount); // need to do this to fix a bug
+		else if(itemInSlot.isArmor()) this.itemInSlot = new InventorySlot(new ArmorInstance(Resources.Load<Armor>("ToolScriptables\\Armor\\" + itemInSlot.itemName)), itemInSlot.itemName);
 		else this.itemInSlot = new InventorySlot(itemInSlot.itemName, itemInSlot.toolInstance, itemInSlot.amount);
 		updateSlot();
 	}
@@ -80,6 +82,8 @@ public class ResultCraftingSlot : MonoBehaviour, IPointerEnterHandler, IPointerE
 		if (!itemImage.activeSelf) return; // if there is not an item in this slot
 
         bool hasPickedUp = InventoryScript.getHasItemsPickedUp();
+		// if holding shift, put the item in this slot in the inventory, if there is space TODO
+
 
 		if (!hasPickedUp) // if the player hasnt picked up anything
 		{
@@ -87,8 +91,9 @@ public class ResultCraftingSlot : MonoBehaviour, IPointerEnterHandler, IPointerE
 			int amount = itemInSlot.amount;
 			string itemToPickup = itemInSlot.itemName;
 			ToolInstance tool = itemInSlot.toolInstance;
+			ArmorInstance armor = itemInSlot.armorInstance;
 
-			InventorySlot slotItems = new InventorySlot(itemToPickup, tool, amount);
+			InventorySlot slotItems = new InventorySlot(itemToPickup, tool, armor, amount);
 			InventoryScript.setItemsPickedUp(slotItems); // set the picked up items to be the items that were in this slot
 			openInventoryScript.setIsItemBeingHeld(true);
 
@@ -99,13 +104,14 @@ public class ResultCraftingSlot : MonoBehaviour, IPointerEnterHandler, IPointerE
 		}
 		else // if the player has picked up something
 		{
+			if (itemInSlot.isTool() || itemInSlot.isArmor()) return;
 			int amount = itemInSlot.amount;
-			string itemToPickup = itemInSlot.itemName; // TODO: need to edit this for tools
+			string itemToPickup = itemInSlot.itemName;
 
 			InventorySlot heldItems = InventoryScript.getItemsPickedUp();
 
 			// if the items being held are the same as in the result slot and there is space for them to be held
-			if(heldItems.itemName.Equals(itemToPickup) && heldItems.amount + amount <= 64) 
+			if (heldItems.itemName.Equals(itemToPickup) && heldItems.amount + amount <= 64)
 			{
 				InventorySlot itemsTogether = new InventorySlot(itemToPickup, heldItems.amount + amount);
 				InventoryScript.setItemsPickedUp(itemsTogether);
@@ -115,9 +121,6 @@ public class ResultCraftingSlot : MonoBehaviour, IPointerEnterHandler, IPointerE
 				Craft.deleteItemsFromSlots(isInventoryResultSlot); // delete the items that were used for crafting
 				updateSlot();
 			}
-
-
-			// if holding shift, put the item in this slot in the inventory, if there is space
 
 		}
 

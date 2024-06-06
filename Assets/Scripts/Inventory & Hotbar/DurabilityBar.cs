@@ -11,14 +11,14 @@ public class DurabilityBar : MonoBehaviour
     public Image fill;
 
 
-    public void updateDurability(ToolInstance tool)
+    public void updateDurability(DurabilityItem tool) // tool is a tool or armor
     {
         slider.value = tool.getDurability();
 
         fill.color = gradient.Evaluate(slider.normalizedValue);
     }
 
-    public void setMaximumDurability(ToolInstance tool)
+    public void setMaximumDurability(DurabilityItem tool)
     {
         slider.maxValue = tool.getStartingDurability();
     }

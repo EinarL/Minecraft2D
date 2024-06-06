@@ -6,7 +6,7 @@ using UnityEngine;
 using System;
 using System.Runtime.Serialization;
 
-public class ToolInstance
+public class ToolInstance : DurabilityItem
 {
 
 

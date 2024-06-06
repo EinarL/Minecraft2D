@@ -22,6 +22,7 @@ public class HealthbarScript : MonoBehaviour
     private PlayerControllerScript playerControllerScript;
     private HungerbarScript hungerbarScript;
     private CanvasScript canvasScript;
+    private ArmorScript armorScript;
 
 	private static IDataService dataService = new JsonDataService();
 
@@ -46,6 +47,7 @@ public class HealthbarScript : MonoBehaviour
 		playerControllerScript = steveContainer.gameObject.GetComponent<PlayerControllerScript>();
 		hungerbarScript = GameObject.Find("Canvas").transform.Find("Hungerbar").GetComponent<HungerbarScript>();
         canvasScript = GameObject.Find("Canvas").transform.GetComponent<CanvasScript>();
+		armorScript = GameObject.Find("Canvas").transform.Find("Armorbar").GetComponent<ArmorScript>();
 
 
 		for (int i = 0; i < hitSounds.Length; i++)
@@ -64,10 +66,12 @@ public class HealthbarScript : MonoBehaviour
 		StartCoroutine(healUp());
 	}
 
-	public void takeDamage(int damage)
+	public void takeDamage(int damage, bool armorProtectsPlayer = true)
     {
-        health -= damage;
-        updateHeartImages();
+        if (armorProtectsPlayer) health -= armorScript.getReducedDamage(damage);
+		else health -= damage;
+
+		updateHeartImages();
         playDamageSound();
         displayTint();
         StartCoroutine(removeRedTint());
@@ -154,7 +158,7 @@ public class HealthbarScript : MonoBehaviour
     {
         while (isTakingHungerDamage)
         {
-            if (health > 1) takeDamage(1);
+            if (health > 1) takeDamage(1, false);
             yield return new WaitForSeconds(2);
         }
     }

@@ -155,7 +155,7 @@ public class FurnaceSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerEx
 	/**
      * runs when player right clicks the item slot
      * 
-     * if the player hasnt picked up anything:
+     * if the player hasnt picked up anything: YET TO IMPLEMENT
      *   picks up half of all items
      * if the player has picked up something:
      *   puts one of the item its holding into the slot if the slot is empty or has the same item with amount < 64
@@ -199,7 +199,7 @@ public class FurnaceSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerEx
 			}
 			else // otherwise just put the held tool in the slot
 			{
-				itemInSlot.putItemOrToolInSlot(heldItems.itemName, heldItems.toolInstance, heldItems.amount);
+				itemInSlot.putItemOrToolInSlot(heldItems.itemName, heldItems.toolInstance, heldItems.armorInstance, heldItems.amount);
 				updateSlot();
 			}
 
@@ -253,7 +253,7 @@ public class FurnaceSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerEx
 		string itemNameInSlot = itemInSlot.itemName;
 		ToolInstance toolInSlot = itemInSlot.toolInstance;
 		int amountInSlot = itemInSlot.amount;
-		itemInSlot.putItemOrToolInSlot(heldItems.itemName, heldItems.toolInstance, heldItems.amount);
+		itemInSlot.putItemOrToolInSlot(heldItems.itemName, heldItems.toolInstance, heldItems.armorInstance, heldItems.amount);
 		heldItems = new InventorySlot(itemNameInSlot, toolInSlot, amountInSlot);
 		updateSlot();
 	}

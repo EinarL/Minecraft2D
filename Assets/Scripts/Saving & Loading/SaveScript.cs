@@ -15,6 +15,7 @@ public class SaveScript : MonoBehaviour
 	private HealthbarScript healthbarScript;
 	private HungerbarScript hungerbarScript;
 	private DayProcessScript dayProcessScript;
+	private ArmorScript armorScript;
 	private static IDataService dataService = new JsonDataService();
 	private Transform steve;
 
@@ -25,6 +26,7 @@ public class SaveScript : MonoBehaviour
 		healthbarScript = GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>();
 		hungerbarScript = GameObject.Find("Canvas").transform.Find("Hungerbar").GetComponent<HungerbarScript>();
 		dayProcessScript = GameObject.Find("CM vcam").transform.Find("SunAndMoonTexture").GetComponent<DayProcessScript>();
+		armorScript = GameObject.Find("Canvas").transform.Find("Armorbar").GetComponent<ArmorScript>();
 		steve = GameObject.Find("SteveContainer").transform;
 	}
 
@@ -35,6 +37,8 @@ public class SaveScript : MonoBehaviour
 		{
 			InventoryScript.saveInventory(); // save inventory
 			openFurnaceScript.saveFurnaces(); // save furnaces
+			armorScript.saveArmor(); // save which armor you have on
+
 											  
 			int health = healthbarScript.getHealth();
 			float hunger = hungerbarScript.getHunger();

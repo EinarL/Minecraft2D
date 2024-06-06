@@ -289,7 +289,7 @@ public class PlayerControllerScript : MonoBehaviour
         fallHeight -= 3; // only take damage if fell from 4 blocks or more
         if (fallHeight > 0) // if we need to reduce health
         {
-            healthbarScript.takeDamage(fallHeight);
+            healthbarScript.takeDamage(fallHeight, false);
         }
         fellFrom = float.NegativeInfinity;
     }

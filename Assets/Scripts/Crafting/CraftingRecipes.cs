@@ -278,6 +278,46 @@ public static class CraftingRecipes
 			new object[] { "Wool", new Vector2(2, 1) }
 		}, new InventorySlot("Bed", 1)
 		},
+
+		// iron helmet
+		new object[]{ "IronIngot", new object[] {
+			new object[] { "IronIngot", new Vector2(2, 0) },
+			new object[] { "IronIngot", new Vector2(0, 1) },
+			new object[] { "IronIngot", new Vector2(1, 1) },
+			new object[] { "IronIngot", new Vector2(2, 1) }
+		}, new InventorySlot( new ArmorInstance(getArmorScriptable("IronHelmet")), "IronHelmet")
+		},
+
+		// iron chestplate
+		new object[]{ "IronIngot", new object[] {
+			new object[] { "IronIngot", new Vector2(1, 0) },
+			new object[] { "IronIngot", new Vector2(2, 0) },
+			new object[] { "IronIngot", new Vector2(0, 1) },
+			new object[] { "IronIngot", new Vector2(1, 1) },
+			new object[] { "IronIngot", new Vector2(2, 1) },
+			new object[] { "IronIngot", new Vector2(0, 2) },
+			new object[] { "IronIngot", new Vector2(2, 2) }
+		}, new InventorySlot( new ArmorInstance(getArmorScriptable("IronChestplate")), "IronChestplate")
+		},
+
+		// iron leggings
+		new object[]{ "IronIngot", new object[] {
+			new object[] { "IronIngot", new Vector2(2, 0) },
+			new object[] { "IronIngot", new Vector2(0, 1) },
+			new object[] { "IronIngot", new Vector2(2, 1) },
+			new object[] { "IronIngot", new Vector2(0, 2) },
+			new object[] { "IronIngot", new Vector2(1, 2) },
+			new object[] { "IronIngot", new Vector2(2, 2) }
+		}, new InventorySlot( new ArmorInstance(getArmorScriptable("IronLeggings")), "IronLeggings")
+		},
+
+		// iron boots
+		new object[]{ "IronIngot", new object[] {
+			new object[] { "IronIngot", new Vector2(2, 0) },
+			new object[] { "IronIngot", new Vector2(0, 1) },
+			new object[] { "IronIngot", new Vector2(2, 1) }
+		}, new InventorySlot( new ArmorInstance(getArmorScriptable("IronBoots")), "IronBoots")
+		},
 	};
 
 	public static List<object[]> getRecipesByLeftBottomMostItem(string itemName)
@@ -297,5 +337,10 @@ public static class CraftingRecipes
 	private static Tool getToolScriptable(string toolName)
 	{
 		return Resources.Load<Tool>("ToolScriptables\\" + toolName);
+	}
+
+	private static Armor getArmorScriptable(string armorName)
+	{
+		return Resources.Load<Armor>("ToolScriptables\\Armor\\" + armorName);
 	}
 }

@@ -453,7 +453,7 @@ public class spawnChunkScript : MonoBehaviour
 				{
 					if (41 <= chunk[x, y] && chunk[x, y] <= 56) // if its a door
 					{
-						instantiateBlock(chunk[x, y], xPos + SpawningChunkData.blockSize * x, yPos - SpawningChunkData.blockSize * y);
+						instantiateBlock(chunk[x, y], xPos + SpawningChunkData.blockSize * x, yPos - SpawningChunkData.blockSize * y); // TODO: make the main thread do this
 						tiles[index] = null;
 					}
 					else

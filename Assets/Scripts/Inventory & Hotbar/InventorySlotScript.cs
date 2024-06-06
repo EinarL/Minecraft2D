@@ -42,14 +42,14 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
 	/**
      * updates what is in the slot 
      * 
-     * ToolInstance tool: the tool that is in this slot. this is null if there is no tool in the slot.
+     * DurabilityItem tool: the tool/armor that is in this slot. this is null if there is no tool nor armor in the slot.
      */
-	public void updateSlot(ToolInstance tool)
+	public void updateSlot(DurabilityItem toolOrArmor)
     {
         if(itemImage == null) Start();
 
         InventorySlot itemsToPutInSlot = InventoryScript.getItemsInSlot(slotNumber);
-        itemInSlot = new InventorySlot(itemsToPutInSlot.itemName, itemsToPutInSlot.toolInstance, itemsToPutInSlot.amount);
+        itemInSlot = new InventorySlot(itemsToPutInSlot.itemName, itemsToPutInSlot.toolInstance, itemsToPutInSlot.armorInstance, itemsToPutInSlot.amount);
 		Sprite image = Resources.Load<Sprite>("Textures\\ItemTextures\\" + itemInSlot.itemName);
 
         if(image != null) // found item to display
@@ -68,7 +68,7 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
         }
 
         // if there is a tool in this slot then add the durability bar, but only display it if durability < STARTING_DURABILITY
-        if(tool != null)
+        if(toolOrArmor != null)
         {
             GameObject durabilityBar;
 
@@ -85,10 +85,10 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
             // edit the durability bar to show how much durability is left
             durabilityBar = transform.Find("DurabilityBarBackground(Clone)").gameObject;
 			durabilityBarScript = durabilityBar.GetComponent<DurabilityBar>();
-            durabilityBarScript.setMaximumDurability(tool);
-            durabilityBarScript.updateDurability(tool);
+            durabilityBarScript.setMaximumDurability(toolOrArmor);
+            durabilityBarScript.updateDurability(toolOrArmor);
 
-            if (tool.getDurability() >= tool.getStartingDurability()) // only display durability bar if durability < STARTING_DURABILITY
+            if (toolOrArmor.getDurability() >= toolOrArmor.getStartingDurability()) // only display durability bar if durability < STARTING_DURABILITY
             {
                 durabilityBar.SetActive(false);
             }
@@ -132,7 +132,7 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
 		{
             // pickup the items in this slot
 
-			InventorySlot slotItems = new InventorySlot(itemInSlot.itemName, itemInSlot.toolInstance, itemInSlot.amount);
+			InventorySlot slotItems = new InventorySlot(itemInSlot.itemName, itemInSlot.toolInstance, itemInSlot.armorInstance, itemInSlot.amount);
 
 			InventoryScript.removeFromInventory(slotNumber, itemInSlot.amount); // remove items from inventory
             

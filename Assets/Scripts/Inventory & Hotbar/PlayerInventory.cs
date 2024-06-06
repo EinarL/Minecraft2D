@@ -106,14 +106,15 @@ public class PlayerInventory : MonoBehaviour
 
         GameObject item = itemContainer.transform.Find("Item").gameObject;
         ToolInstance itemTool = itemContainer.GetComponent<DroppedItemScript>().tool;
+		ArmorInstance itemArmor = itemContainer.GetComponent<DroppedItemScript>().armor;
 
 		string itemName = item.GetComponent<SpriteRenderer>().sprite.name;
 
 		
         bool didPickup;
-		if (itemTool != null) // if the item is a tool
+		if (itemTool != null || itemArmor != null) // if the item is a tool or armor
         {
-			didPickup = InventoryScript.addToInventory(itemTool, itemName); // add tool to inventory
+			didPickup = InventoryScript.addToInventory(itemTool, itemArmor, itemName); // add tool or armor to inventory
         }
         else
         {
@@ -149,6 +150,7 @@ public class PlayerInventory : MonoBehaviour
 
 		DroppedItemScript itemScript = spawnedItem.GetComponent<DroppedItemScript>();
 		itemScript.tool = itemToDrop.toolInstance;
+        itemScript.armor = itemToDrop.armorInstance;
 
 		itemScript.setPickupable(false); // cant pickup the item immediately
         itemScript.addDropVelocity(transform.position); // shoot the item from the player

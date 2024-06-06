@@ -16,7 +16,7 @@ public class DroppedItemScript : MonoBehaviour
 	private Camera cam;
 
 	public ToolInstance tool; // this is null if its not a tool
-	//public Image image;
+	public ArmorInstance armor;
 
 	// Start is called before the first frame update
 	void Start()

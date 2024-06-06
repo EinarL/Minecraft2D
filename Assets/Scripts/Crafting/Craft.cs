@@ -206,6 +206,11 @@ public static class Craft
 			craftingResult = new InventorySlot(items.toolInstance, items.itemName);
 			Debug.Log("can craft " + items.toolInstance.getToolMaterial() + " " + items.toolInstance.getToolType());
 		}
+		else if (items.isArmor()) // if its an armor
+		{
+			craftingResult = new InventorySlot(items.armorInstance, items.itemName);
+			Debug.Log("can craft " + items.armorInstance.getArmorMaterial() + " " + items.armorInstance.getArmorType());
+		}
 		else // if we did not craft a tool
 		{
 			craftingResult = new InventorySlot(items.itemName, items.amount);

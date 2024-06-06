@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class InventorySlot
 {
-
+    public ArmorInstance armorInstance;
 	public ToolInstance toolInstance; // if there not a tool in this slot then this will be null but itemName will have a name of the block that is in here
     public string itemName = ""; // itemName will never be "" except when the slot is empty, even when this slot has a tool, itemName will have the name of the tool
     public int amount = 0;
@@ -24,6 +24,15 @@ public class InventorySlot
 		this.itemName = itemName;
 		amount = 1;
         isFood = FoodHashtable.getFoodAddition(itemName) >= 0;
+	}
+
+	public InventorySlot(ArmorInstance armor, string itemName)
+	{
+		armorInstance = armor;
+		this.itemName = itemName;
+		amount = 1;
+        toolInstance = null;
+        isFood = false;
 	}
 
 	public InventorySlot(string itemName)
@@ -48,6 +57,15 @@ public class InventorySlot
 		isFood = FoodHashtable.getFoodAddition(itemName) >= 0;
 	}
 
+	public InventorySlot(string itemName, ToolInstance tool, ArmorInstance armor, int amount)
+	{
+		this.itemName = itemName;
+		this.amount = amount;
+		toolInstance = tool;
+        armorInstance = armor;
+		isFood = FoodHashtable.getFoodAddition(itemName) >= 0;
+	}
+
 	public bool isEmpty()
     {
         return itemName.Equals("");
@@ -59,6 +77,11 @@ public class InventorySlot
         return toolInstance != null;
     }
 
+	public bool isArmor()
+	{
+		return armorInstance != null;
+	}
+
 	public void putToolInSlot(ToolInstance tool, string itemName)
     {
         toolInstance = tool;
@@ -68,11 +91,12 @@ public class InventorySlot
 	}
 
 
-	public void putItemOrToolInSlot(string itemName, ToolInstance tool, int amount)
+	public void putItemOrToolInSlot(string itemName, ToolInstance tool, ArmorInstance armor, int amount)
     {
 		this.itemName = itemName;
 		this.amount = amount;
         toolInstance = tool;
+        armorInstance = armor;
 		isFood = FoodHashtable.getFoodAddition(itemName) >= 0;
 	}
 
@@ -90,6 +114,7 @@ public class InventorySlot
 		this.itemName = itemName;
 		isFood = FoodHashtable.getFoodAddition(itemName) >= 0;
 		toolInstance = null;
+        armorInstance = null;
 		amount = 1;
         return true;
 	}
@@ -131,6 +156,7 @@ public class InventorySlot
             amount = 0;
             itemName = "";
             toolInstance = null;
+            armorInstance = null;
             isFood = false;
         }
 	}
@@ -141,6 +167,7 @@ public class InventorySlot
         if (amount <= 0) {
             amount = 0;
 			toolInstance = null;
+            armorInstance = null;
             itemName = "";
             isFood = false;
         }
@@ -150,6 +177,7 @@ public class InventorySlot
     {
         amount = 0;
 		toolInstance = null;
+        armorInstance = null;
         itemName = "";
         isFood = false;
     }

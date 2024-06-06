@@ -138,8 +138,9 @@ public class CraftingSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerE
 			return true;
 		}
 		bool isTool = itemsPickedUp.toolInstance != null;
+		bool isArmor = itemsPickedUp.armorInstance != null;
 
-		if (isTool) return true; // we dont craft with tools
+		if (isTool || isArmor) return true; // we dont craft with tools nor armors
 
 		if (addAll)
 		{
@@ -183,9 +184,10 @@ public class CraftingSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerE
 	{
 		string itemNameInSlot = itemInSlot.itemName;
 		ToolInstance toolInSlot = itemInSlot.toolInstance;
+		ArmorInstance armorInSlot = itemInSlot.armorInstance;
 		int amountInSlot = itemInSlot.amount;
-		itemInSlot.putItemOrToolInSlot(itemsPickedUp.itemName, itemsPickedUp.toolInstance, itemsPickedUp.amount);
-		itemsPickedUp = new InventorySlot(itemNameInSlot, toolInSlot, amountInSlot);
+		itemInSlot.putItemOrToolInSlot(itemsPickedUp.itemName, itemsPickedUp.toolInstance, itemsPickedUp.armorInstance, itemsPickedUp.amount);
+		itemsPickedUp = new InventorySlot(itemNameInSlot, toolInSlot, armorInSlot, amountInSlot);
 		InventoryScript.setItemsPickedUp(itemsPickedUp);
 		updateSlot();
 	}

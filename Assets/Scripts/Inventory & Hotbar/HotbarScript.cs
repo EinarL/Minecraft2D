@@ -43,7 +43,7 @@ public class HotbarScript : MonoBehaviour
 		checkIfSelectedSlotChange();
 	}
 
-	public void updateHotbarSlot(ToolInstance tool, int slot) // slot from 0 to 8 (inclusive)
+	public void updateHotbarSlot(DurabilityItem tool, int slot) // slot from 0 to 8 (inclusive)
 	{
 		if (playerInventory == null) Start();
 
@@ -121,7 +121,7 @@ public class HotbarScript : MonoBehaviour
 		}
 	}
 
-	public void updateDurabilityBar(ToolInstance tool, int slot)
+	public void updateDurabilityBar(DurabilityItem tool, int slot)
 	{
 		if (durabilityBars[slot] == null) return;
 
