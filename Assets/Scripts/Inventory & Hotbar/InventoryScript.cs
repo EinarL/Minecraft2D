@@ -24,7 +24,7 @@ public static class InventoryScript
 
 	private static InventorySlotScript[] inventorySlotScripts; // shows images of the item, hvertexture, picking up and putting down item in the invenotry
 
-	private static IDataService dataService = new JsonDataService();
+	private static IDataService dataService = JsonDataService.Instance;
 
 	public static void initializeInventory()
 	{

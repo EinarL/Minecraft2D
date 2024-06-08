@@ -10,11 +10,31 @@ using UnityEngine;
 
 /**
  * this class is used to save data to json format.
- * currently saves the inventory and furnaces.
+ * currently saves the inventory and furnaces & more.
  */
 public class JsonDataService : IDataService
 {
-	private string folderPath = "\\general\\";
+	private static readonly object myLock = new object ();
+
+	private string folderPath = "\\worlds\\?\\general\\"; // We'll replace the ? by the world name
+
+	private static JsonDataService instance = null;
+
+	public static JsonDataService Instance
+	{
+		get
+		{
+			lock (myLock)
+				{
+					if (instance == null)
+					{
+						instance = new JsonDataService();
+					}
+					return instance;
+				}
+		}
+	}
+
 
 	public bool saveData<T>(string filename, T data)
 	{
@@ -146,5 +166,10 @@ public class JsonDataService : IDataService
 		return File.Exists(Application.persistentDataPath + folderPath + filename);
 	}
 
+
+	public void setWorldFolder(string worldName)
+	{
+		folderPath = folderPath.Replace("?", worldName);
+	}
 
 }

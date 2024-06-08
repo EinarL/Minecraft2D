@@ -32,7 +32,7 @@ public class DayProcessScript : MonoBehaviour
 	public Color nightColor;
 	private Light2D sunLight;
 
-	private IDataService dataService = new JsonDataService();
+	private IDataService dataService = JsonDataService.Instance;
 
 	// Start is called before the first frame update
 	void Start()

@@ -11,7 +11,7 @@ public class RespawnButtonScript : MonoBehaviour
 	private HealthbarScript healthbarScript;
 	private HungerbarScript hungerbarScript;
 	private ArmorScript armorScript;
-	private IDataService dataService = new JsonDataService();
+	private IDataService dataService = JsonDataService.Instance;
 
 	private spawnChunkScript scScript;
 	private GameObject mainCam;

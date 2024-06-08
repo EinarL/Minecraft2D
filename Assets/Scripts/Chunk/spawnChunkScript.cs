@@ -39,7 +39,7 @@ public class spawnChunkScript : MonoBehaviour
     private SunLightMovementScript sunLightMovementScript;
     private DayProcessScript dayProcessScript;
 	private MainThreadDispatcher mainThreadDispatcher;
-	private IDataService dataService = new JsonDataService();
+	private IDataService dataService = JsonDataService.Instance;
 
 	// Start is called before the first frame update
 	void Start()

@@ -41,7 +41,7 @@ public class PlayerControllerScript : MonoBehaviour
     private HealthbarScript healthbarScript;
     private HungerbarScript hungerbarScript;
     private SleepScript sleepScript;
-	private IDataService dataService = new JsonDataService();
+	private IDataService dataService = JsonDataService.Instance;
 
 	private bool isRunning = false;
 

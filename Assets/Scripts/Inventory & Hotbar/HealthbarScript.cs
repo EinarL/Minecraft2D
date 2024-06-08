@@ -24,7 +24,7 @@ public class HealthbarScript : MonoBehaviour
     private CanvasScript canvasScript;
     private ArmorScript armorScript;
 
-	private static IDataService dataService = new JsonDataService();
+	private static IDataService dataService = JsonDataService.Instance;
 
 
 	// Start is called before the first frame update

@@ -16,7 +16,7 @@ public class SaveScript : MonoBehaviour
 	private HungerbarScript hungerbarScript;
 	private DayProcessScript dayProcessScript;
 	private ArmorScript armorScript;
-	private static IDataService dataService = new JsonDataService();
+	private static IDataService dataService = JsonDataService.Instance;
 	private Transform steve;
 
 	// Start is called before the first frame update

@@ -21,7 +21,7 @@ public class HungerbarScript : MonoBehaviour
 	private bool isTakingHungerDamage = false; // TODO: need to save this to json file also
 	private IEnumerator hungerDamageCoroutine = null;
 
-	private static IDataService dataService = new JsonDataService();
+	private static IDataService dataService = JsonDataService.Instance;
 
 	void Start()
     {

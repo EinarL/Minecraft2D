@@ -9545,7 +9545,6 @@ MonoBehaviour:
   backgroundVisualTiles: {fileID: 899169872}
   snowParticleSystem: {fileID: 6567574916235594757, guid: e3ebed8671ca4b147945ba7083fde31d, type: 3}
   pauseChunkRendering: 0
-  needsReset: 0
 --- !u!114 &519420034
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20710,7 +20709,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1023232979
 Transform:
   m_ObjectHideFlags: 0

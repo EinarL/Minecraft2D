@@ -8,7 +8,7 @@ using static UnityEngine.RuleTile.TilingRuleOutput;
 public class TombstoneDrop : ItemDropBehaviour
 {
 	private Vector2 blockPos;
-	private JsonDataService dataService = new JsonDataService();
+	private JsonDataService dataService = JsonDataService.Instance;
 	private ArmorScript armorScript = GameObject.Find("Canvas").transform.Find("Armorbar").GetComponent<ArmorScript>();
 
 	public TombstoneDrop(Vector2 blockPos)

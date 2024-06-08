@@ -11,8 +11,7 @@ Material:
   m_Shader: {fileID: 4800000, guid: 68e6db2ebdc24f95958faec2be5558d6, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - UNDERLAY_ON
+  m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -71,7 +70,7 @@ Material:
     - _OutlineSoftness: 0
     - _OutlineUVSpeedX: 0
     - _OutlineUVSpeedY: 0
-    - _OutlineWidth: 0.192
+    - _OutlineWidth: 0.202
     - _PerspectiveFilter: 0.875
     - _Reflectivity: 10
     - _ScaleRatioA: 0.8333333
@@ -119,11 +118,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
-  m_Name: Minecraft
+  m_Name: MinecraftNoShadow
   m_EditorClassIdentifier: 
-  hashCode: 645151053
+  hashCode: -36496470
   material: {fileID: -3221800140824231805}
-  materialHashCode: 1829995085
+  materialHashCode: 425297738
   m_Version: 1.1.0
   m_SourceFontFileGUID: e131eb15dbe2fd04189ef044f7ed5656
   m_SourceFontFile_EditorRef: {fileID: 12800000, guid: e131eb15dbe2fd04189ef044f7ed5656, type: 3}

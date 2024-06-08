@@ -14,7 +14,7 @@ public class SleepBehaviour : RightClickBlockBehaviour
 	private Transform player;
 	private PlayerControllerScript playerController;
 
-	private IDataService dataService = new JsonDataService();
+	private IDataService dataService = JsonDataService.Instance;
 
 	public SleepBehaviour(string blockName, Vector2 blockPos)
 	{

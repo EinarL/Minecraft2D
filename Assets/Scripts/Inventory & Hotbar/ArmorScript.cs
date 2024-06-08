@@ -21,7 +21,7 @@ public class ArmorScript : MonoBehaviour
 	private ArmorSlotScript leggingsSlot;
 	private ArmorSlotScript bootsSlot;
 
-	private IDataService dataService = new JsonDataService();
+	private IDataService dataService = JsonDataService.Instance;
 
 	private int totalArmor = 0; // from 0 to 20 (inclusive), how much armor points the player has
 

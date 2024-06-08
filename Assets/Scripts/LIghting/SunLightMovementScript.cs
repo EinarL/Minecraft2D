@@ -19,12 +19,17 @@ public class SunLightMovementScript : MonoBehaviour
     private bool adjustAtStart = true; // adjust the suns position at the start of the game
     private int adjustAtStartCounter = 0;
 
+	void Awake()
+	{
+		playerPos = GameObject.Find("SteveContainer").transform;
+		minecraftVoid = GameObject.Find("Void").transform;
+		mainThreadDispatcher = GameObject.Find("EventSystem").GetComponent<MainThreadDispatcher>();
+	}
+
 	// Start is called before the first frame update
 	void Start()
     {
-        playerPos = GameObject.Find("SteveContainer").transform;
-        minecraftVoid = GameObject.Find("Void").transform;
-		mainThreadDispatcher = GameObject.Find("EventSystem").GetComponent<MainThreadDispatcher>();
+
         StartCoroutine(followPlayer());
 
         IEnumerator adjustPositionAtStart()
