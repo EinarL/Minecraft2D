@@ -17,7 +17,6 @@ public class spawnChunkScript : MonoBehaviour
 
     public Sprite grassTexture;
 	public Sprite snowyGrassTexture;
-	private Camera cam;
     public Tilemap tilemap;
     public Tilemap backgroundVisualTiles;
     public ParticleSystem snowParticleSystem;
@@ -29,7 +28,6 @@ public class spawnChunkScript : MonoBehaviour
     private int lowestBlockPos = -60;
     private int rendered; // leftmost chunk that is rendered
     public bool pauseChunkRendering = false;
-    public bool needsReset = false; // true if the variables for chunk rendering need to reset, this happens when the player respawns
 
     private Biome spawnChunkStrategy;
     private List<Biome> biomes = new List<Biome> { new Plains(), new Desert(), new Tundra() }; // new List<Biome> { new Plains(), new Desert(), new Tundra() };
@@ -53,7 +51,6 @@ public class spawnChunkScript : MonoBehaviour
 		BlockHashtable.initializeBlockHashtable();
         spawnChunkStrategy = decideBiome(); // dont do this if the biome is already decided, we need to save which biome was rendering when we quit the game
 
-		cam = Camera.main;
 		chunkSize = (int)(SpawningChunkData.blockSize * SpawningChunkData.blocksInChunk);
         SpawningChunkData.setRightMostY(defaultStartSpawnY);
 		SpawningChunkData.setLeftMostY(defaultStartSpawnY);
@@ -76,12 +73,6 @@ public class spawnChunkScript : MonoBehaviour
     void Update()
     {
         if (pauseChunkRendering) return;
-        if(needsReset) // TODO: we will probably have use the x variable for the spawn point in the future, for calculating the rendered variable
-		{
-			rendered = -5 * chunkSize; // getChunkNumber()
-            cam.orthographicSize = 5f;
-            needsReset = false;
-		}
 		/*
         int newAmountOfChunksToRender = getAmountOfChunksToRender();
 		// if we need to render more chunks (for the camera size change)
@@ -162,6 +153,22 @@ public class spawnChunkScript : MonoBehaviour
 		renderChunk(rendered + SpawningChunkData.blocksInChunk * 9);
 	}
 
+	/**
+	 * alreadyRenderedLeftMostChunk is the leftmost chunk that is rendered already (so we dont need to spawn in those chunks)
+	 * since we spawn in 10 chunks at a time, then we dont need to render the chunks that are from 
+	 * alreadyRenderedLeftMostChunk to alreadyRenderedLeftMostChunk + 10 * blocksInChunk (non-inclusive)
+	 */
+	public void loadSpawn(Vector2 playerPos, int alreadyRenderedLeftMostChunk)
+	{
+		transform.position = playerPos;
+		rendered = getChunkNumber(playerPos.x);
+		// spawn in the chunks at "camera x position"
+		for(int i = rendered; i < rendered + SpawningChunkData.blocksInChunk * 10; i += SpawningChunkData.blocksInChunk)
+		{
+			if (i < alreadyRenderedLeftMostChunk || i >= alreadyRenderedLeftMostChunk + (10 * SpawningChunkData.blocksInChunk)) renderChunk(i); // render chunk if it isnt already rendered
+		}
+	}
+
 	private Biome decideBiome()
     {
 
@@ -215,7 +222,7 @@ public class spawnChunkScript : MonoBehaviour
         return (int)closeToChunkNumber;
 	}
 
-	int getChunkNumber(float xPos)
+	public int getChunkNumber(float xPos)
 	{
 		float closeToChunkNumber = xPos - (chunkSize * amountOfChunksToRender / 2); // round this number to the closest 10
 		bool isNegative = closeToChunkNumber < 0;

@@ -132,13 +132,29 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
         else updateDurabilityBar();
     }
 
-    private void removeArmorFromSlot()
+    public void removeArmorFromSlot()
     {
+        if(itemInSlot.isEmpty()) return;
 		armorScript.removeArmor(itemInSlot.armorInstance.armorPoints);
 		itemInSlot.removeEverythingFromSlot();
 		updateSlot();
 		outline.SetActive(true);
 		updateArmorVisually();
+	}
+    /**
+     * returns true if it added the armor, otherwise false
+     */
+    public bool addArmorIfThereIsSpace(InventorySlot armor)
+    {
+		if (armor.armorInstance.getArmorType() != armorSlotType) return false; // if this is e.g. a leggings slot and armor is a chestplate
+        if (!itemInSlot.isEmpty()) return false;
+
+        itemInSlot = armor;
+		armorScript.addArmor(itemInSlot.armorInstance.armorPoints);
+		updateSlot();
+		outline.SetActive(false);
+		updateArmorVisually();
+		return true;
 	}
 
 	/**

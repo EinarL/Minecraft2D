@@ -106,7 +106,7 @@ public static class InventoryScript
 	 * adds the items into the players inventory but doesnt override items that are already in the inventory
 	 * returns the items that don't fit into the inventory.
 	 */
-	public static InventorySlot[] addItemsToInventory(InventorySlot[] items)
+	public static List<InventorySlot> addItemsToInventory(InventorySlot[] items)
 	{
 		int itemIndex = 0;
 		for(int i = 0; i < inventory.Length; i++)
@@ -126,7 +126,7 @@ public static class InventoryScript
 		List<InventorySlot> itemList = items.ToList();
 
 		// return the sublist from itemIndex to the end of the list
-		return itemList.Skip(itemIndex).ToArray();
+		return itemList.Skip(itemIndex) as List<InventorySlot>;
 	}
 
 	/**

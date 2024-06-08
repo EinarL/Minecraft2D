@@ -10,6 +10,7 @@ public class RespawnButtonScript : MonoBehaviour
 	private PlayerControllerScript playerControllerScript;
 	private HealthbarScript healthbarScript;
 	private HungerbarScript hungerbarScript;
+	private ArmorScript armorScript;
 	private IDataService dataService = new JsonDataService();
 
 	private spawnChunkScript scScript;
@@ -25,16 +26,11 @@ public class RespawnButtonScript : MonoBehaviour
 		playerControllerScript = steveContainer.gameObject.GetComponent<PlayerControllerScript>();
 		healthbarScript = GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>();
 		hungerbarScript = GameObject.Find("Canvas").transform.Find("Hungerbar").GetComponent<HungerbarScript>();
+		armorScript = GameObject.Find("Canvas").transform.Find("Armorbar").GetComponent<ArmorScript>();
 		scScript = GameObject.Find("Main Camera").transform.GetComponent<spawnChunkScript>();
 		mainCam = GameObject.Find("Main Camera");
 		vcam = GameObject.Find("CM vcam").GetComponent<CinemachineVirtualCamera>();
 	}
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public void respawn()
     {
@@ -45,29 +41,33 @@ public class RespawnButtonScript : MonoBehaviour
 		// place tombstone at place of death
 		createTombstone();
 
+		Vector2 spawnPoint = new Vector2(0, 0);
+		if (dataService.exists("spawn-point.json"))
+		{
+			float[] sp = dataService.loadData<float[]>("spawn-point.json");
+			spawnPoint = new Vector2(sp[0], sp[1]);
+		}
+
+		int leftMostChunkToRenderAtSpawn = scScript.getChunkNumber(spawnPoint.x);
+		int leftMostChunkToRenderAtDeathPosition = scScript.getLeftmostChunkPos();
 
 		// unrender chunks
-		for (int i = scScript.getLeftmostChunkPos(); i < scScript.getLeftmostChunkPos() + (scScript.getAmountOfChunksRendered() * SpawningChunkData.blocksInChunk); i += SpawningChunkData.blocksInChunk)
+		for (int i = leftMostChunkToRenderAtDeathPosition; i < scScript.getLeftmostChunkPos() + (scScript.getAmountOfChunksRendered() * SpawningChunkData.blocksInChunk); i += SpawningChunkData.blocksInChunk)
         {
-			scScript.unrenderChunk(i);
+			if(i < leftMostChunkToRenderAtSpawn || i >= leftMostChunkToRenderAtSpawn + (10 * SpawningChunkData.blocksInChunk)) scScript.unrenderChunk(i); // unrender chunk if the chunk is not in the spawns position
 		}
 
 		vcam.m_Lens.OrthographicSize = 5; // reset zoom back to default
 		float prevSoftZoneWidth = vcam.GetCinemachineComponent<CinemachineFramingTransposer>().m_SoftZoneWidth;
 		vcam.GetCinemachineComponent<CinemachineFramingTransposer>().m_SoftZoneWidth = 0f;
 
-		Vector2 spawnPoint = new Vector2(0,0);
-		if (dataService.exists("spawn.json"))
-		{
-			float[] sp = dataService.loadData<float[]>("spawn.json");
-			spawnPoint = new Vector2(sp[0], sp[1]);
-		}
+
 
 		mainCam.transform.position = spawnPoint;
 
 		playerControllerScript.teleportToSpawn(spawnPoint); // teleport steve to spawn
 
-		scScript.loadSpawn(spawnPoint); // render chunks at spawnpoint
+		scScript.loadSpawn(spawnPoint, leftMostChunkToRenderAtDeathPosition); // render chunks at spawnpoint
 
 		// reset health and hunger
 		healthbarScript.setFullHealth();
@@ -78,7 +78,6 @@ public class RespawnButtonScript : MonoBehaviour
 		// reset inventory
 
 		canvasScript.closeDeathScreen(); // remove death screen
-		scScript.needsReset = true;
 		scScript.pauseChunkRendering = false; // resume chunk rendering
 		scScript.setCamSettingsBackToNormal(vcam.GetCinemachineComponent<CinemachineFramingTransposer>(), prevSoftZoneWidth);
 	}
@@ -98,12 +97,13 @@ public class RespawnButtonScript : MonoBehaviour
 
 		// save the contents of the tombstone (players inventory)
 		// it will look like: [xPos, yPos, inventory]
-		object[] tombstoneData = new object[] { roundedXPos, roundedYPos, InventoryScript.getInventory() };
+		object[] tombstoneData = new object[] { roundedXPos, roundedYPos, InventoryScript.getInventory(), armorScript.getArmorSlots() };
 		if (!dataService.appendToData("tombstone.json", tombstoneData)) // save tombstone data
 		{
 			Debug.LogError("Could not save tombstone file :(");
 		}
 
 		InventoryScript.setEmptyInventory();
+		armorScript.removeAllArmor();
 	}
 }

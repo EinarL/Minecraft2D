@@ -123,14 +123,13 @@ public static class SpawningChunkData
 			return;
 		}
 
-		//Task.Run(() => { SaveChunk.save(chunkToSave); }); // save chunk
 		SaveChunk.save(chunkToSave);
 		renderedChunks.Remove(chunkPos);
 
 		// we know that the chunk being removed is either the rightmost or leftmost, so its x position is either lower or higher than all the other chunks
 		if (renderedChunks.Count == 0) // if this happens, then we are in the process of unrendering all chunks
 		{
-			leftMostChunkEdge = -20; // TODO: need to change this number when i implement spawning elsewhere
+			leftMostChunkEdge = 0;
 		}
 		else if(renderedChunks.ContainsKey(chunkPos + blocksInChunk)) // if we removed the leftmost chunk
 		{

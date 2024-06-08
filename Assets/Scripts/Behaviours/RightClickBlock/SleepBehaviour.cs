@@ -14,6 +14,8 @@ public class SleepBehaviour : RightClickBlockBehaviour
 	private Transform player;
 	private PlayerControllerScript playerController;
 
+	private IDataService dataService = new JsonDataService();
+
 	public SleepBehaviour(string blockName, Vector2 blockPos)
 	{
 		this.blockName = blockName;
@@ -26,7 +28,19 @@ public class SleepBehaviour : RightClickBlockBehaviour
 
 	public void rightClickBlock()
 	{
-		if(!dayProcessScript.canSleep()) { // if the player cannot sleep then display a message telling the player that
+
+		// save [x,y, x1, y1, x2, y2] where x and y is the spawn point and (x1, y1) is bedBlock1 pos, and (x2, y2) is bedBlock2 pos
+		if(blockName.EndsWith("LowerRight") || blockName.EndsWith("UpperLeft")) // if its the left bed block
+		{
+			dataService.saveData("spawn-point.json", new float[] { player.position.x, player.position.y, blockPos.x, blockPos.y, blockPos.x + 0.5f, blockPos.y });
+		}
+		else // if its the right bed block
+		{
+			dataService.saveData("spawn-point.json", new float[] { player.position.x, player.position.y, blockPos.x, blockPos.y, blockPos.x - 0.5f, blockPos.y });
+		}
+		// TODO: display a message to the player that the spawnpoint is saved
+
+		if (!dayProcessScript.canSleep()) { // if the player cannot sleep then display a message telling the player that
 			messageScript.displayMessage("You cannot sleep during the day"); 
 			return;
 		}

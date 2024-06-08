@@ -138,6 +138,41 @@ public class ArmorScript : MonoBehaviour
 		bootsSlot.reduceArmorDurability();
 	}
 
+	public InventorySlot[] getArmorSlots()
+	{
+		return new InventorySlot[] { helmetSlot.getArmorInSlot(), chestplateSlot.getArmorInSlot(), leggingsSlot.getArmorInSlot(), bootsSlot.getArmorInSlot() };
+	}
+
+	/**
+	 * adds the armor to the player if there is place for the armor
+	 * 
+	 * armor: InventorySlot[]{ helmetSlot, chestplateSlot, leggingsSlot, bootsSlot }
+	 * 
+	 * returns the armor that there wasnt space for
+	 * 
+	 */
+	public List<InventorySlot> addArmor(InventorySlot[] armor)
+	{
+		List<InventorySlot> armorsThatWerentPutOn = new List<InventorySlot>();
+
+		if (!helmetSlot.addArmorIfThereIsSpace(armor[0])) armorsThatWerentPutOn.Add(armor[0]);
+		if (!chestplateSlot.addArmorIfThereIsSpace(armor[1])) armorsThatWerentPutOn.Add(armor[1]);
+		if (!leggingsSlot.addArmorIfThereIsSpace(armor[2])) armorsThatWerentPutOn.Add(armor[2]);
+		if (!bootsSlot.addArmorIfThereIsSpace(armor[3])) armorsThatWerentPutOn.Add(armor[3]);
+
+		return armorsThatWerentPutOn;
+	}
+	/**
+	 * runs when the player dies
+	 */
+	public void removeAllArmor()
+	{
+		helmetSlot.removeArmorFromSlot();
+		chestplateSlot.removeArmorFromSlot();
+		leggingsSlot.removeArmorFromSlot();
+		bootsSlot.removeArmorFromSlot();
+	}
+
 
 	private Sprite getSpriteWithName(Sprite[] list, string name)
 	{
