@@ -16,7 +16,7 @@ public class JsonDataService : IDataService
 {
 	private static readonly object myLock = new object ();
 
-	private string folderPath = "\\worlds\\?\\general\\"; // We'll replace the ? by the world name
+	private string folderPath = "\\worlds\\devWorld\\general\\"; // We'll replace the devWorld by the world name
 
 	private static JsonDataService instance = null;
 
@@ -169,7 +169,7 @@ public class JsonDataService : IDataService
 
 	public void setWorldFolder(string worldName)
 	{
-		folderPath = folderPath.Replace("?", worldName);
+		folderPath = folderPath.Replace("devWorld", worldName);
 	}
 
 }

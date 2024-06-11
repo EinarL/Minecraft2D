@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,6 +16,9 @@ public class TitleScreenScript : MonoBehaviour
     private Button playSelectedWorldButton;
     private TextMeshProUGUI playSelectedWorldButtonText;
 	private TMP_InputField worldNameInput;
+	private GameObject worldsParent;
+
+	private WorldItemScript selectedWorld; // which world is selected on the select world screen
 
 	// Start is called before the first frame update
 	void Start()
@@ -25,16 +30,53 @@ public class TitleScreenScript : MonoBehaviour
 		playSelectedWorldButtonText = playSelectedWorldButton.transform.Find("PlayText").GetComponent<TextMeshProUGUI>();
 		worldNameInput = createNewWorldScreen.transform.Find("WorldNameInput").GetComponent<TMP_InputField>();
 		worldNameErrorText = createNewWorldScreen.transform.Find("ErrorText").gameObject;
+		worldsParent = selectWorldScreen.transform.Find("DarkBackground").Find("Scroll").Find("View").Find("Content").gameObject;
 
 
 		togglePlaySelectedWorldButtonEnabled(false);
+		fillSelectWorldScrollView();
+	}
+
+	private void fillSelectWorldScrollView()
+	{
+		GameObject worldItem = worldsParent.transform.Find("WorldItem").gameObject;
+		GameObject emptyWorldItem = worldsParent.transform.Find("EmptyWorldItem").gameObject;
+
+		if (Directory.Exists(Application.persistentDataPath + "\\worlds\\")) // if worlds folder exists
+		{
+			string[] directories = Directory.GetDirectories(Application.persistentDataPath + "\\worlds\\"); // get all folder names in worlds directory
+
+			foreach (string directory in directories) // create world item for each folder name
+			{
+				GameObject worldItemClone = Instantiate(worldItem);
+				worldItemClone.transform.Find("WorldName").GetComponent<TextMeshProUGUI>().text = Path.GetFileName(directory); // set name to folder name
+				worldItemClone.transform.SetParent(worldsParent.transform, false);
+			}
+
+			// this is a bad fix to make the 1 or 2 world items be at the top because i cant 
+			// figure out a way to do it in the UI
+			if (directories.Length == 1 || directories.Length == 2) 
+			{
+				int howManyToCreate = directories.Length == 1 ? 2 : 1;
+
+				for(int _ = 0; _ < howManyToCreate; _++)
+				{
+					GameObject emptyItemClone = Instantiate(emptyWorldItem);
+					emptyItemClone.transform.SetParent(worldsParent.transform, false);
+				}
+			}
+		}
+
+		Destroy(emptyWorldItem);
+		Destroy(worldItem);
 	}
 
 	void Update()
 	{
-		if(selectWorldScreen.activeSelf && Input.GetKeyDown(KeyCode.Escape)) // If in select world screen && user pressed escape
+		if(Input.GetKeyDown(KeyCode.Escape))
         {
-            backToTitleScreen();
+            if(selectWorldScreen.activeSelf) backToTitleScreen();
+			else if (createNewWorldScreen.activeSelf) backToSelectWorldScreen();
 		} 
 	}
 
@@ -99,8 +141,19 @@ public class TitleScreenScript : MonoBehaviour
 
 	public void playSelectedWorld()
 	{
-		// TODO: load the minecraft scene with the selected worlds name to pass in to the scene
-		//createWorldObject();
+		setWorld(selectedWorld.getWorldName());
+
+		SceneManager.LoadScene("Minecraft");
+	}
+
+	/**
+	 * gets called from a WorldItemScript when a world gets selected.
+	 */
+	public void setSelectedWorld(WorldItemScript world)
+	{
+		if (selectedWorld != null) selectedWorld.deselectWorld();
+		selectedWorld = world;
+		togglePlaySelectedWorldButtonEnabled(true);
 	}
 
 	//////////////////////////////////////////////////////////////////////
@@ -115,7 +168,7 @@ public class TitleScreenScript : MonoBehaviour
 
 	public void createWorldAndPlay()
 	{
-		string worldName = worldNameInput.text;
+		string worldName = worldNameInput.text.Trim();
 		string errorMessage = validateWorldName(worldName);
 		if(!errorMessage.Equals("")) // if there is an error with the input
 		{
@@ -124,7 +177,7 @@ public class TitleScreenScript : MonoBehaviour
 			return;
 		}
 
-		createWorldObject(worldName);
+		setWorld(worldName);
 
 		SceneManager.LoadScene("Minecraft");
 	}
@@ -135,18 +188,18 @@ public class TitleScreenScript : MonoBehaviour
 	}
 	/**
 	 * when we play a world then we need the next scene to know which world to load,
-	 * therefore we create a gameobject that persists through the scene changes
-	 * this gameobject will have a script which contains the variable for which world to load.
+	 * so we tell JsonDataService and SaveChunk which folder the world is in.
 	 */
-	private void createWorldObject(string worldName)
+	private void setWorld(string worldName)
 	{
-		GameObject persistentGameObject = Instantiate(new GameObject());
-		persistentGameObject.name = "WorldVariableGameObject";
+		if (!Directory.Exists(Application.persistentDataPath + "\\worlds\\")) // create worlds folder if it doesn't exist
+		{
+			Directory.CreateDirectory(Application.persistentDataPath + "\\worlds\\");
+		}
+		Directory.CreateDirectory(Application.persistentDataPath + "\\worlds\\" + worldName + "\\"); // create folder for the world
 
-		persistentGameObject.AddComponent<WorldVariableScript>();
-		persistentGameObject.GetComponent<WorldVariableScript>().setWorldName(worldName);
-
-		DontDestroyOnLoad(persistentGameObject);
+		JsonDataService.Instance.setWorldFolder(worldName);
+		SaveChunk.setWorldFolder(worldName);
 	}
 
 	private string validateWorldName(string worldName)
@@ -163,6 +216,17 @@ public class TitleScreenScript : MonoBehaviour
 			if (!(char.IsDigit(c) || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) && c != '_' && c != ' ')
 			{
 				return "World name can only contain letters of the english alphabet, numbers, underscores, or spaces.";
+			}
+		}
+
+		// check if there already exists a world with this name
+		if (Directory.Exists(Application.persistentDataPath + "\\worlds\\"))
+		{
+			string[] directories = Directory.GetDirectories(Application.persistentDataPath + "\\worlds\\");
+
+			foreach (string directory in directories)
+			{
+				if (Path.GetFileName(directory).Equals(worldName)) return "There is already a world named " + worldName;
 			}
 		}
 

@@ -5,7 +5,7 @@ using System;
 
 public static class SaveChunk
 {
-	private static string path = Application.persistentDataPath + "\\worlds\\?\\chunk_data";
+	private static string path = Application.persistentDataPath + "\\worlds\\devWorld\\chunk_data";
 
 	/**
 	 * Save chunk data 
@@ -63,6 +63,6 @@ public static class SaveChunk
 
 	public static void setWorldFolder(string worldName)
 	{
-		path = path.Replace("?", worldName);
+		path = path.Replace("devWorld", worldName);
 	}
 }
