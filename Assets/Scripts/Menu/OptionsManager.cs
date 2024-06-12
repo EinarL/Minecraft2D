@@ -25,9 +25,15 @@ public class OptionsManager
 	}
 
 	private AudioSource musicAudioSource;
-	private int[] options; // [ musicVolume ]
+	private AudioSource stepsAudioSource;
+	private int[] options; // [ musicVolume, stepsVolume ]
 
 	private OptionsManager()
+	{
+		setOptions();
+	}
+
+	public void setOptions()
 	{
 		options = JsonDataService.Instance.loadData<int[]>("options.json", true);
 	}
@@ -35,12 +41,24 @@ public class OptionsManager
 	public void initializeMusicVolume(AudioSource musicAudioSource)
 	{
 		this.musicAudioSource = musicAudioSource;
-		musicAudioSource.volume = options[0] / 100f;
+		if(options != null) musicAudioSource.volume = options[0] / 100f;
+	}
+
+	public void initializeStepsVolume(AudioSource stepsAudioSource)
+	{
+		this.stepsAudioSource = stepsAudioSource;
+		if (options != null) stepsAudioSource.volume = options[1] / 100f;
 	}
 
 	public void setMusicVolume(float volume)
 	{
 		musicAudioSource.volume = volume;
+	}
+
+	public void setStepsVolume(float volume)
+	{
+		if (stepsAudioSource == null) return;
+		stepsAudioSource.volume = volume;
 	}
 
 

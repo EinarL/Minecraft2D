@@ -17,7 +17,7 @@ public class StepSoundScript : MonoBehaviour
     {
 		stepAudioSource = GetComponent<AudioSource>();
         stepAudioSource.volume = 0.1f;
-
+        OptionsManager.Instance.initializeStepsVolume(stepAudioSource);
         //loadSound("Dirt");
 	}
 
