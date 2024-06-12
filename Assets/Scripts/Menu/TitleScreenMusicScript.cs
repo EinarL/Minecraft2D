@@ -13,6 +13,8 @@ public class TitleScreenMusicScript : MonoBehaviour
 	{
 		mainMenuMusic = Resources.LoadAll<AudioClip>("Sounds\\Music\\Menu");
 		audioSource = GetComponent<AudioSource>();
+		OptionsManager.Instance.initializeMusicVolume(audioSource);
+
 		PlayRandomMusic();
 	}
 

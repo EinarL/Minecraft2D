@@ -10,7 +10,7 @@ using UnityEngine;
 
 /**
  * this class is used to save data to json format.
- * currently saves the inventory and furnaces & more.
+ * saves the inventory, furnaces & more.
  */
 public class JsonDataService : IDataService
 {
@@ -35,10 +35,14 @@ public class JsonDataService : IDataService
 		}
 	}
 
-
-	public bool saveData<T>(string filename, T data)
+	/**
+	 * global is true for things like settings, since settings apply to all worlds
+	 */
+	public bool saveData<T>(string filename, T data, bool global = false)
 	{
-		string path = Application.persistentDataPath + folderPath + filename;
+		string path;
+		if(global) path = Application.persistentDataPath + "\\" + filename;
+		else path = Application.persistentDataPath + folderPath + filename;
 		// if directory doesnt exist, the create it
 		if (!Directory.Exists(Application.persistentDataPath + folderPath))
 		{
@@ -141,10 +145,13 @@ public class JsonDataService : IDataService
 		}
 	}
 
-	public T loadData<T>(string filename)
+	public T loadData<T>(string filename, bool global = false)
 	{
-		string path = Application.persistentDataPath + folderPath + filename;
-		if(!File.Exists(path))
+		string path;
+		if(global) path = Application.persistentDataPath + "\\" + filename;
+		else path = Application.persistentDataPath + folderPath + filename;
+
+		if (!File.Exists(path))
 		{
 			throw new FileNotFoundException($"{path} does not exists");
 		}
@@ -161,8 +168,9 @@ public class JsonDataService : IDataService
 		}
 	}
 
-	public bool exists(string filename)
+	public bool exists(string filename, bool global = false)
 	{
+		if(global) return File.Exists(Application.persistentDataPath + "\\" + filename);
 		return File.Exists(Application.persistentDataPath + folderPath + filename);
 	}
 

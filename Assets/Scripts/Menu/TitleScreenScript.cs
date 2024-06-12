@@ -95,7 +95,7 @@ public class TitleScreenScript : MonoBehaviour
      */
 	public void options()
     {
-         // TODO
+		SceneManager.LoadScene("Settings", LoadSceneMode.Additive);
     }
 	/**
      * runs when the user clicks on the quit game button on the title screen.

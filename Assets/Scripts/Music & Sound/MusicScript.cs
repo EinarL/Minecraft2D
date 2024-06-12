@@ -19,6 +19,8 @@ public class MusicScript : MonoBehaviour
 		audioSource = GameObject.Find("Audio").transform.Find("MusicAndAmbient").GetComponent<AudioSource>();
 		overworldMusic = Resources.LoadAll<AudioClip>("Sounds\\Music\\Overworld");
 		caveAmbientNoise = Resources.LoadAll<AudioClip>("Sounds\\Ambient\\Cave");
+		OptionsManager.Instance.initializeMusicVolume(audioSource);
+
 		StartCoroutine(decideIfPlayMusic());
 		StartCoroutine(decideIfPlayCaveAmbientNoise());
 	}
