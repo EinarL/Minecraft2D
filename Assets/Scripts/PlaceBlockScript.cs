@@ -284,6 +284,7 @@ public class PlaceBlockScript : MonoBehaviour
 		else if (itemName.StartsWith("Door"))holdingItem = Resources.Load<GameObject>("Prefabs\\Blocks\\Door" + itemName.Replace("Door", "") + "TopRight");
 		else holdingItem = Resources.Load<GameObject>("Prefabs\\Blocks\\" +  itemName);
 
+        if (rightClickItemBehaviour != null) rightClickItemBehaviour.stopHoldingRightClick(false); // previously held item might have e.g. been a bow and if we are holding right click while switching items, then we call this function
         if (holdingItem == null) // didn't find the block, so the block isn't placeable
 		{
             // the block/item might have a rightClickItemBehaviour though so we have to check that

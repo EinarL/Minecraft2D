@@ -358,6 +358,33 @@ public static class CraftingRecipes
 			new object[] { "Diamond", new Vector2(2, 1) }
 		}, new InventorySlot( new ArmorInstance(getArmorScriptable("DiamondBoots")), "DiamondBoots")
 		},
+
+		// bow
+		new object[]{ "String", new object[] {
+			new object[] { "Stick", new Vector2(1, 0) },
+			new object[] { "String", new Vector2(0, 1) },
+			new object[] { "Stick", new Vector2(2, 1) },
+			new object[] { "String", new Vector2(0, 2) },
+			new object[] { "Stick", new Vector2(1, 2) },
+		}, new InventorySlot( new ToolInstance(getToolScriptable("Bow")), "Bow")
+		},
+
+		// bow
+		new object[]{ "Stick", new object[] {
+			new object[] { "String", new Vector2(1, 0) },
+			new object[] { "Stick", new Vector2(-1, 1) },
+			new object[] { "String", new Vector2(1, 1) },
+			new object[] { "Stick", new Vector2(0, 2) },
+			new object[] { "String", new Vector2(1, 2) },
+		}, new InventorySlot( new ToolInstance(getToolScriptable("Bow")), "Bow")
+		},
+
+		// arrow
+		new object[]{ "Feather", new object[] {
+			new object[] { "Stick", new Vector2(0, 1) },
+			new object[] { "Flint", new Vector2(0, 2) },
+		}, new InventorySlot("Arrow", 4)
+		},
 	};
 
 	public static List<object[]> getRecipesByLeftBottomMostItem(string itemName)

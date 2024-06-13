@@ -6,7 +6,7 @@ public abstract class RightClickItemBehaviour
 {
 	public abstract void rightClickItem();
 
-	public abstract void stopHoldingRightClick();
+	public abstract void stopHoldingRightClick(bool executeDefaultBehaviour = true);
 
 	protected Vector2 getMousePosition()
 	{

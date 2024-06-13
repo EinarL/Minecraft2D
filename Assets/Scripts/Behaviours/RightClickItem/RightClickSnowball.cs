@@ -80,5 +80,5 @@ public class RightClickSnowball : RightClickItemBehaviour
 
 	// this function should be empty:
 
-	public override void stopHoldingRightClick() { }
+	public override void stopHoldingRightClick(bool executeDefaultBehaviour = true) { }
 }

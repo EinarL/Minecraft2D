@@ -42,8 +42,8 @@ public class ArmorOutfitScript
 
 		helmet = steve.Find("Head").Find("Helmet").GetComponent<SpriteRenderer>();
 		torsoChestplate = steve.Find("Torso").Find("TorsoChestplate").GetComponent<SpriteRenderer>();
-		armFrontChestplate = steve.Find("Arm Front").Find("ArmFrontChestplate").GetComponent<SpriteRenderer>();
-		armBackChestplate = steve.Find("Arm Back").Find("ArmBackChestplate").GetComponent<SpriteRenderer>();
+		armFrontChestplate = steve.Find("Arm Front Parent").Find("Arm Front").Find("ArmFrontChestplate").GetComponent<SpriteRenderer>();
+		armBackChestplate = steve.Find("Arm Back Parent").Find("Arm Back").Find("ArmBackChestplate").GetComponent<SpriteRenderer>();
 		legFrontLeggings = steve.Find("Leg Front").Find("LegFrontLeggings").GetComponent<SpriteRenderer>();
 		legBackLeggings = steve.Find("Leg Back").Find("LegBackLeggings").GetComponent<SpriteRenderer>();
 		legFrontBoots = steve.Find("Leg Front").Find("LegFrontBoots").GetComponent<SpriteRenderer>();

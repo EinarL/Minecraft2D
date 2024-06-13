@@ -5,6 +5,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEditor;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 /**
@@ -393,6 +394,29 @@ public static class InventoryScript
 		inventory[slotNumber].removeFromSlot(1);
 
 		updateSlotVisually(slotNumber);
+	}
+
+	public static bool hasArrow()
+	{
+		foreach(InventorySlot slot in inventory)
+		{
+			if (slot.itemName.Equals("Arrow")) return true;
+		}
+		return false;
+	}
+
+	public static void removeArrow()
+	{
+		for(int i = 0; i < inventory.Length; i++)
+		{
+			if (inventory[i].itemName.Equals("Arrow"))
+			{
+				inventory[i].removeFromSlot(1);
+				updateSlotVisually(i);
+				return;
+			}
+		}
+		Debug.LogWarning("No arrow was found in the inventory");
 	}
 
 	public static InventorySlot[] getInventory()

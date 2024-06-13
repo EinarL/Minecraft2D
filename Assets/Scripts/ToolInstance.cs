@@ -91,7 +91,9 @@ public enum ToolType
 	[EnumMember(Value = "Pickaxe")]
 	Pickaxe,
 	[EnumMember(Value = "Axe")]
-	Axe
+	Axe,
+	[EnumMember(Value = "Bow")]
+	Bow
 }
 
 public enum ToolMaterial

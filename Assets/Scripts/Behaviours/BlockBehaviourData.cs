@@ -141,7 +141,8 @@ public static class BlockBehaviourData
 
 	// what happens when right clicking items in your hotbar, e.g. for snowballs, bows, etc.
 	private static Hashtable rightClickItemBehaviours = new Hashtable() {
-		{"Snowball", new RightClickSnowball() }
+		{"Snowball", new RightClickSnowball() },
+		{"Bow", new RightClickBow() }
 	};
 
 

@@ -28,7 +28,7 @@ public class PlayerInventory : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-		holdingItemSpriteRenderer = transform.Find("Arm Front").transform.Find("HoldingItemPosition").transform.Find("HoldingItem").GetComponent<SpriteRenderer>();
+		holdingItemSpriteRenderer = transform.Find("Arm Front Parent").Find("Arm Front").transform.Find("HoldingItemPosition").transform.Find("HoldingItem").GetComponent<SpriteRenderer>();
         torchLight = holdingItemSpriteRenderer.gameObject.transform.Find("TorchLight").gameObject;
 		placeBlockScript = GetComponent<PlaceBlockScript>();
 		anim = GetComponent<Animator>();

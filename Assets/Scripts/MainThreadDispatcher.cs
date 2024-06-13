@@ -50,9 +50,14 @@ public class MainThreadDispatcher : MonoBehaviour
 	}
 
 
-	public void startCoroutine(IEnumerator coroutine)
+	public Coroutine startCoroutine(IEnumerator coroutine)
 	{
-		StartCoroutine(coroutine);
+		return StartCoroutine(coroutine);
+	}
+
+	public void stopCoroutine(Coroutine coroutine)
+	{
+		StopCoroutine(coroutine);
 	}
 
 }

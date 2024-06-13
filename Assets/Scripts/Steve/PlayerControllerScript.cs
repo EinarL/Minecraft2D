@@ -16,6 +16,7 @@ public class PlayerControllerScript : MonoBehaviour
     private Transform head;
     private Transform holdingItemObject; // the object that displays which item the player is holding
     private SpriteRenderer holdingItemObjectSpriteRenderer;
+    private SpriteRenderer AnimatedItemSpriteRenderer;
 	private Camera cam;
     private StepSoundScript stepSoundScript;
     private CapsuleCollider2D capCollider;
@@ -50,8 +51,9 @@ public class PlayerControllerScript : MonoBehaviour
     void Start()
     {
         steve = transform.Find("Steve");
-        holdingItemObject = steve.Find("Arm Front").transform.Find("HoldingItemPosition").transform.Find("HoldingItem");
+        holdingItemObject = steve.Find("Arm Front Parent").Find("Arm Front").transform.Find("HoldingItemPosition").transform.Find("HoldingItem");
 		holdingItemObjectSpriteRenderer = holdingItemObject.GetComponent<SpriteRenderer>();
+		AnimatedItemSpriteRenderer = holdingItemObject.Find("AnimatedItem").GetComponent<SpriteRenderer>();
 		anim = steve.GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
 		stepSoundScript = steve.GetComponent<StepSoundScript>();
@@ -271,8 +273,8 @@ public class PlayerControllerScript : MonoBehaviour
     private void putHoldingItemToOtherHand(bool frontHand)
     {
         Transform newArm;
-        if (frontHand) newArm = steve.Find("Arm Front");
-        else newArm = steve.Find("Arm Back");
+        if (frontHand) newArm = steve.Find("Arm Front Parent").Find("Arm Front");
+        else newArm = steve.Find("Arm Back Parent").Find("Arm Back");
 
         Transform newParent = newArm.Find("HoldingItemPosition");
 
@@ -282,8 +284,16 @@ public class PlayerControllerScript : MonoBehaviour
 
         holdingItemObject.parent = newParent;
 
-        if (frontHand) holdingItemObjectSpriteRenderer.sortingOrder = 12;
-        else holdingItemObjectSpriteRenderer.sortingOrder = 10;
+        if (frontHand)
+        {
+            holdingItemObjectSpriteRenderer.sortingOrder = 12;
+            AnimatedItemSpriteRenderer.sortingOrder = 12;
+        }
+        else
+        {
+            holdingItemObjectSpriteRenderer.sortingOrder = 10;
+			AnimatedItemSpriteRenderer.sortingOrder = 10;
+		}
 
 		anim.SetBool("isFacingRight", frontHand);
 	}
