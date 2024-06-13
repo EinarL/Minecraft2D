@@ -419,6 +419,15 @@ public static class InventoryScript
 		Debug.LogWarning("No arrow was found in the inventory");
 	}
 
+	public static bool hasSpaceFor(string itemName)
+	{
+		foreach (InventorySlot slot in inventory)
+		{
+			if ((slot.itemName.Equals(itemName) && slot.amount < 64) || slot.isEmpty()) return true;
+		}
+		return false;
+	}
+
 	public static InventorySlot[] getInventory()
 	{
 		return inventory;

@@ -101,7 +101,7 @@ public class PlayerInventory : MonoBehaviour
     /**
      * picks up the item if there is space and then destroys the item
      */
-    private void pickupItem(GameObject itemContainer)
+    public void pickupItem(GameObject itemContainer, bool isInstantiated = true)
     {
 
         GameObject item = itemContainer.transform.Find("Item").gameObject;
@@ -125,7 +125,7 @@ public class PlayerInventory : MonoBehaviour
         {
             // TODO: make the item shoot towards the player and then destroy it when it hits the player's collider
             AudioSource.PlayClipAtPoint(pickupItemSound, transform.position);
-            Destroy(itemContainer);
+            if(isInstantiated) Destroy(itemContainer);
         }
     }
 
@@ -157,6 +157,4 @@ public class PlayerInventory : MonoBehaviour
 
         InventoryScript.decrementSlot(dropFromSlot);
 	}
-
-    
 }

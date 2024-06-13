@@ -13,8 +13,8 @@ public class SnowballScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
-    }
+		if (transform.position.y < -100) Destroy(gameObject);
+	}
 
 	private void OnCollisionEnter2D(Collision2D collision)
 	{
