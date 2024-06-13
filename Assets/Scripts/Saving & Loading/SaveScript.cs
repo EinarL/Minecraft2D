@@ -35,28 +35,33 @@ public class SaveScript : MonoBehaviour
     {
 		if (Input.GetKeyDown(KeyCode.I))
 		{
-			InventoryScript.saveInventory(); // save inventory
-			openFurnaceScript.saveFurnaces(); // save furnaces
-			armorScript.saveArmor(); // save which armor you have on
+			save();
+		}
+	}
 
-											  
-			int health = healthbarScript.getHealth();
-			float hunger = hungerbarScript.getHunger();
-			if (!dataService.saveData("health-and-hunger-bar.json", new float[] { health, hunger })) // save health bar and food bar
-			{
-				Debug.LogError("Could not save health and hunger bar file :(");
-			}
-			// save day time
-			if (!dataService.saveData("day-time.json", dayProcessScript.getDataToSave()))
-			{
-				Debug.LogError("Could not save day time file :(");
-			}
+	// saves everything except the chunks
+	public void save()
+	{
+		InventoryScript.saveInventory(); // save inventory
+		openFurnaceScript.saveFurnaces(); // save furnaces
+		armorScript.saveArmor(); // save which armor you have on
 
-			// save player position
-			if(!dataService.saveData("player-position.json", new float[] { steve.position.x, steve.position.y }))
-			{
-				Debug.LogError("Could not save player position :(");
-			}
+		int health = healthbarScript.getHealth();
+		float hunger = hungerbarScript.getHunger();
+		if (!dataService.saveData("health-and-hunger-bar.json", new float[] { health, hunger })) // save health bar and food bar
+		{
+			Debug.LogError("Could not save health and hunger bar file :(");
+		}
+		// save day time
+		if (!dataService.saveData("day-time.json", dayProcessScript.getDataToSave()))
+		{
+			Debug.LogError("Could not save day time file :(");
+		}
+
+		// save player position
+		if (!dataService.saveData("player-position.json", new float[] { steve.position.x, steve.position.y }))
+		{
+			Debug.LogError("Could not save player position :(");
 		}
 	}
 }

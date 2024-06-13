@@ -75,11 +75,14 @@ public class RespawnButtonScript : MonoBehaviour
 		hungerbarScript.setFullHunger();
 		hungerbarScript.startHungerCoroutine();
 
-		// reset inventory
-
 		canvasScript.closeDeathScreen(); // remove death screen
 		scScript.pauseChunkRendering = false; // resume chunk rendering
 		scScript.setCamSettingsBackToNormal(vcam.GetCinemachineComponent<CinemachineFramingTransposer>(), prevSoftZoneWidth);
+	}
+
+	public void unrenderChunks()
+	{
+
 	}
 
 	private void createTombstone()
@@ -90,13 +93,12 @@ public class RespawnButtonScript : MonoBehaviour
 		if (deathPos.x < 0) roundedXPos -= .5f;
 		else roundedXPos += .5f;
 
-		float roundedYPos = Mathf.RoundToInt(deathPos.y);
-		roundedYPos -= .5f;
+		float roundedYPos = Mathf.RoundToInt(deathPos.y) - .5f;
 
 		SpawningChunkData.updateChunkData(roundedXPos, roundedYPos, 23, "FrontBackground" ); // update chunk with the tombstone
 
-		// save the contents of the tombstone (players inventory)
-		// it will look like: [xPos, yPos, inventory]
+		// save the contents of the tombstone (players inventory & armor)
+		// it will look like: [xPos, yPos, inventory, armor]
 		object[] tombstoneData = new object[] { roundedXPos, roundedYPos, InventoryScript.getInventory(), armorScript.getArmorSlots() };
 		if (!dataService.appendToData("tombstone.json", tombstoneData)) // save tombstone data
 		{

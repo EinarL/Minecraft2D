@@ -39,7 +39,12 @@ public class PlaceBlockScript : MonoBehaviour
     private float placingRange = 6f;
     private Transform head; // steve's head
     private Transform torso;
-    
+
+	void Awake()
+	{
+		BlockBehaviourData.initializeHashtables();
+	}
+
 	// Start is called before the first frame update
 	void Start()
     {

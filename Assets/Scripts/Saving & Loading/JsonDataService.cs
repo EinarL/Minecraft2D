@@ -17,6 +17,7 @@ public class JsonDataService : IDataService
 	private static readonly object myLock = new object ();
 
 	private string folderPath = "\\worlds\\devWorld\\general\\"; // We'll replace the devWorld by the world name
+	private string defaultFolderPath = "\\worlds\\devWorld\\general\\";
 
 	private static JsonDataService instance = null;
 
@@ -180,4 +181,9 @@ public class JsonDataService : IDataService
 		folderPath = folderPath.Replace("devWorld", worldName);
 	}
 
+
+	public void resetWorldFolder()
+	{
+		folderPath = defaultFolderPath;
+	}
 }

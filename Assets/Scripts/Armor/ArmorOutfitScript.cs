@@ -35,6 +35,11 @@ public class ArmorOutfitScript
 		}
 	}
 
+	public static void removeInstance()
+	{
+		instance = null;
+	}
+
 
 	private ArmorOutfitScript()
 	{
