@@ -72,6 +72,9 @@ public static class BlockBehaviourData
 			{ "DoorSpruceTopSideRight", new BreakWood() },
 			{ "DoorSpruceBottomSideLeft", new BreakWood() },
 			{ "DoorSpruceBottomSideRight", new BreakWood() },
+			{ "Ladder", new BreakWood() },
+			{ "LadderLeft", new BreakWood() },
+			{ "LadderRight", new BreakWood() },
 		};
 
 		itemDropBehaviours = new Hashtable()
@@ -113,6 +116,8 @@ public static class BlockBehaviourData
 			{ "DoorSpruceBottomSideLeft", new DoorDrop(true, "Spruce") },
 			{ "DoorSpruceBottomSideRight", new DoorDrop(true, "Spruce") },
 			{ "Gravel", new GravelDrop() },
+			{ "LadderLeft", new LadderDrop() },
+			{ "LadderRight", new LadderDrop() }
 		};
 
 		rightClickBehaviours = new Hashtable()

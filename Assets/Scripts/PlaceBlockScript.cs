@@ -458,7 +458,7 @@ public class PlaceBlockScript : MonoBehaviour
         // if its a front background block then we dont check if there is a block above, because torches, grass, flowers, etc. cant float below a block
         if(!FrontBackgroundBlocks.isFrontBackgroundBlock(holdingItem.name) && breakBlockScript.isBlockAboveBlock(futureBlockPos.transform.position, true, true)) return true;
         if(breakBlockScript.isBlockOnRightSideOfBlock(futureBlockPos.transform.position, true, true)) return true;
-        if(breakBlockScript.isBlockBelowBlock(futureBlockPos.transform.position, true, true)) return true;
+        if(!FrontBackgroundBlocks.isWallBlock(holdingItem.name) && breakBlockScript.isBlockBelowBlock(futureBlockPos.transform.position, true, true)) return true; // if its a wall block then we dont check if there is a block below it (we also dont check above it becuase wallblocks are also frontbackgroundblocks)
         if(breakBlockScript.isBlockOnLeftSideOfBlock(futureBlockPos.transform.position, true, true)) return true;
         return false;
     }

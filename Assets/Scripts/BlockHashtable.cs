@@ -81,6 +81,9 @@ public static class BlockHashtable
 			{ 55, getBlockTileWithName("DoorSpruceTopSideLeft")},
 			{ 56, getBlockTileWithName("DoorSpruceBottomSideLeft")},
 			{ 57, getBlockTileWithName("Gravel")},
+			{ 58, getBlockTileWithName("Ladder")},
+			{ 59, getBlockTileWithName("LadderLeft")},
+			{ 60, getBlockTileWithName("LadderRight")},
 		};
 		// id's in blockTiles and blocks hashtable need to be the same for each block
 		blocks = new Hashtable()
@@ -142,12 +145,16 @@ public static class BlockHashtable
 			{ 55, getBlockWithName("DoorSpruceTopSideLeft")},
 			{ 56, getBlockWithName("DoorSpruceBottomSideLeft")},
 			{ 57, getBlockWithName("Gravel")},
+			{ 58, getBlockWithName("Ladder")},
+			{ 59, getBlockWithName("LadderLeft")},
+			{ 60, getBlockWithName("LadderRight")},
 		};
 
 		// contains behaviours for blocks that need special functionality upon placing the block, e.g. torches need to be rotated to be placed on right/left wall
 		placeBlockBehaviours = new Hashtable()
 		{
 			{"Torch", new PlaceTorch()},
+			{"Ladder", new PlaceLadder()},
 			{"BedUpperLeft", new PlaceBed()},
 			{"DoorOakTopRight", new PlaceDoor()},
 			{"DoorSpruceTopRight", new PlaceDoor()}
@@ -163,6 +170,7 @@ public static class BlockHashtable
 			{"CraftingTable", 0},
 			{"DoorOakTopRight", 0},
 			{"DoorSpruceTopRight", 0},
+			{"Ladder", 0},
 			{"Torch", 0},
 			{"Dirt", 1}, // 1 is dirt
 			{"Gravel", 1},

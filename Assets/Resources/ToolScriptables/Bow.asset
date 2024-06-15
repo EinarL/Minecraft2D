@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cc64dd4b787829459b22001d1ec194c, type: 3}
   m_Name: Bow
   m_EditorClassIdentifier: 
-  toolType: 0
+  toolType: 4
   toolMaterial: 0
   damage: 3
   breakSpeed: 1

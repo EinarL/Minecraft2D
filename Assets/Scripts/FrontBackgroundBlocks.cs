@@ -17,7 +17,15 @@ public static class FrontBackgroundBlocks
 		{"Grass"},
 		{"MushroomBrown"},
 		{"MushroomRed"},
+		{"Ladder"}
 	};
+
+	// wallblocks are blocks that have to have a wall behind them, like ladders
+	private static HashSet<string> wallBlocks = new HashSet<string>()
+	{
+		{"Ladder"}
+	};
+
 	// you can place blocks next to these blocks
 	private static HashSet<string> frontLayerBlocksThatCanBePlacedNextTo = new HashSet<string>()
 	{
@@ -34,6 +42,11 @@ public static class FrontBackgroundBlocks
 	public static bool isFallType(string blockName)
 	{
 		return fallTypes.Contains(blockName);
+	}
+
+	public static bool isWallBlock(string blockName)
+	{
+		return wallBlocks.Contains(blockName);
 	}
 
 	public static bool isFrontBackgroundBlock(string blockName)

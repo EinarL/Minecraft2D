@@ -28,6 +28,9 @@ public class BreakBlockScript : MonoBehaviour
 	private Transform head; // steve's head
 	private Transform torso;
 
+	private HashSet<string> highestPriority = new HashSet<string>(){ "Furnace", "CraftingTable", "Torch", "TorchWall", "TorchLeft", "TorchRight", "Ladder", "LadderLeft", "LadderRight" }; // these blocks all have equal highest priority over other blocks
+	private HashSet<string> lowestPriority = new HashSet<string>(){ "SnowBlockThin" };
+
 
 	// Start is called before the first frame update
 	void Start()
@@ -233,12 +236,11 @@ public class BreakBlockScript : MonoBehaviour
 		filter.SetLayerMask(LayerMask.GetMask("Default") | LayerMask.GetMask("FrontBackground") | LayerMask.GetMask("BackBackground")); // only blocks on layer "Default" or "FrontBackground" or "BackBackground"
 
 		// Check for overlaps
-		Physics2D.OverlapCircle(new Vector2(worldMousePos.x, worldMousePos.y), 0.0001f, filter, blockToBreak);
+		Vector2 roundedMousePos = getRoundedMousePosition();
+		Physics2D.OverlapCircle(roundedMousePos, 0.40f, filter, blockToBreak);
 		if (blockToBreak.Count == 0) return null; // mousePosition wasn't on any block
 		if (blockToBreak.Count > 1) // if hovering over many blocks then here you can define which block has the highest priority to be broken/right-clicked first
 		{
-			string[] highestPriority = new string[] { "Furnace", "CraftingTable", "Torch", "TorchWall", "TorchLeft", "TorchRight" }; // these blocks all have equal highest priority over other blocks
-			string[] lowestPriority = new string[] { "SnowBlockThin" };
 			GameObject objectToReturn = null;
 			for (int i = 0; i < blockToBreak.Count; i++)
 			{
@@ -275,8 +277,9 @@ public class BreakBlockScript : MonoBehaviour
 
 	private bool isBlockReachable(GameObject block)
 	{
-		if (block.layer == LayerMask.GetMask("Default")) return raycastGameObject(torso.transform.position, block.transform.position, block) || raycastGameObject(head.transform.position, block.transform.position, block) || raycastGameObject(new Vector2(head.transform.position.x, head.transform.position.y + 1f), block.transform.position, block);
-		else return raycastBackgroundGameObject(torso.transform.position, block.transform.position, block) || raycastBackgroundGameObject(head.transform.position, block.transform.position, block) || raycastBackgroundGameObject(new Vector2(head.transform.position.x, head.transform.position.y + 1f), block.transform.position, block);
+		// if (block.layer == LayerMask.GetMask("Default")) 
+		return raycastGameObject(torso.transform.position, block.transform.position, block) || raycastGameObject(head.transform.position, block.transform.position, block) || raycastGameObject(new Vector2(head.transform.position.x, head.transform.position.y + 1f), block.transform.position, block);
+		//else return raycastBackgroundGameObject(torso.transform.position, block.transform.position, block) || raycastBackgroundGameObject(head.transform.position, block.transform.position, block) || raycastBackgroundGameObject(new Vector2(head.transform.position.x, head.transform.position.y + 1f), block.transform.position, block);
 	}
 
 	/**
@@ -330,7 +333,7 @@ public class BreakBlockScript : MonoBehaviour
 			return ReferenceEquals(hit.collider.gameObject, block);
 		}
 
-		return false;
+		return true;
 	}
 
 	/**
@@ -338,7 +341,6 @@ public class BreakBlockScript : MonoBehaviour
      */
 	private bool raycastBackgroundGameObject(Vector2 start, Vector2 end, GameObject block)
 	{
-
 		// Calculate direction and distance
 		Vector2 direction = end - start;
 		float distance = Vector2.Distance(start, end);
