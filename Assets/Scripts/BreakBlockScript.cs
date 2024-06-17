@@ -216,13 +216,13 @@ public class BreakBlockScript : MonoBehaviour
      */
 	private object getHoveredBlock()
 	{
-		Vector3 worldMousePos = getMousePosition();
+		Vector3 worldMousePos = getRoundedMousePosition();
 		// first lets check if there is a tile in the cursors position
 		Collider2D[] results = new Collider2D[1];
 		ContactFilter2D filter = new ContactFilter2D();
 		filter.SetLayerMask(LayerMask.GetMask("Tilemap")); // only blocks on layer "Tilemap"
 														   // Check for overlaps
-		int count = Physics2D.OverlapCircle(worldMousePos, 0.0001f, filter, results);
+		int count = Physics2D.OverlapCircle(worldMousePos, 0.4f, filter, results);
 		if (count > 0)
 		{
 			return tilemap.GetTile(tilemap.WorldToCell(worldMousePos)); // return a tile
@@ -236,8 +236,7 @@ public class BreakBlockScript : MonoBehaviour
 		filter.SetLayerMask(LayerMask.GetMask("Default") | LayerMask.GetMask("FrontBackground") | LayerMask.GetMask("BackBackground")); // only blocks on layer "Default" or "FrontBackground" or "BackBackground"
 
 		// Check for overlaps
-		Vector2 roundedMousePos = getRoundedMousePosition();
-		Physics2D.OverlapCircle(roundedMousePos, 0.40f, filter, blockToBreak);
+		Physics2D.OverlapCircle(worldMousePos, 0.40f, filter, blockToBreak);
 		if (blockToBreak.Count == 0) return null; // mousePosition wasn't on any block
 		if (blockToBreak.Count > 1) // if hovering over many blocks then here you can define which block has the highest priority to be broken/right-clicked first
 		{
@@ -291,7 +290,7 @@ public class BreakBlockScript : MonoBehaviour
 	}
 
 	/**
-     * returns true if the raycast can get from start to end and hitting the tile at the tilePos
+     * returns true if the raycast can get from start to end without hitting anything other than the tile at tilePos
      */
 	private bool raycast(Vector2 start, Vector2 end, Vector3Int tilePos)
 	{
@@ -311,11 +310,11 @@ public class BreakBlockScript : MonoBehaviour
 			return hitTilePos == tilePos;
 		}
 
-		return false;
+		return true;
 	}
 
 	/**
-     * returns true if the raycast can get from start to end and hit the block without hitting any other block first
+     * returns true if the raycast can get from start to end and not hit any block except "block"
      */
 	private bool raycastGameObject(Vector2 start, Vector2 end, GameObject block)
 	{
@@ -333,7 +332,7 @@ public class BreakBlockScript : MonoBehaviour
 			return ReferenceEquals(hit.collider.gameObject, block);
 		}
 
-		return true;
+		return true; // hit nothing, return true
 	}
 
 	/**

@@ -32,6 +32,7 @@ public class PlayerControllerScript : MonoBehaviour
 	private float jumpBoostWhenRunning = 1.2f;
 	private float speed; // this will change to runSpeed when runnning and walkSpeed when walking
     private bool isJumping = false;
+    private bool isOnLadder = false;
     private bool isInAirAfterJumping = false;
     private bool facingRight = true;
     private float animationRunningSpeed = 1.5f;
@@ -88,7 +89,7 @@ public class PlayerControllerScript : MonoBehaviour
 		horizontalMove = Input.GetAxisRaw("Horizontal"); // -1: left, 0: still, 1: right
 
         // jump
-		if ((Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) && isGrounded() && !isJumping && !isInAirAfterJumping && rb.velocity.y <= 0)
+		if ((Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.UpArrow) || (Input.GetKey(KeyCode.W) && !isOnLadder)) && isGrounded() && !isJumping && !isInAirAfterJumping && rb.velocity.y <= 0)
         {
             isJumping = true;
             rb.velocity = new Vector2(rb.velocity.x * jumpBoost, jumpPower);
@@ -122,7 +123,25 @@ public class PlayerControllerScript : MonoBehaviour
 			anim.SetBool("isWalking", false);
 		}
 
-        if (!isGrounded())
+        if (!isOnLadder && isLadderNextToPlayer()) // this runs once, when the player gets on a ladder
+        {
+            isOnLadder = true;
+			rb.gravityScale = 0;
+		}
+
+        if (isOnLadder)
+        {
+			ladderLogic();
+
+            if (!isLadderNextToPlayer())
+            {
+                isOnLadder = false;
+				rb.gravityScale = 5;
+                fellFrom = transform.position.y;
+			}
+		}
+
+        if (!isGrounded() && !isOnLadder)
         {
             fellFrom = Mathf.Max(fellFrom, transform.position.y);
             didFall = true;
@@ -130,7 +149,7 @@ public class PlayerControllerScript : MonoBehaviour
         else if (didFall)
         {
             didFall = false;
-            checkIfTakeFallDamage();
+            if(!isOnLadder) checkIfTakeFallDamage();
         }
 
 
@@ -307,6 +326,40 @@ public class PlayerControllerScript : MonoBehaviour
             healthbarScript.takeDamage(fallHeight, false);
         }
         fellFrom = float.NegativeInfinity;
+    }
+
+    private void ladderLogic()
+    {
+        if (Input.GetKey(KeyCode.W)) rb.velocity = new Vector2(rb.velocity.x, 5);
+        else if (Input.GetKey(KeyCode.S)) rb.velocity = new Vector2(rb.velocity.x, -6);
+		else rb.velocity = new Vector2(rb.velocity.x, -2.5f);
+
+	}
+
+	private bool isLadderNextToPlayer()
+    {
+        // first lets check if there is a ladder tile at the players position
+        TileBase tile1 = tilemap.GetTile(tilemap.WorldToCell(new Vector2(groundCheck.position.x, groundCheck.position.y + 1)));
+        TileBase tile2 = tilemap.GetTile(tilemap.WorldToCell(groundCheck.position));
+		// if the tile at groundChecks position or the tile above groundChecks position is a ladder, then return true
+		if ((tile1 != null && tile1.name.StartsWith("Ladder")) || (tile2 != null &&  tile2.name.StartsWith("Ladder"))) return true;
+
+		// now we will check if there is a ladder gameobject at the players position
+		// Create a list to store the results
+		List<Collider2D> blocks = new List<Collider2D>();
+
+		ContactFilter2D filter = new ContactFilter2D();
+		filter.SetLayerMask(LayerMask.GetMask("Default") | LayerMask.GetMask("FrontBackground") | LayerMask.GetMask("BackBackground")); // only blocks on layer "Default" or "FrontBackground" or "BackBackground"
+
+		// Check for overlaps
+		Physics2D.OverlapCircle(groundCheck.position, 0.30f, filter, blocks);
+
+        foreach (Collider2D blockCollider in blocks)
+        {
+            if (blockCollider.gameObject.name.StartsWith("Ladder")) return true;
+        }
+
+		return false;
     }
 
     public void teleportToSpawn(Vector2 pos)
