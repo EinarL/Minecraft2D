@@ -95,7 +95,12 @@ public class ArrowScript : MonoBehaviour
 			Transform playerHead = collision.transform.Find("Steve").Find("Head").transform;
 			if (transform.position.y >= playerHead.position.y) transform.parent = playerHead.transform;
 		}
-		else StartCoroutine(setPickupable());
+		else { 
+			StartCoroutine(setPickupable());
+			// play arrow sound
+			int arrowSoundIndex = Random.Range(1, 5);
+			AudioSource.PlayClipAtPoint(Resources.Load<AudioClip>($"Sounds\\Random\\bowhit{arrowSoundIndex}"), transform.position);
+		}
 
 		Destroy(rb);
 		Destroy(arrowCollider);
@@ -105,6 +110,8 @@ public class ArrowScript : MonoBehaviour
 			Destroy(gameObject);
 		}
 		StartCoroutine(destroyArrow());
+
+
 	}
 
 	public void EnableCollider(Collider2D collider)

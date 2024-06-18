@@ -19,7 +19,7 @@ public class RightClickBow : RightClickItemBehaviour
 
 	private float drawStartTime; // the time when the player started drawing back the bow
 	private float maxDrawTime = 0.9f; // the time it takes to get maximum power on the arrow
-	private float maxShootForce = 18f; // Maximum shoot force
+	private float maxShootForce = 20f; // Maximum shoot force
 	private float minShootForce = 10f; // Minimum shoot force
 	private float minDamage = 1f;
 	private float maxDamage = 7f;
