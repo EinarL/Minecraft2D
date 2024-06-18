@@ -153,6 +153,7 @@ public class RightClickBow : RightClickItemBehaviour
 		}
 		rb.velocity = direction.normalized * shootForce;
 		arrow.GetComponent<ArrowScript>().setDamage(damage);
+		arrow.GetComponent<ArrowScript>().EnableCollider(playerTransform.GetComponent<Collider2D>());
 	}
 
 

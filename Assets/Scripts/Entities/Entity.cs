@@ -27,7 +27,7 @@ public abstract class Entity : MonoBehaviour
 	protected Coroutine walkingCoroutine;
 	protected Transform playerTransform;
 
-	public void initializeEntity()
+	public virtual void initializeEntity()
 	{
 		higherBlockCheck = transform.Find("HigherBlockCheck");
 		lowerBlockCheck = transform.Find("LowerBlockCheck");

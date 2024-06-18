@@ -6,21 +6,22 @@ public class ArrowScript : MonoBehaviour
 {
 	Rigidbody2D rb;
 	bool collided = false;
-	private float damage = 7f;
-	private Collider2D arrowCollider;
-	private Collider2D playerCollider;
+	private float damage = 5f;
+	private GameObject arrowCollider;
 	private Transform playerTransform;
 	private bool pickupable = false;
+
+	private void Awake()
+	{
+		arrowCollider = transform.Find("Collider").gameObject;
+		arrowCollider.SetActive(false);
+	}
 
 	// Start is called before the first frame update
 	void Start()
     {
 		rb = GetComponent<Rigidbody2D>();
-		arrowCollider = transform.Find("Collider").GetComponent<Collider2D>();
-
-		playerCollider = GameObject.Find("SteveContainer").GetComponent<Collider2D>();
 		playerTransform = GameObject.Find("SteveContainer").transform.Find("Steve").Find("Torso").transform;
-		StartCoroutine(IgnorePlayerCollision());
 	}
 
 	// Update is called once per frame
@@ -92,13 +93,12 @@ public class ArrowScript : MonoBehaviour
 		{
 			GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>().takeDamage(Mathf.RoundToInt(damage));
 			Transform playerHead = collision.transform.Find("Steve").Find("Head").transform;
-			Debug.Log(playerHead.position.y);
 			if (transform.position.y >= playerHead.position.y) transform.parent = playerHead.transform;
 		}
 		else pickupable = true;
 
 		Destroy(rb);
-		Destroy(transform.Find("Collider").gameObject);
+		Destroy(arrowCollider);
         IEnumerator destroyArrow()
 		{
 			yield return new WaitForSeconds(60f);
@@ -107,10 +107,16 @@ public class ArrowScript : MonoBehaviour
 		StartCoroutine(destroyArrow());
 	}
 
-	private IEnumerator IgnorePlayerCollision()
+	public void EnableCollider(Collider2D collider)
 	{
-		Physics2D.IgnoreCollision(arrowCollider, playerCollider, true);
+		arrowCollider.SetActive(true); // enable all collisions
+		Physics2D.IgnoreCollision(arrowCollider.GetComponent<Collider2D>(), collider, true); // disable collision with "collider"
+		StartCoroutine(removeColliderIgnore(collider));
+	}
+
+	private IEnumerator removeColliderIgnore(Collider2D collider)
+	{
 		yield return new WaitForSeconds(0.5f);
-		if(arrowCollider != null) Physics2D.IgnoreCollision(arrowCollider, playerCollider, false);
+		if (arrowCollider != null) Physics2D.IgnoreCollision(arrowCollider.GetComponent<Collider2D>(), collider, false); // enable collision with "collider"
 	}
 }
