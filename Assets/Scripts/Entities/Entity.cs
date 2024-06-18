@@ -78,7 +78,7 @@ public abstract class Entity : MonoBehaviour
 	/**
 	 * displays a red tint on the entity if red remains true, otherwise returns the entity color back to normal
 	 */
-	private void displayTint(bool red = true)
+	protected void displayTint(bool red = true)
 	{
 		SpriteRenderer[] spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
 		Color color;

@@ -39,9 +39,13 @@ public class PunchScript : MonoBehaviour
 		RaycastHit2D hit = Physics2D.Raycast(head.position, direction, hitDistance, LayerMask.GetMask("Entity") | LayerMask.GetMask("Default"));
         if (hit && hit.collider.gameObject.layer == 10) // if hit entity
         {
-            ToolInstance tool = InventoryScript.getHeldTool();
-            if(tool == null) hit.collider.gameObject.GetComponent<Entity>().takeDamage(1, transform.position.x);
-            else hit.collider.gameObject.GetComponent<Entity>().takeDamage(tool.damage, transform.position.x);
+            Entity entityScript = hit.collider.gameObject.GetComponent<Entity>();
+            if (entityScript != null)
+            {
+                ToolInstance tool = InventoryScript.getHeldTool();
+                if (tool == null) entityScript.takeDamage(1, transform.position.x);
+                else entityScript.takeDamage(tool.damage, transform.position.x);
+            }
 		}
 
         // do punch animation

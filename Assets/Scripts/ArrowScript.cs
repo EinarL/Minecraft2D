@@ -95,7 +95,7 @@ public class ArrowScript : MonoBehaviour
 			Transform playerHead = collision.transform.Find("Steve").Find("Head").transform;
 			if (transform.position.y >= playerHead.position.y) transform.parent = playerHead.transform;
 		}
-		else pickupable = true;
+		else StartCoroutine(setPickupable());
 
 		Destroy(rb);
 		Destroy(arrowCollider);
@@ -118,5 +118,11 @@ public class ArrowScript : MonoBehaviour
 	{
 		yield return new WaitForSeconds(0.5f);
 		if (arrowCollider != null) Physics2D.IgnoreCollision(arrowCollider.GetComponent<Collider2D>(), collider, false); // enable collision with "collider"
+	}
+
+	private IEnumerator setPickupable()
+	{
+		yield return new WaitForSeconds(0.5f);
+		pickupable = true;
 	}
 }

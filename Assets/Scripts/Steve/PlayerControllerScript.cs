@@ -33,6 +33,7 @@ public class PlayerControllerScript : MonoBehaviour
 	private float speed; // this will change to runSpeed when runnning and walkSpeed when walking
     private bool isJumping = false;
     private bool isOnLadder = false;
+    private LadderType ladderType = LadderType.Center; // what kind of ladder the player is next to
     private bool isInAirAfterJumping = false;
     private bool facingRight = true;
     private float animationRunningSpeed = 1.5f;
@@ -330,7 +331,9 @@ public class PlayerControllerScript : MonoBehaviour
 
     private void ladderLogic()
     {
-        if (Input.GetKey(KeyCode.W)) rb.velocity = new Vector2(rb.velocity.x, 5);
+        if (ladderType == LadderType.Right && Input.GetKey(KeyCode.D)) rb.velocity = new Vector2(rb.velocity.x, 5);
+        else if (ladderType == LadderType.Left && Input.GetKey(KeyCode.A)) rb.velocity = new Vector2(rb.velocity.x, 5);
+		else if (Input.GetKey(KeyCode.W)) rb.velocity = new Vector2(rb.velocity.x, 5);
         else if (Input.GetKey(KeyCode.S)) rb.velocity = new Vector2(rb.velocity.x, -6);
 		else rb.velocity = new Vector2(rb.velocity.x, -2.5f);
 
@@ -341,8 +344,16 @@ public class PlayerControllerScript : MonoBehaviour
         // first lets check if there is a ladder tile at the players position
         TileBase tile1 = tilemap.GetTile(tilemap.WorldToCell(new Vector2(groundCheck.position.x, groundCheck.position.y + 1)));
         TileBase tile2 = tilemap.GetTile(tilemap.WorldToCell(groundCheck.position));
-		// if the tile at groundChecks position or the tile above groundChecks position is a ladder, then return true
-		if ((tile1 != null && tile1.name.StartsWith("Ladder")) || (tile2 != null &&  tile2.name.StartsWith("Ladder"))) return true;
+        // if the tile at groundChecks position or the tile above groundChecks position is a ladder, then return true
+        bool tile1IsLadder = tile1 != null && tile1.name.StartsWith("Ladder");
+        bool tile2IsLadder = tile2 != null && tile2.name.StartsWith("Ladder");
+
+		if (tile1IsLadder || tile2IsLadder)
+        {
+            if (tile1IsLadder) ladderType = tile1.name.EndsWith("Right") ? LadderType.Right : (tile1.name.EndsWith("Left") ? LadderType.Left : LadderType.Center);
+            else if (tile2IsLadder) ladderType = tile2.name.EndsWith("Right") ? LadderType.Right : (tile2.name.EndsWith("Left") ? LadderType.Left : LadderType.Center);
+			return true;
+        }
 
 		// now we will check if there is a ladder gameobject at the players position
 		// Create a list to store the results
@@ -356,7 +367,11 @@ public class PlayerControllerScript : MonoBehaviour
 
         foreach (Collider2D blockCollider in blocks)
         {
-            if (blockCollider.gameObject.name.StartsWith("Ladder")) return true;
+            if (blockCollider.gameObject.name.StartsWith("Ladder"))
+            {
+				ladderType = blockCollider.gameObject.name.EndsWith("Right") ? LadderType.Right : (blockCollider.gameObject.name.EndsWith("Left") ? LadderType.Left : LadderType.Center);
+				return true;
+            }
         }
 
 		return false;
@@ -422,5 +437,13 @@ public class PlayerControllerScript : MonoBehaviour
     public bool getIsRunning()
     {
         return isRunning;
+    }
+
+
+    public enum LadderType
+    {
+        Right,
+        Left,
+        Center
     }
 }

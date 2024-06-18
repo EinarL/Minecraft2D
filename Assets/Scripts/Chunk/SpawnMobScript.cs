@@ -11,7 +11,8 @@ public static class SpawnMobScript
 	private static string[] mobs = new string[] { "Zombie", "Spider" };
 	private static Dictionary<string, int> mobMaxClusterSize = new Dictionary<string, int>(){ // {mob, how many of them can spawn in a cluster}
 		{"Zombie", 3},
-		{"Spider", 2}
+		{"Spider", 2},
+		{"Skeleton", 2},
 	};
 
 	// runs on saved chunks (also new)
