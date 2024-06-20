@@ -112,22 +112,26 @@ public static class InventoryScript
 		int itemIndex = 0;
 		for(int i = 0; i < inventory.Length; i++)
 		{
-			while(itemIndex < items.Length && items[itemIndex].isEmpty())
+			if (!inventory[i].isEmpty()) continue;
+			while (itemIndex < items.Length && items[itemIndex].isEmpty())
 			{
 				itemIndex++;
 			}
-			if (itemIndex == items.Length) return null; // we have gone through all items, so return null
-			if (!inventory[i].isEmpty()) continue;
+			if (itemIndex == items.Length) { Debug.Log("does this"); return null; }// we have gone through all items, so return null
 
 			inventory[i] = items[itemIndex];
 			updateSlotVisually(i);
 			itemIndex++;
 		}
-		// Convert the array to a list
-		List<InventorySlot> itemList = items.ToList();
 
 		// return the sublist from itemIndex to the end of the list
-		return itemList.Skip(itemIndex) as List<InventorySlot>;
+		List<InventorySlot> remainingItems = new List<InventorySlot>();
+		for(int i = itemIndex; i < items.Length; i++)
+		{
+			if (!items[i].isEmpty()) remainingItems.Add(items[i]);
+		}
+
+		return remainingItems;
 	}
 
 	/**

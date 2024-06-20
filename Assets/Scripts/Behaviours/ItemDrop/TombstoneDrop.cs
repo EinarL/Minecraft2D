@@ -31,7 +31,6 @@ public class TombstoneDrop : ItemDropBehaviour
 				InventorySlot[] armorSlots = JsonConvert.DeserializeObject<InventorySlot[]>(JsonConvert.SerializeObject(tombstone[3]));
 				// we want to add this inventory to the players inventory, if there isnt space for some items, then we drop them
 				List<InventorySlot> remainingItems = InventoryScript.addItemsToInventory(inventory);
-
 				List<InventorySlot> remainingArmors = armorScript.addArmor(armorSlots); // we want to add this to the players armor slots, otherwise inventory, othewise drop them
 				if(remainingItems != null)
 				{
@@ -41,7 +40,6 @@ public class TombstoneDrop : ItemDropBehaviour
 				{
 					remainingArmors = InventoryScript.addItemsToInventory(remainingArmors.ToArray());
 				}
-
 				if (remainingArmors != null && remainingArmors.Count > 0) // if there are remaining items we need to drop // (ignore the remainingArmors variable name, this list contains all of the items that dont fit in the inv)
 				{
 					List<GameObject> itemsToDrop = new List<GameObject>();
@@ -53,17 +51,16 @@ public class TombstoneDrop : ItemDropBehaviour
 
 						itemObject.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Textures\\ItemTextures\\" + item.itemName); // change item texture 
 
-
-						DroppedItemScript itemScript = itemToDrop.GetComponent<DroppedItemScript>();
-						itemScript.tool = item.toolInstance;
-						itemScript.armor = item.armorInstance;
-
 						for(int i = 0; i < item.amount; i++)
 						{
-							itemsToDrop.Add(itemToDrop);
+							GameObject itemInstance = GameObject.Instantiate(itemToDrop, blockPos, Quaternion.identity);
+
+							DroppedItemScript itemScript = itemInstance.GetComponent<DroppedItemScript>();
+							itemScript.tool = item.toolInstance;
+							itemScript.armor = item.armorInstance;
 						}
 					}
-					return itemsToDrop;
+					return null;
 				}
 				return null;
 			}

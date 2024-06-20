@@ -146,6 +146,7 @@ public class ArmorSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
      */
     public bool addArmorIfThereIsSpace(InventorySlot armor)
     {
+        if (armor.armorInstance == null) return false;
 		if (armor.armorInstance.getArmorType() != armorSlotType) return false; // if this is e.g. a leggings slot and armor is a chestplate
         if (!itemInSlot.isEmpty()) return false;
 

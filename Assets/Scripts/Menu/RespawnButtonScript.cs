@@ -96,6 +96,7 @@ public class RespawnButtonScript : MonoBehaviour
 		float roundedYPos = Mathf.RoundToInt(deathPos.y) - .5f;
 
 		SpawningChunkData.updateChunkData(roundedXPos, roundedYPos, 23, "FrontBackground" ); // update chunk with the tombstone
+		Instantiate(Resources.Load<GameObject>("Prefabs\\Blocks\\Tombstone"), new Vector2(roundedXPos, roundedYPos), Quaternion.identity);
 
 		// save the contents of the tombstone (players inventory & armor)
 		// it will look like: [xPos, yPos, inventory, armor]

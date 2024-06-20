@@ -155,10 +155,10 @@ public class ArmorScript : MonoBehaviour
 	{
 		List<InventorySlot> armorsThatWerentPutOn = new List<InventorySlot>();
 
-		if (!helmetSlot.addArmorIfThereIsSpace(armor[0])) armorsThatWerentPutOn.Add(armor[0]);
-		if (!chestplateSlot.addArmorIfThereIsSpace(armor[1])) armorsThatWerentPutOn.Add(armor[1]);
-		if (!leggingsSlot.addArmorIfThereIsSpace(armor[2])) armorsThatWerentPutOn.Add(armor[2]);
-		if (!bootsSlot.addArmorIfThereIsSpace(armor[3])) armorsThatWerentPutOn.Add(armor[3]);
+		if (armor[0].armorInstance != null && !helmetSlot.addArmorIfThereIsSpace(armor[0])) armorsThatWerentPutOn.Add(armor[0]);
+		if (armor[1].armorInstance != null && !chestplateSlot.addArmorIfThereIsSpace(armor[1])) armorsThatWerentPutOn.Add(armor[1]);
+		if (armor[2].armorInstance != null && !leggingsSlot.addArmorIfThereIsSpace(armor[2])) armorsThatWerentPutOn.Add(armor[2]);
+		if (armor[3].armorInstance != null && !bootsSlot.addArmorIfThereIsSpace(armor[3])) armorsThatWerentPutOn.Add(armor[3]);
 
 		return armorsThatWerentPutOn;
 	}
