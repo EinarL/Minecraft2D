@@ -163,7 +163,7 @@ public class PlaceBlockScript : MonoBehaviour
             else // remove water if there is any at this position
             {
                 removeWater(block);
-				if(block.name.StartsWith("Water")) block.GetComponent<WaterScript>().flow();
+				if(block.name.StartsWith("Water")) block.GetComponent<WaterScript>().startFlowing();
 			}
 
 			// update the chunkData
@@ -533,12 +533,42 @@ public class PlaceBlockScript : MonoBehaviour
             {
                 if(!ReferenceEquals(col.gameObject, ignoredBlock))
                 {
-					// TODO unflow water
 					Destroy(results[0].gameObject);
+                    deflowWater();
 				}
             }
 
 		}
 		
+	}
+
+	// after placing a block on water, this function runs to make the water around it deflow
+	private void deflowWater()
+	{
+		WaterScript belowWater = getWaterAtPosition(new Vector2(hoveringOverPosition.x, hoveringOverPosition.y - 1));
+		if (belowWater != null) belowWater.startDeflowing();
+		WaterScript leftWater = getWaterAtPosition(new Vector2(hoveringOverPosition.x - 1, hoveringOverPosition.y));
+		if (leftWater != null) leftWater.startDeflowing();
+		WaterScript rightWater = getWaterAtPosition(new Vector2(hoveringOverPosition.x + 1, hoveringOverPosition.y));
+		if (rightWater != null) rightWater.startDeflowing();
+
+        // if we placed a block below water then the water above the block might have to flow
+        WaterScript aboveWater = getWaterAtPosition(new Vector2(hoveringOverPosition.x, hoveringOverPosition.y + 1));
+		if (aboveWater != null) aboveWater.startFlowing();
+	}
+
+	private WaterScript getWaterAtPosition(Vector2 pos)
+	{
+		ContactFilter2D filter = new ContactFilter2D();
+		filter.SetLayerMask(LayerMask.GetMask("Water"));
+
+		// Create a list to store the results
+		List<Collider2D> results = new List<Collider2D>();
+
+		// Check for overlaps
+		Physics2D.OverlapCircle(pos, 0.45f, filter, results);
+		if (results.Count == 0) return null;
+		if (results.Count > 1) Debug.LogError("PlaceBlockScript: Found more than one water blocks at position: " + pos);
+		return results[0].gameObject.GetComponent<WaterScript>();
 	}
 }

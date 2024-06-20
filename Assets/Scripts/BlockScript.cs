@@ -261,11 +261,11 @@ public class BlockScript : MonoBehaviour
 	private void checkForWater()
 	{
 		WaterScript aboveWater = getWaterAtPosition(new Vector2(transform.position.x, transform.position.y + 1));
-		if (aboveWater != null) aboveWater.flow();
+		if (aboveWater != null) aboveWater.startFlowing();
 		WaterScript leftWater = getWaterAtPosition(new Vector2(transform.position.x - 1, transform.position.y));
-		if (leftWater != null) leftWater.flow();
+		if (leftWater != null) leftWater.startFlowing();
 		WaterScript rightWater = getWaterAtPosition(new Vector2(transform.position.x + 1, transform.position.y));
-		if (rightWater != null) rightWater.flow();
+		if (rightWater != null) rightWater.startFlowing();
 	}
 
 	private WaterScript getWaterAtPosition(Vector2 pos)

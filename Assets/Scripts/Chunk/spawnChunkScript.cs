@@ -525,7 +525,7 @@ public class spawnChunkScript : MonoBehaviour
 			{
 				foreach (WaterScript water in waterToFlow)
 				{
-						water.flow();
+						if(water != null) water.startFlowing();
 				}
 				waterToFlow = new HashSet<WaterScript>();
 			});
