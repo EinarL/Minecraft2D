@@ -25,7 +25,12 @@ public class spawnChunkScript : MonoBehaviour
 	private Dictionary<int, ParticleSystem> snowParticleSystems = new Dictionary<int, ParticleSystem>(); 
 	private HashSet<WaterScript> waterToFlow = new HashSet<WaterScript>(); // when we finish rendering a chunk then we need all of these water blocks to flow
 
-    private int lowestBlockPos = -60;
+	// water by the right and leftmost chunk border needs to be notified when to flow in order to not flow outside of the chunk and into the void
+	// therefore we have a list of observers which will be notified when the next chunk is rendered and then they will flow
+	public HashSet<WaterScript> rightChunkWaterToFlow = new HashSet<WaterScript>();
+	public HashSet<WaterScript> leftChunkWaterToFlow = new HashSet<WaterScript>();
+
+	private int lowestBlockPos = -60;
     private int rendered; // leftmost chunk that is rendered
     public bool pauseChunkRendering = false;
 
@@ -285,6 +290,17 @@ public class spawnChunkScript : MonoBehaviour
         sunLightMovementScript.addChunkHeight(chunkData.getVerticalLineHeights());
         SpawningChunkData.addRenderedChunk(chunkData, !fromRight);
 
+		if (!fromRight) // if rendering right chunk (i.e. rendering from left to right)
+		{
+			waterToFlow.UnionWith(rightChunkWaterToFlow);
+			rightChunkWaterToFlow = new HashSet<WaterScript>();
+		}
+		else
+		{
+			waterToFlow.UnionWith(leftChunkWaterToFlow);
+			leftChunkWaterToFlow = new HashSet<WaterScript>();
+		}
+
 		renderSavedChunk(chunkData, !fromRight);
 	}
 
@@ -348,8 +364,38 @@ public class spawnChunkScript : MonoBehaviour
 
 		Task.Run(() => SpawningChunkData.removeAndSaveChunkByChunkPosition(chunkPos)); // save
 
+		addWaterToObserverList(chunkPos > transform.position.x, chunkPos > transform.position.x ? chunkPos - 0.5f : chunkPos + 10.5f);
+
 		// remove tiles
 		removeTilesInChunk(chunkPos);
+	}
+	/**
+	 * when we unrender a chunk we need to add the water by the chunk edge on the left/right-most chunk (not the chunk being unrendered but the one next to it)
+	 * to the observer list so that the water will then be notified to flow again when the chunk (that was being unrendered)
+	 * will render again
+	 */
+	private void addWaterToObserverList(bool rightChunk, float vLineXPosition)
+	{
+		if(rightChunk) rightChunkWaterToFlow = new HashSet<WaterScript>();
+		else leftChunkWaterToFlow = new HashSet<WaterScript>();
+
+		ContactFilter2D filter = new ContactFilter2D();
+		filter.SetLayerMask(LayerMask.GetMask("Water"));
+
+		Vector2 center = new Vector2(vLineXPosition, (SpawningChunkData.maxBuildHeight + lowestBlockPos) / 2);
+		Vector2 size = new Vector2(0.5f, SpawningChunkData.maxBuildHeight + Math.Abs(lowestBlockPos));
+
+		// Create a list to store the results
+		List<Collider2D> results = new List<Collider2D>();
+
+		// Check for overlaps
+		Physics2D.OverlapBox(center, size, 0f, filter, results);
+
+		foreach(Collider2D collider in results)
+		{
+			if(rightChunk) rightChunkWaterToFlow.Add(collider.gameObject.GetComponent<WaterScript>());
+			else leftChunkWaterToFlow.Add(collider.gameObject.GetComponent<WaterScript>());
+		}
 	}
 
     private List<Collider2D> getCollidersWithinChunk(int chunkPos, ContactFilter2D filter)
@@ -368,7 +414,7 @@ public class spawnChunkScript : MonoBehaviour
     /**
      * loads a chunk that has been saved. loads the chunk from left to right.
      */
-    void renderSavedChunk(ChunkData chunkData, bool goingRight)
+	void renderSavedChunk(ChunkData chunkData, bool goingRight)
     {
 		int[,] chunk = chunkData.getChunkData(); //  2d array of the contents of the chunk, each integer represents a block ID (0 = no block)
         List<float[]> frontBackgroundBlocks = chunkData.getFrontBackgroundBlocks(); // list of type {[x,y, blockID]}, blocks that go on the FrontBackground layer

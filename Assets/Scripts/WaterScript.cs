@@ -9,11 +9,13 @@ public class WaterScript : MonoBehaviour
     public int waterState = 0; // goes from 0 to 7 (inclusive), where 0 is full water (still water) and 7 is very low water
     private bool isFlowing = false; // is the water stillwater or is it flowing
     private Animator anim;
+    private spawnChunkScript scScript;
     private int checkedWaterState = 0; // the state on the water block that we previously found by calling getBlockAtPosition()
 
 	void Awake()
 	{
 		anim = transform.Find("Image").GetComponent<Animator>();
+        scScript = GameObject.Find("Main Camera").GetComponent<spawnChunkScript>();
 	}
 
 	// Start is called before the first frame update
@@ -59,12 +61,20 @@ public class WaterScript : MonoBehaviour
         // at this point we know that there is a block below us, so we can flow right and/or left (depending on what blocks are right and left)
 
         BlockType rightBlock = getRightBlock();
-        if(rightBlock == BlockType.None && SpawningChunkData.getRightMostChunkEdge() > transform.position.x + 1) createWaterBlock(Direction.Right, waterState + 1);
-        else if(rightBlock == BlockType.Water && waterState < checkedWaterState) replaceWaterBlock(Direction.Right, waterState + 1);
+        if (rightBlock == BlockType.None)
+        {
+            if (SpawningChunkData.getRightMostChunkEdge() > transform.position.x + 1) createWaterBlock(Direction.Right, waterState + 1); 
+            else scScript.rightChunkWaterToFlow.Add(this); // if water is flowing out of map
+		}
+        else if (rightBlock == BlockType.Water && waterState < checkedWaterState) replaceWaterBlock(Direction.Right, waterState + 1);
 
 		BlockType leftBlock = getLeftBlock();
-		if (leftBlock == BlockType.None && SpawningChunkData.getLeftMostChunkEdge() < transform.position.x - 1) createWaterBlock(Direction.Left, waterState + 1);
-		else if (leftBlock == BlockType.Water && waterState < checkedWaterState) replaceWaterBlock(Direction.Left, waterState + 1);
+        if (leftBlock == BlockType.None)
+        {
+            if (SpawningChunkData.getLeftMostChunkEdge() < transform.position.x - 1) createWaterBlock(Direction.Left, waterState + 1);
+			else scScript.leftChunkWaterToFlow.Add(this); // if water is flowing out of map
+		}
+        else if (leftBlock == BlockType.Water && waterState < checkedWaterState) replaceWaterBlock(Direction.Left, waterState + 1);
 	}
 
 	private void createWaterBlock(Direction direction, int state)
