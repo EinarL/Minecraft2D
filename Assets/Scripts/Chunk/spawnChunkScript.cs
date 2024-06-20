@@ -23,7 +23,7 @@ public class spawnChunkScript : MonoBehaviour
 
 	// the snow particle systems that are being rendered, the key is the chunk position
 	private Dictionary<int, ParticleSystem> snowParticleSystems = new Dictionary<int, ParticleSystem>(); 
-
+	private HashSet<WaterScript> waterToFlow = new HashSet<WaterScript>(); // when we finish rendering a chunk then we need all of these water blocks to flow
 
     private int lowestBlockPos = -60;
     private int rendered; // leftmost chunk that is rendered
@@ -310,8 +310,7 @@ public class spawnChunkScript : MonoBehaviour
     {
 		// Create a collision filter to only include colliders in these layers
 		ContactFilter2D filter = new ContactFilter2D();
-		filter.SetLayerMask(LayerMask.GetMask("Default") | LayerMask.GetMask("FrontBackground") | LayerMask.GetMask("BackBackground") | LayerMask.GetMask("Entity") | LayerMask.GetMask("Item"));
-
+		filter.SetLayerMask(LayerMask.GetMask("Default") | LayerMask.GetMask("FrontBackground") | LayerMask.GetMask("BackBackground") | LayerMask.GetMask("Entity") | LayerMask.GetMask("Item") | LayerMask.GetMask("Water"));
 
 		List<Collider2D> results = getCollidersWithinChunk(chunkPos, filter);
 
@@ -460,12 +459,12 @@ public class spawnChunkScript : MonoBehaviour
 			{
 				for (int y = 0; y < chunk.GetLength(1); y++)
 				{
-					if (41 <= chunk[x, y] && chunk[x, y] <= 56) // if its a door
+					if ((41 <= chunk[x, y] && chunk[x, y] <= 56) || chunk[x, y] == 61) // if its a door || water
 					{
 						int blockID = chunk[x, y];
 						float xBlockPos = xPos + SpawningChunkData.blockSize * x;
 						float yBlockPos = yPos - SpawningChunkData.blockSize * y;
-						mainThreadDispatcher.enqueue(() => instantiateBlock(blockID, xBlockPos, yBlockPos)); // make the main thread do this
+						mainThreadDispatcher.enqueue(() => instantiateBlock(blockID, xBlockPos, yBlockPos, blockID == 61 ? "Water" : "Default")); // make the main thread do this
 						tiles[index] = null;
 					}
 					else
@@ -476,6 +475,15 @@ public class spawnChunkScript : MonoBehaviour
 					index++;
 				}
 			}
+			mainThreadDispatcher.enqueue(() =>
+			{
+				foreach (WaterScript water in waterToFlow)
+				{
+						water.flow();
+				}
+				waterToFlow = new HashSet<WaterScript>();
+			});
+			
 		});
 
         tilemap.SetTiles(tilePositions, tiles);
@@ -565,6 +573,8 @@ public class spawnChunkScript : MonoBehaviour
 			blockRenderer.color = new Color(170f / 255f, 170f / 255f, 170f / 255f); // dark tint
 			blockRenderer.sortingOrder = -10;
 		}
+
+		if (layer.Equals("Water")) waterToFlow.Add(spawnedBlock.GetComponent<WaterScript>());
 
 	}
 	// returns the position of the tile, if the tile was set, otherwise Vector3Int(-100, -100)

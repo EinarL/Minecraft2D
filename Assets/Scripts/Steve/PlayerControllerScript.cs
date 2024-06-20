@@ -80,6 +80,14 @@ public class PlayerControllerScript : MonoBehaviour
 
 			transform.position = new Vector2(playerPosition[0], playerPosition[1]);
 		}
+
+        rb.constraints = RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation; // make the player not fall through blocks while the world is loading
+        IEnumerator removeRBConstraints()
+        {
+            yield return new WaitForSeconds(0.5f);
+			rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+		}
+        StartCoroutine(removeRBConstraints());
 	}
 
 	// Update is called once per frame

@@ -39,7 +39,7 @@ public class ChunkData
 
 	public void changeBlock(float x, float y, int newBlockID, string layer = "Default")
 	{
-		if (layer.Equals("Default"))
+		if (layer.Equals("Default") || layer.Equals("Water"))
 		{
 			chunkData[(int)x, (int)y] = newBlockID;
 		}

@@ -144,7 +144,7 @@ public class CraftingSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerE
 
 		if (addAll)
 		{
-			if (itemsPickedUp.itemName.Equals(itemInSlot.itemName)) // if we're putting the same item type that already is in this slot
+			if (itemsPickedUp.itemName.Equals(itemInSlot.itemName) && !BlockHashtable.isNotStackable(itemInSlot.itemName)) // if we're putting the same item type that already is in this slot
 			{
 				int leftOver = itemInSlot.addItemsToSlot(itemsPickedUp.itemName, itemsPickedUp.amount);
 				itemsPickedUp.amount = leftOver;
@@ -210,7 +210,7 @@ public class CraftingSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerE
 			int amount = int.Parse(amountText.text);
 			string itemInSlot = "";
 			if (itemImage.activeSelf) itemInSlot = itemImage.GetComponent<Image>().sprite.name; // "itemImage.activeSelf" basically means: is there an item in this slot
-			if (itemInSlot == "" || (itemInSlot.Equals(InventoryScript.getItemsPickedUp().itemName) && amount < 64)) // if the slot is empty or has the same item with amount < 64
+			if (itemInSlot == "" || (itemInSlot.Equals(InventoryScript.getItemsPickedUp().itemName) && amount < 64 && !BlockHashtable.isNotStackable(InventoryScript.getItemsPickedUp().itemName))) // if the slot is empty or has the same item with amount < 64
 			{
 				// then we can place one of the held items in this slot
 				bool isStillHoldingItems = addPickedUpItemsToSlot(InventoryScript.getItemsPickedUp(), false);

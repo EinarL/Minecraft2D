@@ -107,7 +107,7 @@ public class InventorySlot
 	{
         if(this.itemName.Equals(itemName))
         {
-            if (amount >= 64) return false;
+            if (amount >= 64 || BlockHashtable.isNotStackable(itemName)) return false;
             amount++;
             return true;
         }

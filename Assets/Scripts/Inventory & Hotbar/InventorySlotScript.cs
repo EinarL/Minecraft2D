@@ -168,7 +168,7 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
 			int amount = int.Parse(amountText.text);
             string itemInSlot = "";
 			if(itemImage.activeSelf) itemInSlot = itemImage.GetComponent<Image>().sprite.name; // "itemImage.activeSelf" basically means: is there an item in this slot
-			if (itemInSlot.Equals("") || (itemInSlot.Equals(InventoryScript.getItemsPickedUp().itemName) && amount < 64)) // if the slot is empty or has the same item with amount < 64
+			if (itemInSlot.Equals("") || (itemInSlot.Equals(InventoryScript.getItemsPickedUp().itemName) && amount < 64 && !BlockHashtable.isNotStackable(InventoryScript.getItemsPickedUp().itemName))) // if the slot is empty or has the same item with amount < 64 (and the item is stackable)
 			{
                 // then we can place one of the held items in this slot
                 bool isStillHoldingItems = InventoryScript.addPickedUpItemsToSlot(slotNumber, false);

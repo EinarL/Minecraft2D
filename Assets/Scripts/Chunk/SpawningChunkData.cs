@@ -50,6 +50,7 @@ public static class SpawningChunkData
 		switch (layer)
 		{
 			case "Default":
+			case "Water":
 				int[] indexes = worldPosToChunkArrayIndex(x, y, correspondingChunk.getChunkPosition());
 				correspondingChunk.changeBlock(indexes[0], indexes[1], newBlockID, layer);
 				break;

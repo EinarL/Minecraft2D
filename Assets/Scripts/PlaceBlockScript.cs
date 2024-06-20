@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using static Unity.Collections.AllocatorManager;
+using static UnityEditor.PlayerSettings;
 using static UnityEngine.UI.Image;
 
 
@@ -159,6 +160,11 @@ public class PlaceBlockScript : MonoBehaviour
 			{
 				block.layer = LayerMask.NameToLayer("FrontBackground");
 			}
+            else // remove water if there is any at this position
+            {
+                removeWater(block);
+				if(block.name.StartsWith("Water")) block.GetComponent<WaterScript>().flow();
+			}
 
 			// update the chunkData
 			if (block != null) SpawningChunkData.updateChunkData(block.transform.position.x, block.transform.position.y, BlockHashtable.getIDByBlockName(block.name), LayerMask.LayerToName(block.layer));
@@ -183,6 +189,7 @@ public class PlaceBlockScript : MonoBehaviour
      */
 	private void placeBlockInBackground()
 	{
+        if (holdingItem.name.Equals("Water")) return; // cant place water in the background
 		List<GameObject> placedBlocks = placeBlock();
 
 		foreach (GameObject block in placedBlocks)
@@ -229,7 +236,12 @@ public class PlaceBlockScript : MonoBehaviour
 		}
 		else placedBlocks = new List<GameObject>() { Instantiate(holdingItem, hoveringOverPosition, Quaternion.identity) }; // place block
 		InventoryScript.decrementSlot(InventoryScript.getSelectedSlot()); // remove the block from the inventory
-        playPlaceBlockAnimation();
+        if (placedBlocks[0].name.StartsWith("Water"))
+        {
+            InventoryScript.setSelectedSlotItem(new InventorySlot("Bucket"));
+        }
+
+		playPlaceBlockAnimation();
 
 		foreach (GameObject block in placedBlocks)
         {
@@ -286,7 +298,8 @@ public class PlaceBlockScript : MonoBehaviour
     {
         // special case if the player is holding a bed. because there isnt a bed block, but rather a bedUpper and bedLower blocks (similar for doors)
         if(itemName.Equals("Bed")) holdingItem = Resources.Load<GameObject>("Prefabs\\Blocks\\BedUpperLeft");
-		else if (itemName.StartsWith("Door"))holdingItem = Resources.Load<GameObject>("Prefabs\\Blocks\\Door" + itemName.Replace("Door", "") + "TopRight");
+		else if (itemName.StartsWith("Door")) holdingItem = Resources.Load<GameObject>("Prefabs\\Blocks\\Door" + itemName.Replace("Door", "") + "TopRight");
+        else if (itemName.Equals("WaterBucket")) holdingItem = Resources.Load<GameObject>("Prefabs\\Blocks\\Water");
 		else holdingItem = Resources.Load<GameObject>("Prefabs\\Blocks\\" +  itemName);
 
         if (rightClickItemBehaviour != null) rightClickItemBehaviour.stopHoldingRightClick(false); // previously held item might have e.g. been a bow and if we are holding right click while switching items, then we call this function
@@ -503,4 +516,29 @@ public class PlaceBlockScript : MonoBehaviour
         return false;
 	}
 
+    // removes water if there is any at the cursors position
+	private void removeWater(GameObject ignoredBlock)
+    {
+		ContactFilter2D filter = new ContactFilter2D();
+		filter.SetLayerMask(LayerMask.GetMask("Water"));
+
+		// Create a list to store the results
+		List<Collider2D> results = new List<Collider2D>();
+
+		// Check for overlaps
+		Physics2D.OverlapCircle(hoveringOverPosition, 0.45f, filter, results);
+        if (results.Count > 0)
+        {
+            foreach (Collider2D col in results)
+            {
+                if(!ReferenceEquals(col.gameObject, ignoredBlock))
+                {
+					// TODO unflow water
+					Destroy(results[0].gameObject);
+				}
+            }
+
+		}
+		
+	}
 }

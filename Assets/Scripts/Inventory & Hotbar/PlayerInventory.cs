@@ -112,7 +112,7 @@ public class PlayerInventory : MonoBehaviour
 
 		
         bool didPickup;
-		if (itemTool != null || itemArmor != null) // if the item is a tool or armor
+		if (itemTool != null || itemArmor != null || BlockHashtable.isNotStackable(itemName)) // if the item is a tool or armor or unstackable item
         {
 			didPickup = InventoryScript.addToInventory(itemTool, itemArmor, itemName); // add tool or armor to inventory
         }

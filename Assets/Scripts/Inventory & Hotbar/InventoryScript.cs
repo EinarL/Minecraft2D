@@ -145,7 +145,7 @@ public static class InventoryScript
 			return true;
 		}
 
-		if (itemsPickedUp.isTool() || itemsPickedUp.isArmor())
+		if (itemsPickedUp.isTool() || itemsPickedUp.isArmor() || BlockHashtable.isNotStackable(itemsPickedUp.itemName))
 		{
 			if (!inventory[slotNumber].isEmpty()) // if the slot is not empty
 			{
@@ -323,6 +323,13 @@ public static class InventoryScript
 	public static void setItemsPickedUp(InventorySlot item)
 	{
 		itemsPickedUp = item;
+	}
+
+	public static void setSelectedSlotItem(InventorySlot item)
+	{
+		int selectedSlot = hotbarScript.getSelectedSlot();
+		inventory[selectedSlot] = item;
+		updateSlotVisually(selectedSlot);
 	}
 
 	/**

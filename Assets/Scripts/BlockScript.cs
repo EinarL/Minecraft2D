@@ -154,6 +154,7 @@ public class BlockScript : MonoBehaviour
 		// check if above block is fallType, then make it fall
 		checkIfAboveBlockIsFallType();
 		checkIfAboveIsNoFloatType(); // check if the block above is cactus, then make it break instantly
+		checkForWater(); // chekc if the blocks around it is water, then make it flow
 
 		// if this block was a furnace, then we need to drop the items that were in the furnace
 		if (gameObject.name.Equals("Furnace")) openFurnaceScript.removeFurnace(transform.position);
@@ -254,6 +255,32 @@ public class BlockScript : MonoBehaviour
 		{
 			if (c.gameObject.tag.Equals("NoFloatType")) c.gameObject.GetComponent<BlockScript>().breakBlock();
 		}
+	}
+
+	// after breaking a block this function runs to make the water around it flow
+	private void checkForWater()
+	{
+		WaterScript aboveWater = getWaterAtPosition(new Vector2(transform.position.x, transform.position.y + 1));
+		if (aboveWater != null) aboveWater.flow();
+		WaterScript leftWater = getWaterAtPosition(new Vector2(transform.position.x - 1, transform.position.y));
+		if (leftWater != null) leftWater.flow();
+		WaterScript rightWater = getWaterAtPosition(new Vector2(transform.position.x + 1, transform.position.y));
+		if (rightWater != null) rightWater.flow();
+	}
+
+	private WaterScript getWaterAtPosition(Vector2 pos)
+	{
+		ContactFilter2D filter = new ContactFilter2D();
+		filter.SetLayerMask(LayerMask.GetMask("Water"));
+
+		// Create a list to store the results
+		List<Collider2D> results = new List<Collider2D>();
+
+		// Check for overlaps
+		Physics2D.OverlapCircle(pos, 0.45f, filter, results);
+		if (results.Count == 0) return null;
+		if (results.Count > 1) Debug.LogError("BlockScript: Found more than one water blocks at position: " + pos);
+		return results[0].gameObject.GetComponent<WaterScript>();
 	}
 
 	private GameObject getAboveBlock(ContactFilter2D contactFilter)

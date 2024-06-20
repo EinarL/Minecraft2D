@@ -18,6 +18,7 @@ public static class BlockHashtable
 	private static Hashtable blockNameToPlaceAudioIndex; // what audio plays when a block is placed
 	private static Hashtable blockToID = new Hashtable();
 	private static Hashtable placeBlockBehaviours = new Hashtable();
+	private static HashSet<string> unstackableItems = new HashSet<string>();
 	private static Object[] blockObjects;
 	private static Tile[] blockTileTextures;
 	private static List<AudioClip[]> placeBlockAudio = new List<AudioClip[]>();
@@ -148,6 +149,7 @@ public static class BlockHashtable
 			{ 58, getBlockWithName("Ladder")},
 			{ 59, getBlockWithName("LadderLeft")},
 			{ 60, getBlockWithName("LadderRight")},
+			{ 61, getBlockWithName("Water")}
 		};
 
 		// contains behaviours for blocks that need special functionality upon placing the block, e.g. torches need to be rotated to be placed on right/left wall
@@ -157,7 +159,7 @@ public static class BlockHashtable
 			{"Ladder", new PlaceLadder()},
 			{"BedUpperLeft", new PlaceBed()},
 			{"DoorOakTopRight", new PlaceDoor()},
-			{"DoorSpruceTopRight", new PlaceDoor()}
+			{"DoorSpruceTopRight", new PlaceDoor()},
 		};
 
 		// maps blocks to which index in the placeBlockAudio list is the place block sound for the block
@@ -190,7 +192,15 @@ public static class BlockHashtable
 			{"BedLowerRight", 5},
 		};
 
-		foreach(DictionaryEntry entry in blocks) // create the opposite type of hashtable, i.e. block to ID
+		unstackableItems = new HashSet<string>() // tools and armors dont have to be in here despite being unstackable
+		{
+			{"Bucket"},
+			{"WaterBucket"}
+		};
+
+
+
+		foreach (DictionaryEntry entry in blocks) // create the opposite type of hashtable, i.e. block to ID
 		{
 			if((int)entry.Key != 2) blockToID[((GameObject)entry.Value).name] = entry.Key;
 		}
@@ -256,6 +266,11 @@ public static class BlockHashtable
 	public static int getIDByBlockName(string blockName)
 	{
 		return (int)blockToID[blockName];
+	}
+
+	public static bool isNotStackable(string itemName)
+	{
+		return unstackableItems.Contains(itemName);
 	}
 
 	// gets the block id that will be behind the mined block

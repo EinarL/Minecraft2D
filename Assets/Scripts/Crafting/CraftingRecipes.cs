@@ -396,6 +396,13 @@ public static class CraftingRecipes
 			new object[] { "Stick", new Vector2(2, 2) },
 		}, new InventorySlot("Ladder", 3)
 		},
+
+		// bucket
+		new object[]{ "IronIngot", new object[] {
+			new object[] { "IronIngot", new Vector2(-1, 1) },
+			new object[] { "IronIngot", new Vector2(1, 1) },
+		}, new InventorySlot("WaterBucket", 1) // TODO: change to normal bucket
+		},
 	};
 
 	public static List<object[]> getRecipesByLeftBottomMostItem(string itemName)

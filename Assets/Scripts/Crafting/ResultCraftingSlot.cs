@@ -104,7 +104,7 @@ public class ResultCraftingSlot : MonoBehaviour, IPointerEnterHandler, IPointerE
 		}
 		else // if the player has picked up something
 		{
-			if (itemInSlot.isTool() || itemInSlot.isArmor()) return;
+			if (itemInSlot.isTool() || itemInSlot.isArmor() || BlockHashtable.isNotStackable(itemInSlot.itemName)) return;
 			int amount = itemInSlot.amount;
 			string itemToPickup = itemInSlot.itemName;
 

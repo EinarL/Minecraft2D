@@ -188,7 +188,7 @@ public class FurnaceSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerEx
 	
 	private bool addPickedUpItemsToSlot(InventorySlot heldItems, bool addAll)
 	{
-		// TODO: if held items is armor, then return
+		if (heldItems.isArmor()) return true; // if held items is armor, then return
 
 		if (heldItems.isTool())
 		{
@@ -208,7 +208,7 @@ public class FurnaceSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
 		if (addAll)
 		{
-			if (heldItems.itemName.Equals(itemInSlot.itemName)) // if we're putting the same item type that already is in this slot
+			if (heldItems.itemName.Equals(itemInSlot.itemName) && !BlockHashtable.isNotStackable(itemInSlot.itemName)) // if we're putting the same item type that already is in this slot
 			{
 
 				int leftOver = itemInSlot.addItemsToSlot(heldItems.itemName, heldItems.amount);

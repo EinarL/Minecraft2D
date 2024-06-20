@@ -243,9 +243,11 @@ public class BreakBlockScript : MonoBehaviour
 			GameObject objectToReturn = null;
 			for (int i = 0; i < blockToBreak.Count; i++)
 			{
-				if (blockToBreak[i].gameObject.name.StartsWith("Door")) return blockToBreak[i].gameObject;
-				if (objectToReturn == null && highestPriority.Contains(blockToBreak[i].gameObject.name)) objectToReturn = blockToBreak[i].gameObject;
-				if (lowestPriority.Contains(blockToBreak[i].gameObject.name)) return i == 0 ? blockToBreak[1].gameObject : blockToBreak[0].gameObject;
+				if (blockToBreak[i].gameObject.layer == LayerMask.NameToLayer("FrontBackground")) return blockToBreak[i].gameObject;
+				else if (blockToBreak[i].gameObject.layer == LayerMask.NameToLayer("Default")) objectToReturn =  blockToBreak[i].gameObject;
+				else if (objectToReturn == null && blockToBreak[i].gameObject.name.StartsWith("Door")) objectToReturn = blockToBreak[i].gameObject;
+				else if (objectToReturn == null && highestPriority.Contains(blockToBreak[i].gameObject.name)) objectToReturn = blockToBreak[i].gameObject;
+				else if (lowestPriority.Contains(blockToBreak[i].gameObject.name)) return i == 0 ? blockToBreak[1].gameObject : blockToBreak[0].gameObject;
 			}
 			if (objectToReturn != null) return objectToReturn;
 		}
