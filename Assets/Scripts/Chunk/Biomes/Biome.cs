@@ -245,51 +245,31 @@ public abstract class Biome
 		List<object[]> entitiesInCave = new List<object[]>();
 
 		int[] verticalLine = new int[maxAmountOfBlocksInLine]; // represents the blocks in the line with the blocks ID's // on the Default layer
-		int spawnCaveIn = -1; // if this is a positive number, then we should start spawning a cave in spawnCaveIn blocks.
+
 		int[] caveSpawnInfo = new int[] { };
+		int spawnCaveIn = -1; // if this is a positive number, then we should start spawning a cave in spawnCaveIn blocks.
 
 		int i;
 		for (i = 0; i < 4; i++) // first, spawn in four blocks of dirt/sand
 		{
-			if (spawnCaveIn == -1)
+			if (spawnCaveIn == -1) // if were not currently spawning a cave
 			{
-				caveSpawnInfo = decideIfSpawnCave(prevVerticalLine, startBlockIndex, prevLineHeight, i == 0); // returns int[]{-1 if we shouldn't spawn a cave, caveOffset, caveHeight}
-				if (caveSpawnInfo[0] != -1)
-				{
-					spawnCaveIn = caveSpawnInfo[1];
-					if (spawnCaveIn == 0)
-					{	
-						spawnCaveIn = -1;
-
-						for(int _ = 0; _ < caveSpawnInfo[2]; _++)
-						{
-							if (i == 0) backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(startBlockIndex), topBlockID }); // e.g. grass block/sand
-							else if (i < 4) backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(startBlockIndex), secondBlockID }); // dirt/sand
-							else backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(startBlockIndex), 3 }); // stone
-							i++;
-							startBlockIndex++;
-						}
-					}
-					spawnCaveIn--;
-					continue;
-				}
+				caveSpawnInfo = CaveSpawnScript.decideIfSpawnCave(prevVerticalLine, startBlockIndex, i == 0); // returns int[]{-1 if we shouldn't spawn a cave, caveOffset, caveHeight}
+				if (caveSpawnInfo[0] != -1) spawnCaveIn = caveSpawnInfo[1];
 			}
-			else if (spawnCaveIn > 0) spawnCaveIn--;
-			else
+			if (spawnCaveIn > 0) spawnCaveIn--;
+			else if(spawnCaveIn != -1)
 			{	// spawn cave
 				spawnCaveIn = -1;
-
-				for (int _ = 0; _ < caveSpawnInfo[2]; _++)
+				CaveSpawnScript.spawnCave(caveSpawnInfo[2], xPos, startBlockIndex, i, topBlockID, secondBlockID, backgroundVisualBlocks);
+				i += caveSpawnInfo[2];
+				startBlockIndex += caveSpawnInfo[2];
+				if (i >= 4)
 				{
-					if (i == 0) backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(startBlockIndex), topBlockID }); // e.g. grass block/sand
-					else if (i < 4) backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(startBlockIndex), secondBlockID }); // dirt/sand
-					else backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(startBlockIndex), 3 }); // stone
-					i++;
-					startBlockIndex++;
-				}
-				continue;
-			}
 
+					break;
+				}
+			}
 
 			if (i == 0)
 			{
@@ -304,42 +284,18 @@ public abstract class Biome
 		{
 			if (spawnCaveIn == -1)
 			{
-				// returns int[]{-1 if we shouldn't spawn a cave, caveOffset, caveHeight}
-				caveSpawnInfo = decideIfSpawnCave(prevVerticalLine, startBlockIndex, prevLineHeight, false);
-				
-				if (caveSpawnInfo[0] != -1)
-				{
-					//Debug.Log("spawning cave with height: " + caveSpawnInfo[2]);
-					spawnCaveIn = caveSpawnInfo[1];
-					if (spawnCaveIn == 0) // spawn cave
-					{
-						for(int j = startBlockIndex; j < startBlockIndex + caveSpawnInfo[2]; j++)
-						{
-							backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(j), 3 }); // add background visual blocks for the cave
-						}
-						startBlockIndex += caveSpawnInfo[2]; // spawn cave
-						spawnCaveIn = -1;
-						AddToListIfNotNull(entitiesInCave, SpawnMobScript.decideIfSpawnMobInCave(xPos, blockIndexToYPosition(startBlockIndex))); // maybe spawn mob in cave
-						continue;
-					}
-					// else
-					spawnCaveIn--;
-				}
+				caveSpawnInfo = CaveSpawnScript.decideIfSpawnCave(prevVerticalLine, startBlockIndex, false); // returns int[]{-1 if we shouldn't spawn a cave, caveOffset, caveHeight}
+				if (caveSpawnInfo[0] != -1) spawnCaveIn = caveSpawnInfo[1];
 			}
-			else if (spawnCaveIn > 0) spawnCaveIn--;
-			else
+			if (spawnCaveIn > 0) spawnCaveIn--;
+			else if (spawnCaveIn != -1) // spawn cave
 			{
-				// here we should spawn in a cave
-				for (int j = startBlockIndex; j < startBlockIndex + caveSpawnInfo[2]; j++)
-				{
-					backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(j), 3 }); // add background visual blocks for the cave
-				}
-				startBlockIndex += caveSpawnInfo[2]; // spawn cave
 				spawnCaveIn = -1;
+				CaveSpawnScript.spawnCave(caveSpawnInfo[2], xPos, startBlockIndex, backgroundVisualBlocks);
+				startBlockIndex += caveSpawnInfo[2]; 
 				AddToListIfNotNull(entitiesInCave, SpawnMobScript.decideIfSpawnMobInCave(xPos, blockIndexToYPosition(startBlockIndex))); // maybe spawn mob in cave
-				continue;
+				if (startBlockIndex >= verticalLine.Length - 1) break;
 			}
-
 
 			int aboveBlockID = verticalLine[startBlockIndex - 1];
 
@@ -357,35 +313,6 @@ public abstract class Biome
 		verticalLine[139] = 4; // bedrock is last block
 
 		return new object[] { verticalLine, backgroundVisualBlocks, entitiesInCave};
-	}
-	/**
-	 * 
-	 * returns int[]{-1 if we shouldn't spawn a cave, caveOffset, caveHeight}
-	 */
-	protected int[] decideIfSpawnCave(int[] prevVerticalLine, int blockIndex, float prevLineHeight, bool atTop)
-	{
-		int checkCaveOffset = atTop ? 0 : 2; // how many blocks below the "current height" will you check if there was a cave in the previous 
-		// lets check if we are in the process of spawning in a cave 
-		// if prevVerticalLine != null && we are underground && not by the end of the list (close to bedrock) && there is a cave on the prev line (we check 2 blocks below bcuz caves can go 2 blocks up)
-		if (prevVerticalLine != null && blockIndexToYPosition(blockIndex) <= prevLineHeight && blockIndex+5 < prevVerticalLine.Length && prevVerticalLine[blockIndex+checkCaveOffset] == 0)
-		{
-			int caveHeight = 1;
-			int caveIndex = blockIndex + 3;
-			while (prevVerticalLine[caveIndex] == 0) // find the height of the cave
-			{
-				caveHeight++;
-				caveIndex++;
-			}
-			if (caveHeight <= 1) return new int[] { -1 };
-			int[] caveOffsetAndHeight = CaveSpawnScript.continueSpawningCave(caveHeight, (int)blockIndexToYPosition(blockIndex+2));
-			if (caveOffsetAndHeight[0] == -1 ) return caveOffsetAndHeight;
-			if (atTop && (caveOffsetAndHeight[0] < 2 || caveOffsetAndHeight[0] == 4)) caveOffsetAndHeight[0] = 2; // if were at the top then we dont want the cave to go up
-			return new int[] { 1, caveOffsetAndHeight[0], caveOffsetAndHeight[1] };
-		}
-
-		// otherwise we check if we should start spawning a cave
-		int caveH = CaveSpawnScript.spawnCave(blockIndexToYPosition(blockIndex)); // returns -1 if we shouldn't spawn in a cave
-		return new int[] { caveH, 0, caveH };
 	}
 
 	// converts a index from a list to a y position in the world where the block should spawn

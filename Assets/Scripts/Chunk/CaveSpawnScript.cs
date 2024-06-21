@@ -14,9 +14,93 @@ public static class CaveSpawnScript
 
 
 	/**
+	 * 
+	 * checkAbove: do we check above this position on the previous line to check if we are in the process of spawning a cave,
+	 *			   otherwise we just check 2 blocks below to see if we are spawning a cave or not
+	 * 
+	 * returns int[]{-1 if we shouldn't spawn a cave, caveOffset, caveHeight}
+	 */
+	public static int[] decideIfSpawnCave(int[] prevVerticalLine, int blockIndex, bool atTop, bool checkAbove = false)
+	{
+		int checkCaveOffset = atTop ? 0 : 2; // how many blocks below the "current height" will you check if there was a cave in the previous line
+		// lets check if we are in the process of spawning in a cave 
+		// if prevVerticalLine != null  && not by the end of the list (close to bedrock) && there is a cave on the prev line (we check 2 blocks below bcuz caves can go 2 blocks up) || ...
+		if (prevVerticalLine != null && blockIndex + 3 < prevVerticalLine.Length)
+		{
+			int caveIndex = -1;
+			if (checkAbove)
+			{
+				if (prevVerticalLine[blockIndex - 1] == 0) caveIndex = blockIndex - 1;
+				else if (prevVerticalLine[blockIndex] == 0) caveIndex = blockIndex;
+			}
+			if (caveIndex == -1)
+			{
+				if(prevVerticalLine[blockIndex + checkCaveOffset] == 0) caveIndex = blockIndex + checkCaveOffset;
+			}
+
+			if(caveIndex >= 0)
+			{
+				int caveHeight = 0;
+				while (caveIndex < prevVerticalLine.Length && prevVerticalLine[caveIndex] == 0) // find the height of the cave
+				{
+					caveHeight++;
+					caveIndex++;
+				}
+				if (caveHeight <= 1) return new int[] { -1 };
+				int[] caveOffsetAndHeight = continueSpawningCave(caveHeight, (int)blockIndexToYPosition(blockIndex + 2));
+				if (caveOffsetAndHeight[0] == -1) return caveOffsetAndHeight;
+				if (atTop && caveOffsetAndHeight[0] > 1)
+				{
+					caveOffsetAndHeight[0] = 0; // if were at the top then reduce offset
+				}
+				return new int[] { 1, caveOffsetAndHeight[0], caveOffsetAndHeight[1] };
+			}
+		}
+
+		// otherwise we check if we should start spawning a cave
+		int caveH = spawnNewCave(blockIndexToYPosition(blockIndex)); // returns -1 if we shouldn't spawn in a cave
+		return new int[] { caveH, 0, caveH };
+	}
+
+	/**
+	 * spawns the cave
+	 * 
+	 * caveHeight: height of the cave.
+	 * xPos: the x position in the world of the vertical line being rendered.
+	 * distanceFromTopBlock: the distance the current block is from the topmost block in the vertical line, 
+	 *						 e.g. 0 if this is the grass block, 1 if this is the dirt block below the grass block, etc,
+	 * topBlockID: the id of the block that is at the top (usually a grass block)
+	 * secondBlockID: the id of the block that is below the top block (usually dirt)
+	 * backgroundVisualBlocks: list of the background visual blocks that will show the walls of the cave
+	 * 
+	 */
+	public static void spawnCave(int caveHeight, float xPos, int index, int distanceFromTopBlock, int topBlockID, int secondBlockID, List<float[]> backgroundVisualBlocks)
+	{
+		for (int _ = 0; _ < caveHeight; _++)
+		{
+			if (distanceFromTopBlock == 0) backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(index), topBlockID }); // e.g. grass block/sand
+			else if (distanceFromTopBlock < 4) backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(index), secondBlockID }); // dirt/sand
+			else backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(index), 3 }); // stone
+			distanceFromTopBlock++;
+			index++;
+		}
+	}
+
+	// this is the same function as above, except it always puts stone as the background wall in the cave
+	public static void spawnCave(int caveHeight, float xPos, int index, List<float[]> backgroundVisualBlocks)
+	{
+		for (int _ = 0; _ < caveHeight; _++)
+		{
+			backgroundVisualBlocks.Add(new float[] { xPos, blockIndexToYPosition(index), 3 }); // stone
+			index++;
+		}
+	}
+
+
+	/**
 	 * returns the height of the cave if the cave should spawn, otherwise -1
 	 */
-	public static int spawnCave(float y)
+	public static int spawnNewCave(float y)
 	{
 		if (y < caveSpawnsAboveY) return -1;
 		float rand = Random.value * 100;
@@ -80,5 +164,11 @@ public static class CaveSpawnScript
 		}
 
 		return new int[] { offset, newHeight };	
+	}
+
+
+	private static float blockIndexToYPosition(int blockIndex)
+	{
+		return SpawningChunkData.maxBuildHeight - blockIndex - 0.5f;
 	}
 }

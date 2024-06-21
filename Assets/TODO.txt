@@ -1,7 +1,6 @@
-make puch hand go in the direction of the mouse
+! make puch hand go in the direction of the mouse
 
 better sound for breaking blocks.
-maybe different sound for walking on grass.
 
 make it so that you can place a block in the BackBackground behind an entity and player
 
@@ -11,11 +10,11 @@ there is a bug in the spawning trees when you load a chunk that hasnt finished s
 and open it again, the game wont know that it was spawning a tree so it wont continue to spawn in the tree
 FIX: have a variable in chunkData that corresponds how much is left off spawning a tree, also the treeHeight
 
-change how ores spawn
+! change how ores spawn
 
 change it so that you can place frontBackgroundBlocks where players and entities are
 
-change the sound for breaking wood blocks
+! change the sound for breaking wood blocks
 
 make it so that BackBackground blocks dont break noFloatType blocks that are above it 
 
@@ -23,14 +22,16 @@ make it so that torches are NoFloatType, but you need another implementation bec
 
 burp sound for steve
 
-make particle systems for: eating, when entities dissapear when they die, when steve runs, breaking blocks
+! make particle systems for: eating, when entities dissapear when they die, when steve runs, breaking blocks
 
 add fall damage for entities
 
-have the furnace texture to be the lit furnace when the furnace is turned on
+! have the furnace texture to be the lit furnace when the furnace is turned on
 
 store chunks in region files, about 300 chunks or so in a region.
 
-have knockback on player when entities attack
+! have knockback on player when entities attack
 
 breaking bed removes the spawnpoint
+
+! implement spawn protection by not having mobs in the chunks where the player respawns at

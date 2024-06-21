@@ -37,6 +37,8 @@ public class RightClickBucket : RightClickItemBehaviour
 			AudioSource.PlayClipAtPoint(waterGetSound, mousePos); // play water sound
 
 			GameObject.Destroy(results[0].gameObject); // remove water
+			Vector2 removedWaterPosition = getRoundedMousePosition();
+			SpawningChunkData.updateChunkData(removedWaterPosition.x, removedWaterPosition.y, 0, "Water"); // remove water from chunk data
 
 			InventoryScript.setSelectedSlotItem(new InventorySlot("WaterBucket")); // change Bucket to WaterBucket
 

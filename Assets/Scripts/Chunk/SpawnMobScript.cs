@@ -6,9 +6,9 @@ public static class SpawnMobScript
 {
 	private static System.Random random = new System.Random();
 
-	private static float mobSpawnChance = 15f; // x% chance to spawn in each chunk
+	private static float mobSpawnChance = 25f; // x% chance to spawn in each chunk
 	private static float mobCaveSpawnChance = 5f; // x% chance to spawn in each vertical line in a chunk (which is 10 per chunk)
-	private static string[] mobs = new string[] { "Zombie", "Spider" };
+	private static string[] mobs = new string[] { "Zombie", "Spider", "Skeleton" };
 	private static Dictionary<string, int> mobMaxClusterSize = new Dictionary<string, int>(){ // {mob, how many of them can spawn in a cluster}
 		{"Zombie", 3},
 		{"Spider", 2},
@@ -31,7 +31,6 @@ public static class SpawnMobScript
 				float yPos = getYValueBasedOnX(xPos, verticalLineHeights);
 				mobsToSpawn.Add(new object[] { xPos, yPos, mobName });
 			}
-			//Debug.Log("spawning " + mobCount + " zombies");
 		}
 		return mobsToSpawn;
 	}
@@ -42,7 +41,7 @@ public static class SpawnMobScript
 		float rand = Random.value * 100; // Generate a random value between 0 and 100
 		if (rand < mobCaveSpawnChance)
 		{
-			return new object[] { xPos, yPos, mobs[random.Next(0, mobs.Length)] }; // spawn random mob
+			return new object[] { xPos, yPos + 0.5f, mobs[random.Next(0, mobs.Length)] }; // spawn random mob
 		}
 		return null;
 	}
