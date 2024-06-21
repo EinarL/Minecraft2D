@@ -60,7 +60,6 @@ public class TombstoneDrop : ItemDropBehaviour
 							itemScript.armor = item.armorInstance;
 						}
 					}
-					return null;
 				}
 				return null;
 			}

@@ -36,7 +36,7 @@ public class PunchScript : MonoBehaviour
 		Vector3 mouseWorldPos = cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, cam.nearClipPlane));
         Vector2 direction = mouseWorldPos - head.position;
 
-		RaycastHit2D hit = Physics2D.Raycast(head.position, direction, hitDistance, LayerMask.GetMask("Entity") | LayerMask.GetMask("Default"));
+		RaycastHit2D hit = Physics2D.Raycast(head.position, direction, hitDistance, LayerMask.GetMask("Entity") | LayerMask.GetMask("Default") | LayerMask.GetMask("Tilemap"));
         if (hit && hit.collider.gameObject.layer == 10) // if hit entity
         {
             Entity entityScript = hit.collider.gameObject.GetComponent<Entity>();

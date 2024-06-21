@@ -159,6 +159,7 @@ public static class BlockBehaviourData
 		rightClickItemBehaviours = new Hashtable() {
 			{"Snowball", new RightClickSnowball() },
 			{"Bow", new RightClickBow() },
+			{"Bucket", new RightClickBucket() } 
 		};
 
 

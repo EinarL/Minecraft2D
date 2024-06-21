@@ -8,7 +8,7 @@ public class WaterScript : MonoBehaviour
 {
 
     public int waterState = 0; // goes from 0 to 7 (inclusive), where 0 is full water (still water) and 7 is very low water
-    private bool isFlowing = false; // is the water stillwater or is it flowing
+    public bool isFlowing { get; private set; } = false; // is the water stillwater or is it flowing
     private Animator anim;
     private spawnChunkScript scScript;
     private int checkedWaterState = 0; // the state on the water block that we previously found by calling getBlockAtPosition()
@@ -307,7 +307,6 @@ public class WaterScript : MonoBehaviour
 	{
 		return getBlockAtPosition(new Vector2(transform.position.x - 1, transform.position.y));
 	}
-
 
 }
 

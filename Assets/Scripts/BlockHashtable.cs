@@ -23,13 +23,25 @@ public static class BlockHashtable
 	private static Tile[] blockTileTextures;
 	private static List<AudioClip[]> placeBlockAudio = new List<AudioClip[]>();
 
+	private static AudioClip waterPlaceSound;
+	private static AudioClip waterFlowSound;
+
+	private static MainThreadDispatcher mainThreadDispatcher;
+	private static Transform playerTransform;
+
 	public static void initializeBlockHashtable()
 	{
 
 		blockObjects = Resources.LoadAll("Prefabs\\Blocks");
 		blockTileTextures = Resources.LoadAll<Tile>("Palletes\\Tile sprites");
 
-		
+		waterPlaceSound = Resources.Load<AudioClip>("Sounds\\Liquid\\water_place");
+		waterFlowSound = Resources.Load<AudioClip>("Sounds\\Liquid\\water_flow");
+
+		mainThreadDispatcher = GameObject.Find("EventSystem").GetComponent<MainThreadDispatcher>();
+		playerTransform = GameObject.Find("SteveContainer").transform;
+
+
 		blockTiles = new Hashtable()
 		{
 			{ 1, getBlockTileWithName("Dirt")},
@@ -190,6 +202,7 @@ public static class BlockHashtable
 			{"BedLowerLeft", 5},
 			{"BedUpperRight", 5},
 			{"BedLowerRight", 5},
+			{"Water", -2},
 		};
 
 		unstackableItems = new HashSet<string>() // tools and armors dont have to be in here despite being unstackable
@@ -237,8 +250,14 @@ public static class BlockHashtable
 		// if its null then return stone sound by default
 		if (placeAudioIndex == null) return getRandomPlaceAudio(2);
 		else if (placeAudioIndex == -1) return null; // if its -1 then we dont want to play any sound
+		else if (placeAudioIndex < -1) // if its less than -1, then it means that the sound is not in the Dig folder, therefore its not in the placeAudioList so we will manually get it here
+		{
+			if (placeAudioIndex == -2) return playWaterPlaceSound();
+		}
 		return getRandomPlaceAudio((int)placeAudioIndex);
 	}
+
+
 
 	private static AudioClip getRandomPlaceAudio(int index)
 	{
@@ -305,5 +324,17 @@ public static class BlockHashtable
 			}
 			placeBlockAudio.Add( soundList.ToArray() );
 		}
+	}
+
+	private static AudioClip playWaterPlaceSound()
+	{
+		IEnumerator playWaterFlowSound()
+		{
+			yield return new WaitForSeconds(waterPlaceSound.length);
+			AudioSource.PlayClipAtPoint(waterFlowSound, playerTransform.position);
+		}
+		mainThreadDispatcher.startCoroutine(playWaterFlowSound());
+
+		return waterPlaceSound;
 	}
 }

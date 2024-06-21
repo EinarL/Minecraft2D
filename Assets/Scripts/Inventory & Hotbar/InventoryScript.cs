@@ -117,7 +117,7 @@ public static class InventoryScript
 			{
 				itemIndex++;
 			}
-			if (itemIndex == items.Length) { Debug.Log("does this"); return null; }// we have gone through all items, so return null
+			if (itemIndex == items.Length) return null; // we have gone through all items, so return null
 
 			inventory[i] = items[itemIndex];
 			updateSlotVisually(i);
