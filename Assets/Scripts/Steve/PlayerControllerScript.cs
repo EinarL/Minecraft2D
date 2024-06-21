@@ -24,6 +24,9 @@ public class PlayerControllerScript : MonoBehaviour
     private Vector2 sleepingColliderSize;
     public Tilemap tilemap;
 
+    private AudioClip splashSmall;
+	private AudioClip splashBig;
+
 	private float walkSpeed = 6;
 	private float runSpeed = 10;
 	private float jumpPower = 12f; // how high you jump
@@ -36,7 +39,8 @@ public class PlayerControllerScript : MonoBehaviour
     private LadderType ladderType = LadderType.Center; // what kind of ladder the player is next to
     private bool isInAirAfterJumping = false;
     private bool facingRight = true;
-    private float animationRunningSpeed = 1.5f;
+    private bool isSwimming = false;
+	private float animationRunningSpeed = 1.5f;
     private string blockBelowPlayer; // the block name that the player is standing on
 
     private bool didFall = false; // used to know when the player hits the ground after falling
@@ -70,6 +74,9 @@ public class PlayerControllerScript : MonoBehaviour
         sleepingColliderSize = new Vector2(capCollider.size.x, 0.3f);
 		head = steve.Find("Head"); // find player's head
 
+        splashSmall = Resources.Load<AudioClip>("Sounds\\Liquid\\splash_small");
+		splashBig = Resources.Load<AudioClip>("Sounds\\Liquid\\splash_big");
+
 		healthbarScript = GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>();
 		hungerbarScript = GameObject.Find("Canvas").transform.Find("Hungerbar").GetComponent<HungerbarScript>();
 		sleepScript = GameObject.Find("Canvas").transform.Find("SleepTint").GetComponent<SleepScript>();
@@ -98,7 +105,7 @@ public class PlayerControllerScript : MonoBehaviour
 		horizontalMove = Input.GetAxisRaw("Horizontal"); // -1: left, 0: still, 1: right
 
         // jump
-		if ((Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.UpArrow) || (Input.GetKey(KeyCode.W) && !isOnLadder)) && isGrounded() && !isJumping && !isInAirAfterJumping && rb.velocity.y <= 0)
+		if ((Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.UpArrow) || (Input.GetKey(KeyCode.W) && !isOnLadder)) && isGrounded() && !isJumping && !isInAirAfterJumping && rb.velocity.y <= 0 && !isSwimming)
         {
             isJumping = true;
             rb.velocity = new Vector2(rb.velocity.x * jumpBoost, jumpPower);
@@ -158,15 +165,69 @@ public class PlayerControllerScript : MonoBehaviour
         else if (didFall)
         {
             didFall = false;
-            if(!isOnLadder) checkIfTakeFallDamage();
+            if(!isOnLadder && !isSwimming) checkIfTakeFallDamage();
         }
 
+        if (!isSwimming)
+        {
+            if(isInWater())
+            {
+                toggleSwimmingPhysics();
+            }
+        }
+        else if (!isInWater()) // if the player got out of the water
+        {
+            toggleSwimmingPhysics(false);
+			fellFrom = transform.position.y;
+		}
+        else // if the player is swimming
+        {
+            swimmingControls();
+        }
 
         checkIfRunning();
         lookTowardsMouse();
 	}
 
-    // Move our character
+
+    private void toggleSwimmingPhysics(bool on = true)
+    {
+        if (on) // swimming physics on
+        {
+			rb.gravityScale = 1;
+            rb.drag = 5;
+
+			walkSpeed = 3;
+	        runSpeed = 5;
+
+            // possibly play splash sound if player jumped in the water
+            float fallDistance = fellFrom - transform.position.y;
+            if (fallDistance > 2 && fallDistance < 7)
+            {
+				AudioSource.PlayClipAtPoint(splashSmall, transform.position);
+			}
+            else if(fallDistance >= 7)
+            {
+				AudioSource.PlayClipAtPoint(splashBig, transform.position);
+			}
+        }
+        else
+        {
+            rb.gravityScale = 5;
+            rb.drag = 0;
+
+			walkSpeed = 6;
+			runSpeed = 10;
+		}
+    }
+
+    private void swimmingControls()
+    {
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space)) rb.AddForce(new Vector2(0, 8));
+		if (Input.GetKey(KeyCode.S)) rb.AddForce(new Vector2(0, -5));
+	}
+
+	// Move our character
 	private void FixedUpdate()
 	{
         if (InventoryScript.getIsInUI()) return; // if user is in the UI, then we cant move
@@ -240,6 +301,19 @@ public class PlayerControllerScript : MonoBehaviour
 
         return isGrounded;
     }
+
+    private bool isInWater()
+    {
+		Collider2D[] results = new Collider2D[1];
+
+		ContactFilter2D contactFilter = new ContactFilter2D();
+		contactFilter.layerMask = LayerMask.GetMask("Water");
+		contactFilter.useLayerMask = true;
+
+		int count = Physics2D.OverlapCircle(groundCheck.position, 0.01f, contactFilter, results);
+	    isSwimming = count > 0;
+        return isSwimming;
+	}
 
 	/**
      * checks if there is a block in the way of the player
