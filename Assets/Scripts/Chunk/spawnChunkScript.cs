@@ -35,11 +35,11 @@ public class spawnChunkScript : MonoBehaviour
     public bool pauseChunkRendering = false;
 
     private Biome spawnChunkStrategy;
-    private List<Biome> biomes = new List<Biome> { new Plains(), new Desert(), new Tundra() }; // new List<Biome> { new Plains(), new Desert(), new Tundra() };
+    private List<Biome> biomes = new List<Biome> { new Plains() }; // new List<Biome> { new Plains(), new Desert(), new Tundra() };
 
 	// how long the biome is (in chunks), this counts down every time a new chunk is rendered and when
 	// it hits 0, then a new random chunk gets generated
-	private int biomeLength; 
+	public int biomeLength { get; private set; }
 
     private SunLightMovementScript sunLightMovementScript;
     private DayProcessScript dayProcessScript;
@@ -54,7 +54,8 @@ public class spawnChunkScript : MonoBehaviour
 		mainThreadDispatcher = GameObject.Find("EventSystem").GetComponent<MainThreadDispatcher>();
 
 		BlockHashtable.initializeBlockHashtable();
-        spawnChunkStrategy = decideBiome(); // dont do this if the biome is already decided, we need to save which biome was rendering when we quit the game
+        spawnChunkStrategy = decideBiome(); // TODO: dont do this if the biome is already decided, we need to save which biome was rendering when we quit the game
+		biomes.Add(new Ocean()); // player cant spawn in an ocean, so we add it to the biome list after deciding an intial biome
 
 		chunkSize = (int)(SpawningChunkData.blockSize * SpawningChunkData.blocksInChunk);
         SpawningChunkData.setRightMostY(defaultStartSpawnY);
@@ -189,6 +190,7 @@ public class spawnChunkScript : MonoBehaviour
         
         if (currentBiome != null) biomes.Add(currentBiome);
 
+		if (newBiome.GetType() == typeof(Ocean)) Debug.Log("biome is ocean");
         return newBiome; // newBiome
     }
 

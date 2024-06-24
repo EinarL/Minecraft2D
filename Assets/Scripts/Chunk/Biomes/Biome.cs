@@ -85,6 +85,7 @@ public abstract class Biome
 		float chunkEnd = chunkStart + chunkSize;
 		int[] vLine = SpawningChunkData.prevVerticalLineRight;
 		float height = SpawningChunkData.getRightMostY();
+		Debug.Log("height is: " + height);
 		float prevLineHeight = height;
 		float[] verticalLineHeights = new float[10];
 		int vLineHeightIndex = 0;
@@ -334,7 +335,7 @@ public abstract class Biome
 		}
 	}
 
-	private void AddToListIfNotNull(List<object[]> list, object[] toAdd)
+	protected void AddToListIfNotNull(List<object[]> list, object[] toAdd)
 	{
 		if(toAdd != null) list.Add(toAdd);
 	}

@@ -119,7 +119,6 @@ public class PlayerControllerScript : MonoBehaviour
         {
             if (hasBlockInPath())
             {
-                //rb.velocity = new Vector2(0, rb.velocity.y); //  if there is a block in the way, then just go up
                 isJumping = false;
             }
 			isInAirAfterJumping = true;
@@ -223,7 +222,7 @@ public class PlayerControllerScript : MonoBehaviour
 
     private void swimmingControls()
     {
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space)) rb.AddForce(new Vector2(0, 8));
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space)) rb.velocity = new Vector2(rb.velocity.x, 5);
 		if (Input.GetKey(KeyCode.S)) rb.AddForce(new Vector2(0, -5));
 	}
 

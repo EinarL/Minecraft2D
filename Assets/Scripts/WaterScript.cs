@@ -96,7 +96,7 @@ public class WaterScript : MonoBehaviour
              yield break;
         }
         else if (belowBlock == BlockType.Water) {
-            replaceWaterBlock(Direction.Down, 0); // water block below, then replace it with the flow of this water block
+            if (checkedWaterState != 0) replaceWaterBlock(Direction.Down, 0); // water block below, then replace it with the flow of this water block
 			yield break;
         }
         if (waterState == 7) yield break; // the final state cant flow further, so return
