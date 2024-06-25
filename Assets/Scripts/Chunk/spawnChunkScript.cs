@@ -110,7 +110,7 @@ public class spawnChunkScript : MonoBehaviour
 		int leftMostChunkToRender = getChunkNumber();
         if (leftMostChunkToRender != rendered) // if we need to load a chunk
         {
-			if (leftMostChunkToRender == rendered + chunkSize) // need to load chunk rendered + 4*chunkSize (rightmost chunk)
+			if (leftMostChunkToRender == rendered + chunkSize) // need to load chunk rendered + 10*chunkSize (rightmost chunk)
 			{
 				renderChunk(rendered + amountOfChunksToRender * chunkSize);
 				unrenderChunk(rendered); // unrender leftmost chunk

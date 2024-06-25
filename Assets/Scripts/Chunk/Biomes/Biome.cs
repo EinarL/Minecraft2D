@@ -85,7 +85,6 @@ public abstract class Biome
 		float chunkEnd = chunkStart + chunkSize;
 		int[] vLine = SpawningChunkData.prevVerticalLineRight;
 		float height = SpawningChunkData.getRightMostY();
-		Debug.Log("height is: " + height);
 		float prevLineHeight = height;
 		float[] verticalLineHeights = new float[10];
 		int vLineHeightIndex = 0;
@@ -123,7 +122,7 @@ public abstract class Biome
 		return chunkData;
 	}
 
-	private void addVerticalLineToChunk(int[,] chunk, int chunkIndex, int[] vLine)
+	protected void addVerticalLineToChunk(int[,] chunk, int chunkIndex, int[] vLine)
 	{
 		for (int j = 0; j < vLine.Length; j++)
 		{
@@ -199,7 +198,7 @@ public abstract class Biome
 	}
 
 
-	private Hashtable getOreSpawnsFromVerticalLine(int[] vLine)
+	protected Hashtable getOreSpawnsFromVerticalLine(int[] vLine)
 	{
 		GameObject block;
 		Hashtable oreSpawns = new Hashtable();
@@ -265,11 +264,7 @@ public abstract class Biome
 				CaveSpawnScript.spawnCave(caveSpawnInfo[2], xPos, startBlockIndex, i, topBlockID, secondBlockID, backgroundVisualBlocks);
 				i += caveSpawnInfo[2];
 				startBlockIndex += caveSpawnInfo[2];
-				if (i >= 4)
-				{
-
-					break;
-				}
+				if (i >= 4) break;
 			}
 
 			if (i == 0)
@@ -327,7 +322,7 @@ public abstract class Biome
 		return (int)(maxBuildHeight - yPos - 0.5f);
 	}
 
-	private void addEntitesToList(List<object[]> entities, List<object[]> entitiesToAdd)
+	protected void addEntitesToList(List<object[]> entities, List<object[]> entitiesToAdd)
 	{
 		foreach (object[] entity in entitiesToAdd)
 		{

@@ -10,7 +10,8 @@ public class ChunkData
 	private List<float[]> backBackgroundBlocks = new List<float[]>(); // list of type {[x,y, blockID]}
 	private List<float[]> backgroundVisualBlocks = new List<float[]>(); // list of type {[x,y, blockID]}
 	private int chunkPosition;
-	private float startHeight = -2.5f; // height of the chunk (height of grass block)
+	private float startHeight = -2.5f; // height of the chunk (height of grass block that is in the last vertical line in the chunk)
+									   // we use this variable to find what the height of the first vertical line in the next chunk should be
 	// need to also have here the variables dontGoUpRight, dontGoUpLeft, etc.
 	private List<object[]> entities; // list of entities in this chunk // of type {[x, y, entityName], [x, y, entityName], ...}
 	private string biome;

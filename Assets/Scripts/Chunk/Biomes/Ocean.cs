@@ -21,9 +21,101 @@ public class Ocean : Biome
 
 	public Ocean() : base()
 	{
-		biomeLength = new int[] { 4, 4 };
+		biomeLength = new int[] { 4, 20 };
 		biomeType = "Ocean";
 		scScript = GameObject.Find("Main Camera").GetComponent<spawnChunkScript>();
+	}
+
+
+	public override ChunkData renderLeftChunk(int chunkStart)
+	{
+		int[,] chunk = new int[blocksInChunk, maxAmountOfBlocksInLine]; // 2d array representing the blocks with the ID's of the blocks
+
+		List<float[]> frontBackgroundBlocks = new List<float[]>();
+		List<float[]> backgroundVisualBlocks = new List<float[]>();
+
+		List<object[]> entities = new List<object[]>();
+
+		float chunkEnd = chunkStart + chunkSize;
+		int[] vLine = SpawningChunkData.prevVerticalLineLeft;
+		float height = SpawningChunkData.getLeftMostY();
+		Hashtable prevSpawnedOresLeft = SpawningChunkData.getPrevSpawnedOresLeft();
+		float[] verticalLineHeights = new float[10];
+		int vLineHeightIndex = 0;
+		int chunkIndex = chunkSize - 1;
+		for (float i = chunkEnd - blockSize; i >= chunkStart; i -= blockSize)
+		{
+			// returns {vLine, blocksToAddToFrontBackgroundLayer, entities, backgroundVisualBlocks }
+			object[] returnValue = renderLine(height, i + blockSize / 2, chunkIndex, chunkStart, prevSpawnedOresLeft, height, vLine);
+			vLine = (int[])returnValue[0];
+			prevSpawnedOresLeft = getOreSpawnsFromVerticalLine(vLine);
+			foreach (float[] value in (List<float[]>)returnValue[1]) // for each value in frontBackgroundBlocksToAdd
+			{
+				frontBackgroundBlocks.Add(value); // add block info to the list
+			}
+			foreach (float[] value in (List<float[]>)returnValue[3]) // for each value in backgroundVisualBlocks
+			{
+				backgroundVisualBlocks.Add(value); // add block info to the list
+			}
+			addEntitesToList(entities, (List<object[]>)returnValue[2]); // add entities to list
+
+			addVerticalLineToChunk(chunk, chunkIndex, vLine);
+
+			chunkIndex--;
+			verticalLineHeights[vLineHeightIndex] = height < 0 ? height : height - 1; // idk why i need to do height-1 when its a positive number but it fixes a bug
+			vLineHeightIndex++;
+		}
+
+		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresLeft, frontBackgroundBlocks, entities, verticalLineHeights, backgroundVisualBlocks, biomeType);
+		SpawningChunkData.prevVerticalLineLeft = vLine;
+		SaveChunk.save(chunkData);
+
+		return chunkData;
+	}
+
+	public override ChunkData renderRightChunk(int chunkStart)
+	{
+		int[,] chunk = new int[blocksInChunk, maxAmountOfBlocksInLine]; // 2d array representing the blocks with the ID's of the blocks
+
+		List<float[]> frontBackgroundBlocks = new List<float[]>();
+		List<float[]> backgroundVisualBlocks = new List<float[]>();
+		List<object[]> entities = new List<object[]>();
+
+		float chunkEnd = chunkStart + chunkSize;
+		int[] vLine = SpawningChunkData.prevVerticalLineRight;
+		float height = SpawningChunkData.getRightMostY();
+		float[] verticalLineHeights = new float[10];
+		int vLineHeightIndex = 0;
+		Hashtable prevSpawnedOresRight = SpawningChunkData.getPrevSpawnedOresRight();
+		int chunkIndex = 0;
+		for (float i = chunkStart + blockSize / 2; i < chunkEnd; i += blockSize)
+		{
+			// returns {vLine, blocksToAddToFrontBackgroundLayer, entities, backgroundVisualBlocks }
+			object[] returnValue = renderLine(height, i, chunkIndex, chunkStart, prevSpawnedOresRight, height, vLine);
+			vLine = (int[])returnValue[0];
+			prevSpawnedOresRight = getOreSpawnsFromVerticalLine(vLine);
+			foreach (float[] value in (List<float[]>)returnValue[1]) // for each value in frontBackgroundBlocksToAdd
+			{
+				frontBackgroundBlocks.Add(value); // add block info to the list
+			}
+			foreach (float[] value in (List<float[]>)returnValue[3]) // for each value in backgroundVisualBlocks
+			{
+				backgroundVisualBlocks.Add(value); // add block info to the list
+			}
+			addEntitesToList(entities, (List<object[]>)returnValue[2]); // add entities to list
+
+			addVerticalLineToChunk(chunk, chunkIndex, vLine);
+
+			chunkIndex++;
+			verticalLineHeights[vLineHeightIndex] = height < 0 ? height : height - 1; // idk why i need to do height-1 when its a positive number but it fixes a bug
+			vLineHeightIndex++;
+		}
+
+		ChunkData chunkData = new ChunkData(chunkStart, chunk, height, prevSpawnedOresRight, frontBackgroundBlocks, entities, verticalLineHeights, backgroundVisualBlocks, biomeType);
+		SpawningChunkData.prevVerticalLineRight = vLine;
+		SaveChunk.save(chunkData);
+
+		return chunkData;
 	}
 
 	/**
@@ -79,11 +171,11 @@ public class Ocean : Biome
 				{
 					// reset variables for the next ocean biome
 					firstChunk = true;
-					if (xPos < 0) SpawningChunkData.setLeftMostY(blockIndexToYPosition(oceanHeight-2));
+					if (xPos < 0) SpawningChunkData.setLeftMostY(blockIndexToYPosition(oceanHeight));
 					else
 					{
-						SpawningChunkData.setRightMostY(blockIndexToYPosition(oceanHeight-2));
-						Debug.Log("set right height to: " + blockIndexToYPosition(oceanHeight - 2));
+						SpawningChunkData.setRightMostY(blockIndexToYPosition(oceanHeight));
+						Debug.Log("set right height to: " + blockIndexToYPosition(oceanHeight));
 					}
 				}
 			}
