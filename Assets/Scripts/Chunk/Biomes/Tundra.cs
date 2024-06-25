@@ -16,6 +16,8 @@ public class Tundra : Biome
 	public Tundra() : base()
 	{
 		biomeType = "Tundra";
+		topBlockID = 28;
+		secondBlockID = 1;
 	}
 
 	/**
@@ -46,7 +48,7 @@ public class Tundra : Biome
 		List<object[]> entities = new List<object[]>();
 		if(animalToSpawn != null) entities.Add(animalToSpawn);
 
-		object[] returnValue = createVerticalLine(28, 1, blockIndex, prevLineOreSpawns, prevLineHeight, prevVerticalLine, xPos); // returns {verticalLine, backgroundVisualBlocks, entitiesInCave}
+		object[] returnValue = createVerticalLine(blockIndex, prevLineOreSpawns, prevLineHeight, prevVerticalLine, xPos); // returns {verticalLine, backgroundVisualBlocks, entitiesInCave}
 		bool didAddSnowBlock = decideIfAddSnowBlock((int[])returnValue[0], blockIndex - 1, yPositionToBlockIndex(prevLineHeight) - 1);
 
 		if(!didAddSnowBlock)

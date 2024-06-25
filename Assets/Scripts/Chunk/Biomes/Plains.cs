@@ -39,7 +39,7 @@ public class Plains : Biome
 		List<object[]> entities = new List<object[]>();
 		if(animalToSpawn != null) entities.Add(animalToSpawn);
 
-		object[] returnValue = createVerticalLine(2, 1, blockIndex, prevLineOreSpawns, prevLineHeight, prevVerticalLine, xPos); // returns {verticalLine, backgroundVisualBlocks, entitiesInCave}
+		object[] returnValue = createVerticalLine(blockIndex, prevLineOreSpawns, prevLineHeight, prevVerticalLine, xPos); // returns {verticalLine, backgroundVisualBlocks, entitiesInCave}
 
 		foreach (object[] entity in (List<object[]>)returnValue[2])
 		{

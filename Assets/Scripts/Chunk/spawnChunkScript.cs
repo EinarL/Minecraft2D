@@ -34,8 +34,11 @@ public class spawnChunkScript : MonoBehaviour
     private int rendered; // leftmost chunk that is rendered
     public bool pauseChunkRendering = false;
 
-    private Biome spawnChunkStrategy;
-    private List<Biome> biomes = new List<Biome> { new Plains() }; // new List<Biome> { new Plains(), new Desert(), new Tundra() };
+    public Biome spawnChunkStrategy { get; private set; } // the biome that is rendering
+	public Biome nextSpawnChunkStrategy { get; private set; } // the next biome that should be rendered
+	public Biome previousSpawnChunkStrategy { get; private set; } // the previous biome that was rendered
+
+	private List<Biome> biomes = new List<Biome> { new Plains(), new Desert() }; // new List<Biome> { new Plains(), new Desert(), new Tundra() };
 
 	// how long the biome is (in chunks), this counts down every time a new chunk is rendered and when
 	// it hits 0, then a new random chunk gets generated
@@ -54,8 +57,8 @@ public class spawnChunkScript : MonoBehaviour
 		mainThreadDispatcher = GameObject.Find("EventSystem").GetComponent<MainThreadDispatcher>();
 
 		BlockHashtable.initializeBlockHashtable();
-        spawnChunkStrategy = decideBiome(); // TODO: dont do this if the biome is already decided, we need to save which biome was rendering when we quit the game
-		biomes.Add(new Ocean()); // player cant spawn in an ocean, so we add it to the biome list after deciding an intial biome
+        decideBiome(); // TODO: dont do this if the biome is already decided, we need to save which biome was rendering when we quit the game
+		biomes.Add(new Ocean()); // player cant spawn in an ocean, so we add it to the biome list after deciding the initial two biomes
 
 		chunkSize = (int)(SpawningChunkData.blockSize * SpawningChunkData.blocksInChunk);
         SpawningChunkData.setRightMostY(defaultStartSpawnY);
@@ -175,12 +178,17 @@ public class spawnChunkScript : MonoBehaviour
 		}
 	}
 
-	private Biome decideBiome()
+	// sets spawnChunkStrategy to nextSpawnChunkStrategy and gets a new biome for nextSpawnChunkStrategy
+	private void decideBiome()
     {
+		if (nextSpawnChunkStrategy != null)
+		{
+			previousSpawnChunkStrategy = spawnChunkStrategy;
+			spawnChunkStrategy = nextSpawnChunkStrategy;
+		}
+        Biome nextBiome = nextSpawnChunkStrategy;
 
-        Biome currentBiome = spawnChunkStrategy;
-
-        if(currentBiome != null) biomes.Remove(currentBiome);
+        if(nextBiome != null) biomes.Remove(nextBiome);
 
 		System.Random rand = new System.Random();
 		int randIndex = rand.Next(biomes.Count); // get random index
@@ -188,10 +196,12 @@ public class spawnChunkScript : MonoBehaviour
 		Biome newBiome = biomes[randIndex];
         biomeLength = rand.Next(newBiome.biomeLength[0], newBiome.biomeLength[1] + 1);
         
-        if (currentBiome != null) biomes.Add(currentBiome);
+        if (nextBiome != null) biomes.Add(nextBiome);
 
 		if (newBiome.GetType() == typeof(Ocean)) Debug.Log("biome is ocean");
-        return newBiome; // newBiome
+
+		nextSpawnChunkStrategy = newBiome;
+		if(spawnChunkStrategy == null) decideBiome();
     }
 
 	/*
@@ -286,7 +296,7 @@ public class spawnChunkScript : MonoBehaviour
             biomeLength--;
             if(biomeLength <= 0)
             {
-                spawnChunkStrategy = decideBiome();
+                decideBiome();
             }
 		}
         sunLightMovementScript.addChunkHeight(chunkData.getVerticalLineHeights());

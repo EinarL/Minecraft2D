@@ -16,8 +16,10 @@ public abstract class Biome
 	public int chunkSize;
 	public int highestStartSpawnY = 20;
 	public int lowestStartSpawnY = -15;
-	public int[] biomeLength = new int[] {5,30}; // min and max biome length, in chunks; (both inclusive)
+	public int[] biomeLength = new int[] { 5, 30 }; // min and max biome length, in chunks; (both inclusive)
 	protected string biomeType = "Plains";
+	public int topBlockID { get; protected set; } = 2;
+	public int secondBlockID { get; protected set; } = 1;
 
 	public Biome()
 	{
@@ -238,7 +240,7 @@ public abstract class Biome
 	 * returns a list of block ID's where each id represents a block in that vertical line, also returns background visual blocks for the background in the cave
 	 * 
 	 */
-	protected virtual object[] createVerticalLine(int topBlockID, int secondBlockID, int startBlockIndex, Hashtable prevLineOreSpawns, float prevLineHeight, int[] prevVerticalLine, float xPos)
+	protected virtual object[] createVerticalLine(int startBlockIndex, Hashtable prevLineOreSpawns, float prevLineHeight, int[] prevVerticalLine, float xPos)
 	{
 		if (prevLineHeight > 0) prevLineHeight -= 1; // this is to fix some bug, idk why i need to -1 when its a positive number
 		List<float[]> backgroundVisualBlocks = new List<float[]>(); // list of type {[x,y, blockID], ...}, these are the blocks that are in the background of a cave

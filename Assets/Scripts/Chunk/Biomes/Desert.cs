@@ -11,6 +11,8 @@ public class Desert : Biome
 	{
 		biomeLength = new int[] { 5, 20 };
 		biomeType = "Desert";
+		topBlockID = 14;
+		secondBlockID = 14;
 	}
 
 	/**
@@ -35,7 +37,7 @@ public class Desert : Biome
 		List<object[]> entities = new List<object[]>();
 		//if (animalToSpawn != null) entities.Add(animalToSpawn);
 
-		object[] returnValue = createVerticalLine(14, 14, blockIndex, prevLineOreSpawns, prevLineHeight, prevVerticalLine, xPos); // returns {verticalLine, backgroundVisualBlocks, entitiesInCave}
+		object[] returnValue = createVerticalLine(blockIndex, prevLineOreSpawns, prevLineHeight, prevVerticalLine, xPos); // returns {verticalLine, backgroundVisualBlocks, entitiesInCave}
 
 		foreach (object[] entity in (List<object[]>)returnValue[2])
 		{
