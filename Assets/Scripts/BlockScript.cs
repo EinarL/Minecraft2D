@@ -148,9 +148,6 @@ public class BlockScript : MonoBehaviour
 			toolBreakingWith.reduceDurability();
 		}
 
-		// make tiles next to this block turn into gameObjects
-		//turnTilesToGameObjects();
-
 		// check if above block is fallType, then make it fall
 		checkIfAboveBlockIsFallType();
 		checkIfAboveIsNoFloatType(); // check if the block above is cactus, then make it break instantly
@@ -158,8 +155,16 @@ public class BlockScript : MonoBehaviour
 
 		// if this block was a furnace, then we need to drop the items that were in the furnace
 		if (gameObject.name.Equals("Furnace")) openFurnaceScript.removeFurnace(transform.position);
+		else if (gameObject.name.Equals("Ice")) placeWater();
 
 		createBackgroundVisualBlock();
+	}
+
+	// this is used for the ice block, places water where the ice was broken
+	private void placeWater()
+	{
+		Instantiate(Resources.Load<GameObject>("Prefabs\\Blocks\\Water"), transform.position, Quaternion.identity);
+		SpawningChunkData.updateChunkData(transform.position.x, transform.position.y, 61);
 	}
 
 	// runs when the block is broken, drops items from the block

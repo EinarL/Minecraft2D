@@ -38,7 +38,7 @@ public class spawnChunkScript : MonoBehaviour
 	public Biome nextSpawnChunkStrategy { get; private set; } // the next biome that should be rendered
 	public Biome previousSpawnChunkStrategy { get; private set; } // the previous biome that was rendered
 
-	private List<Biome> biomes = new List<Biome> { new Plains(), new Desert() }; // new List<Biome> { new Plains(), new Desert(), new Tundra() };
+	private List<Biome> biomes = new List<Biome> { new Plains(), new Desert(), new Tundra() };
 
 	// how long the biome is (in chunks), this counts down every time a new chunk is rendered and when
 	// it hits 0, then a new random chunk gets generated
@@ -82,33 +82,6 @@ public class spawnChunkScript : MonoBehaviour
     void Update()
     {
         if (pauseChunkRendering) return;
-		/*
-        int newAmountOfChunksToRender = getAmountOfChunksToRender();
-		// if we need to render more chunks (for the camera size change)
-		if (amountOfChunksToRender < newAmountOfChunksToRender)
-        {
-			int diff = Math.Abs(amountOfChunksToRender - newAmountOfChunksToRender);
-
-            for(int i = 1; i <= diff/2; i++)
-            {
-                renderChunk(rendered - (chunkSize * i)); // spawn left chunk
-                renderChunk(rendered + (chunkSize * (amountOfChunksToRender - 1)) + (chunkSize*i)); // spawn right chunk
-			}
-			amountOfChunksToRender = newAmountOfChunksToRender;
-            rendered = getChunkNumber();
-        }
-        else if(amountOfChunksToRender > newAmountOfChunksToRender) // if we need to render fewer chunks (because of the camera size change)
-		{
-			int diff = Math.Abs(amountOfChunksToRender - newAmountOfChunksToRender);
-			for (int i = 1; i <= diff/2; i++)
-            {
-                unrenderChunk(rendered + (chunkSize * (i - 1))); //despawn left chunk
-                unrenderChunk(rendered + chunkSize * (amountOfChunksToRender-1) + (chunkSize*(i-1))); // despawn right chunk
-            }
-            amountOfChunksToRender = newAmountOfChunksToRender;
-            rendered = getChunkNumber();
-		}
-		*/
 		// check if we need to render a new chunk (because of movement left or right)
 		int leftMostChunkToRender = getChunkNumber();
         if (leftMostChunkToRender != rendered) // if we need to load a chunk
@@ -198,24 +171,9 @@ public class spawnChunkScript : MonoBehaviour
         
         if (nextBiome != null) biomes.Add(nextBiome);
 
-		if (newBiome.GetType() == typeof(Ocean)) Debug.Log("biome is ocean");
-
 		nextSpawnChunkStrategy = newBiome;
 		if(spawnChunkStrategy == null) decideBiome();
     }
-
-	/*
-	public int getAmountOfChunksToRender()
-	{
-		int size = (int)cam.orthographicSize;
-		Debug.Assert(size <= 20);
-
-		if (size <= 5) return 4;
-		if (size <= 7) return 6;
-		if (size <= 11) return 8;
-		return 10;
-	}
-	*/
 
 	// gets the x position of the leftmost chunk to be rendered
 	int getChunkNumber()
@@ -517,7 +475,7 @@ public class spawnChunkScript : MonoBehaviour
 			{
 				for (int y = 0; y < chunk.GetLength(1); y++)
 				{
-					if ((41 <= chunk[x, y] && chunk[x, y] <= 56) || chunk[x, y] == 61) // if its a door || water
+					if ((41 <= chunk[x, y] && chunk[x, y] <= 56) || chunk[x, y] == 61 || chunk[x, y] == 62) // if its a door || water || ice
 					{
 						int blockID = chunk[x, y];
 						float xBlockPos = xPos + SpawningChunkData.blockSize * x;

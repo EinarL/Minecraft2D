@@ -97,6 +97,7 @@ public static class BlockHashtable
 			{ 58, getBlockTileWithName("Ladder")},
 			{ 59, getBlockTileWithName("LadderLeft")},
 			{ 60, getBlockTileWithName("LadderRight")},
+			{ 62, getBlockTileWithName("Ice")}
 		};
 		// id's in blockTiles and blocks hashtable need to be the same for each block
 		blocks = new Hashtable()
@@ -161,7 +162,8 @@ public static class BlockHashtable
 			{ 58, getBlockWithName("Ladder")},
 			{ 59, getBlockWithName("LadderLeft")},
 			{ 60, getBlockWithName("LadderRight")},
-			{ 61, getBlockWithName("Water")}
+			{ 61, getBlockWithName("Water")},
+			{ 62, getBlockWithName("Ice")}
 		};
 
 		// contains behaviours for blocks that need special functionality upon placing the block, e.g. torches need to be rotated to be placed on right/left wall

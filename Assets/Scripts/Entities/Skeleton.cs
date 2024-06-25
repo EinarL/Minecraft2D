@@ -94,8 +94,8 @@ public class Skeleton : Mob
 
 		if (!facingRight)
 		{
-			backArm.rotation = Quaternion.Euler(-180f, 0f, -zRotation + 90f);
-			frontArm.rotation = Quaternion.Euler(-180f, 0f, -zRotation + 80f);
+			backArm.rotation = Quaternion.Euler(-180f, 0f, -zRotation + 100f);
+			frontArm.rotation = Quaternion.Euler(-180f, 0f, -zRotation + 90f);
 			head.rotation = Quaternion.Euler(-180f, 0f, -zRotation);
 		}
 		else

@@ -14,11 +14,13 @@ public static class SpawnMobScript
 		{"Spider", 2},
 		{"Skeleton", 2},
 	};
+	public static bool spawnProtection = false; // true if we dont spawn mobs above ground, so the player doesnt instantly die after he respawns
 
 	// runs on saved chunks (also new)
 	public static List<object[]> decideIfSpawnMob(float chunkLeftPosition, float[] verticalLineHeights)
 	{
 		List<object[]> mobsToSpawn = new List<object[]>();
+		if(spawnProtection) return mobsToSpawn;
 
 		float rand = Random.value * 100; // Generate a random value between 0 and 100
 		if (rand < mobSpawnChance) {

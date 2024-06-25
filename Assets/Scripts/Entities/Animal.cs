@@ -12,6 +12,7 @@ public abstract class Animal : Entity
 	protected bool isRunning = false;
 	private float runningChangeDirectionChance = 0.6f;
 	protected Vector2 deadColliderSize; // the collider size of the animal when its dead
+	protected Coroutine runningChangeDirectionCoroutine = null;
 
 	protected void Start()
 	{
@@ -34,32 +35,12 @@ public abstract class Animal : Entity
 				anim.SetFloat("movementSpeed", 1); // change animation back to walking speed
 				runCounter = 0;
 				speed = walkSpeed;
-				StopCoroutine(decideIfChangeDirectionWhenRunning());
+				if(runningChangeDirectionCoroutine != null) StopCoroutine(runningChangeDirectionCoroutine);
+				runningChangeDirectionCoroutine = null;
 			}
 		}
 	}
-	/*
-	public override IEnumerator makeStepSound()
-	{
-		// Loop indefinitely
-		
-		while (true)
-		{
-			if (isWalking && !stepAudioSource.isPlaying) // play walking sound
-			{
-				// get random clip to play
-				var rand = new System.Random();
-				int randIndex = rand.Next(stepSounds.Length);
-				AudioClip randClip = stepSounds[randIndex];
-				stepAudioSource.clip = randClip;
-				Debug.Log(randClip);
-				stepAudioSource.Play();
-			}
-			yield return new WaitForSeconds(.15f); // Wait
-		}
-		
-	}
-	*/
+
 	public override void takeDamage(float damage, float playerXPos)
 	{
 		if (anim.GetBool("isDead")) return;
@@ -79,7 +60,7 @@ public abstract class Animal : Entity
 			isWalking = true; 
 			anim.SetFloat("movementSpeed", 1.4f); // make animation faster
 			anim.SetBool("isWalking", true);
-			StartCoroutine(decideIfChangeDirectionWhenRunning());
+			if(runningChangeDirectionCoroutine == null) runningChangeDirectionCoroutine = StartCoroutine(decideIfChangeDirectionWhenRunning());
 			speed = runSpeed;
 		}
 		else

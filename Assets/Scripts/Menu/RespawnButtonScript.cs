@@ -16,6 +16,7 @@ public class RespawnButtonScript : MonoBehaviour
 	private spawnChunkScript scScript;
 	private GameObject mainCam;
 	private CinemachineVirtualCamera vcam;
+	private MainThreadDispatcher mainThreadDispatcher;
 
 
 	// Start is called before the first frame update
@@ -30,6 +31,7 @@ public class RespawnButtonScript : MonoBehaviour
 		scScript = GameObject.Find("Main Camera").transform.GetComponent<spawnChunkScript>();
 		mainCam = GameObject.Find("Main Camera");
 		vcam = GameObject.Find("CM vcam").GetComponent<CinemachineVirtualCamera>();
+		mainThreadDispatcher = GameObject.Find("EventSystem").GetComponent<MainThreadDispatcher>();
 	}
 
     public void respawn()
@@ -67,7 +69,10 @@ public class RespawnButtonScript : MonoBehaviour
 
 		playerControllerScript.teleportToSpawn(spawnPoint); // teleport steve to spawn
 
+
+		SpawnMobScript.spawnProtection = true;
 		scScript.loadSpawn(spawnPoint, leftMostChunkToRenderAtDeathPosition); // render chunks at spawnpoint
+		
 
 		// reset health and hunger
 		healthbarScript.setFullHealth();
@@ -78,6 +83,13 @@ public class RespawnButtonScript : MonoBehaviour
 		canvasScript.closeDeathScreen(); // remove death screen
 		scScript.pauseChunkRendering = false; // resume chunk rendering
 		scScript.setCamSettingsBackToNormal(vcam.GetCinemachineComponent<CinemachineFramingTransposer>(), prevSoftZoneWidth);
+
+		IEnumerator removeSpawnProtection()
+		{
+			yield return new WaitForSeconds(1.0f);
+			SpawnMobScript.spawnProtection = false;
+		}
+		mainThreadDispatcher.startCoroutine(removeSpawnProtection());
 	}
 
 	public void unrenderChunks()

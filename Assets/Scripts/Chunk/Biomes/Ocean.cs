@@ -25,6 +25,7 @@ public class Ocean : Biome
 	private int bottomBlock = 1; // the block that is at the bottom of the ocean
 	private int prevBottomBlock = 1;
 	private bool canChangeBottomBlock = true;
+	private bool spawnIce = false; // spawn a layer of ice at the top of the ocean?
 
 
 	public Ocean() : base()
@@ -173,6 +174,7 @@ public class Ocean : Biome
 			goDeeper = true;
 			firstChunk = false;
 			canChangeBottomBlock = true;
+			spawnIce = biomeBlend.GetType() == typeof(Tundra); //spawn ice if its a tundra biome
 		}
 		// if this is the last ocean chunk
 		if (scScript.biomeLength <= 1 && Mathf.Abs(xPos) % 10 > 5)
@@ -189,11 +191,7 @@ public class Ocean : Biome
 					// reset variables for the next ocean biome
 					firstChunk = true;
 					if (xPos < 0) SpawningChunkData.setLeftMostY(blockIndexToYPosition(oceanHeight));
-					else
-					{
-						SpawningChunkData.setRightMostY(blockIndexToYPosition(oceanHeight));
-						Debug.Log("set right height to: " + blockIndexToYPosition(oceanHeight));
-					}
+					else SpawningChunkData.setRightMostY(blockIndexToYPosition(oceanHeight));
 				}
 			}
 		}
@@ -207,10 +205,14 @@ public class Ocean : Biome
 
 		if (scScript.biomeLength == currentOceanLength / 2) biomeBlend = scScript.nextSpawnChunkStrategy;
 
+		if (biomeBlend.GetType() == typeof(Tundra) && !spawnIce && scScript.biomeLength <= 2) spawnIce = Random.value < 0.2f; // maybe spawn ice
+		else if(spawnIce && scScript.biomeLength > 2) spawnIce = Random.value < 0.8f; // maybe stop spawning ice
+
 		int backgroundBlock = biomeBlend.topBlockID;
 		for (int i = oceanHeight; i < currentDepth; i++)
 		{
-			verticalLine[i] = 61; // water
+			if(spawnIce && i == oceanHeight) verticalLine[i] = 62; // ice
+			else verticalLine[i] = 61; // water
 
 			if (i == oceanHeight + 1) backgroundBlock = biomeBlend.secondBlockID;
 			else if (i == oceanHeight + 4) backgroundBlock = 3;

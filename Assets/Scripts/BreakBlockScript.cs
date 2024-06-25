@@ -52,7 +52,6 @@ public class BreakBlockScript : MonoBehaviour
 
 		if (hoveringOverBlock != null) // if the mouse is hovering over a block
 		{
-
 			if (Input.GetMouseButtonDown(1) && !Input.GetKey(KeyCode.LeftControl)) // if right click
 			{
 				if (hoveringOverBlock is GameObject) ((GameObject)hoveringOverBlock).GetComponent<BlockScript>().rightClick(); // call right click method on the block
