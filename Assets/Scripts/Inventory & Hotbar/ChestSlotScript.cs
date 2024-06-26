@@ -14,7 +14,7 @@ using TMPro;
  * * picking up an item from the slot
  * * putting an item in the slot
  */
-public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, Slot
+public class ChestSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, Slot
 {
 
     private GameObject itemImage;
@@ -22,7 +22,7 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
     private TextMeshProUGUI amountText;
 	private int slotNumber;
     private OpenInventoryScript openInventoryScript;
-    private InventorySlot itemInSlot = new InventorySlot();
+    public InventorySlot itemInSlot { get; private set; } = new InventorySlot();
     private DurabilityBar durabilityBarScript;
     private bool hasRightClicked = false; // has the cursor right clicked to place an item in this slot
 
@@ -33,7 +33,7 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
 		hoverTexture = transform.Find("HoverTexture").GetComponent<Image>();
 		amountText = itemImage.transform.Find("Amount").GetComponent<TextMeshProUGUI>();
 		string gameObjectName = gameObject.name;
-		gameObjectName = gameObjectName.Replace("InventorySlot", "").Trim(); // remove InventorySlot from name
+		gameObjectName = gameObjectName.Replace("ChestSlot", "").Trim(); // remove ChestSlot from name
         slotNumber = int.Parse(gameObjectName);
 
         openInventoryScript = transform.parent.parent.parent.parent.GetComponent<OpenInventoryScript>();
@@ -44,12 +44,11 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
      * 
      * DurabilityItem tool: the tool/armor that is in this slot. this is null if there is no tool nor armor in the slot.
      */
-	public void updateSlot(DurabilityItem toolOrArmor)
+	public void updateSlot(InventorySlot newItem = null)
     {
         if(itemImage == null) Start();
 
-        InventorySlot itemsToPutInSlot = InventoryScript.getItemsInSlot(slotNumber);
-        itemInSlot = new InventorySlot(itemsToPutInSlot.itemName, itemsToPutInSlot.toolInstance, itemsToPutInSlot.armorInstance, itemsToPutInSlot.amount);
+        if(newItem != null) itemInSlot = new InventorySlot(newItem.itemName, newItem.toolInstance, newItem.armorInstance, newItem.amount);
 		Sprite image = Resources.Load<Sprite>("Textures\\ItemTextures\\" + itemInSlot.itemName);
 
         if(image != null) // found item to display
@@ -66,7 +65,7 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
         {
             itemImage.SetActive(false);
         }
-
+        DurabilityItem toolOrArmor = itemInSlot.toolInstance == null ? itemInSlot.armorInstance : itemInSlot.toolInstance;
         // if there is a tool in this slot then add the durability bar, but only display it if durability < STARTING_DURABILITY
         if(toolOrArmor != null)
         {
@@ -131,26 +130,107 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
         if(!hasPickedUp && itemImage.activeSelf) // if the player hasnt picked up anything && there is an item in this slot
 		{
             // pickup the items in this slot
-
 			InventorySlot slotItems = new InventorySlot(itemInSlot.itemName, itemInSlot.toolInstance, itemInSlot.armorInstance, itemInSlot.amount);
-
-			InventoryScript.removeFromInventory(slotNumber, itemInSlot.amount); // remove items from inventory
             
             InventoryScript.setItemsPickedUp(slotItems); // set the picked up items to be the items that were in this slot
             openInventoryScript.setIsItemBeingHeld(true);
+
+            itemInSlot.removeEverythingFromSlot(); // remove everything from this slot
+			updateSlot(); 
 
 		}
         else if(hasPickedUp) // if the player has picked up something
 		{
             // put the picked up items in this slot
-            bool isStillHoldingItems = InventoryScript.addPickedUpItemsToSlot(slotNumber, true);
-            openInventoryScript.setIsItemBeingHeld(isStillHoldingItems);
+            bool isStillHoldingItems = addPickedUpItemsToSlot(InventoryScript.getItemsPickedUp(), true);
+			openInventoryScript.setIsItemBeingHeld(isStillHoldingItems);
 
 		}
         
     }
 
-    /**
+	/**
+	 * adds the items in "itemsPickedUp" to the slot
+	 * if addAll is false, then it only adds one of the items it is holding
+	 * 
+	 * returns: true if it is still holding items, but false if it got rid of all the items in itemsPickedUp
+	 */
+
+	public bool addPickedUpItemsToSlot(InventorySlot itemsPickedUp, bool addAll)
+	{
+		if (itemsPickedUp.isEmpty())
+		{
+			Debug.LogError("addPickedUpItemsToSlot() in ChestSlotScript was called, but there arent any items that are picked up.");
+			return true;
+		}
+
+		if (itemsPickedUp.isTool() || itemsPickedUp.isArmor() || BlockHashtable.isNotStackable(itemsPickedUp.itemName))
+		{
+			if (!itemInSlot.isEmpty()) // if the slot is not empty
+			{
+				switchHeldItemsAndItemInSlot(itemsPickedUp); // switch the items being held and the items in the slot
+				return true;
+			}
+			else // otherwise just put the held tool/armor in the slot
+			{
+				itemInSlot.putItemOrToolInSlot(itemsPickedUp.itemName, itemsPickedUp.toolInstance, itemsPickedUp.armorInstance, 1);
+				updateSlot();
+			}
+
+			return false;
+		}
+
+		if (addAll)
+		{
+			if (itemsPickedUp.itemName.Equals(itemInSlot.itemName) && !BlockHashtable.isNotStackable(itemInSlot.itemName)) // if we're putting the same item type that already is in this slot
+			{
+				int leftOver = itemInSlot.addItemsToSlot(itemsPickedUp.itemName, itemsPickedUp.amount);
+				itemsPickedUp.amount = leftOver;
+				updateSlot();
+				if (leftOver > 0) return true;
+				return false;
+			}
+			if (!itemInSlot.isEmpty()) // if there is already a tool or an item in this slot
+			{
+				// here we switch the items that are being held and the items that are in the slot
+				switchHeldItemsAndItemInSlot(itemsPickedUp);
+				return true;
+			}
+			else // if the slot is empty
+			{
+				itemInSlot.putItemInSlot(itemsPickedUp.itemName);
+				itemInSlot.setAmount(itemsPickedUp.amount);
+				updateSlot();
+				return false;
+			}
+		}
+		else // only add one
+		{
+			if (itemInSlot.putItemInSlot(itemsPickedUp.itemName)) // if it did add the item to the slot
+			{
+				itemsPickedUp.amount--;
+				updateSlot();
+				if (itemsPickedUp.amount > 0) return true; // return true if still holding items
+			}
+
+		}
+
+		return false;
+	}
+
+	private void switchHeldItemsAndItemInSlot(InventorySlot itemsPickedUp)
+	{
+		string itemNameInSlot = itemInSlot.itemName;
+		ToolInstance toolInSlot = itemInSlot.toolInstance;
+		ArmorInstance armorInSlot = itemInSlot.armorInstance;
+		int amountInSlot = itemInSlot.amount;
+		itemInSlot.putItemOrToolInSlot(itemsPickedUp.itemName, itemsPickedUp.toolInstance, itemsPickedUp.armorInstance, itemsPickedUp.amount);
+		itemsPickedUp = new InventorySlot(itemNameInSlot, toolInSlot, armorInSlot, amountInSlot);
+		InventoryScript.setItemsPickedUp(itemsPickedUp);
+		updateSlot();
+	}
+
+	/**
      * runs when player right clicks the item slot
      * 
      * if the player hasnt picked up anything:
@@ -159,7 +239,7 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
      *   puts one of the item its holding into the slot if the slot is empty or has the same item with amount < 64
      * 
      */
-    public void rightClickSlot()
+	public void rightClickSlot()
     {
 		bool hasPickedUp = InventoryScript.getHasItemsPickedUp();
 
@@ -171,7 +251,7 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
 			if (itemInSlot.Equals("") || (itemInSlot.Equals(InventoryScript.getItemsPickedUp().itemName) && amount < 64 && !BlockHashtable.isNotStackable(InventoryScript.getItemsPickedUp().itemName))) // if the slot is empty or has the same item with amount < 64 (and the item is stackable)
 			{
                 // then we can place one of the held items in this slot
-                bool isStillHoldingItems = InventoryScript.addPickedUpItemsToSlot(slotNumber, false);
+                bool isStillHoldingItems = addPickedUpItemsToSlot(InventoryScript.getItemsPickedUp(), false);
 				openInventoryScript.setIsItemBeingHeld(isStillHoldingItems);
 			}
 		}

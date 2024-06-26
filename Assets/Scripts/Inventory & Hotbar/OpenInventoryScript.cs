@@ -135,7 +135,7 @@ public class OpenInventoryScript : MonoBehaviour, IPointerClickHandler
 		}
 		else if (eventData.button == PointerEventData.InputButton.Right) // drop one of the held items
 		{
-            print("drop one");
+            print("drop one"); // TODO
 		}
 	}
 }

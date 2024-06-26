@@ -7,10 +7,10 @@ using UnityEngine;
  */
 public class OpenChestBehaviour : RightClickBlockBehaviour
 {
-	private OpenCraftingTableScript ctScript = GameObject.Find("Canvas").transform.Find("InventoryParent").GetComponent<OpenCraftingTableScript>();
+	private OpenChestScript openChestScript = GameObject.Find("Canvas").transform.Find("InventoryParent").GetComponent<OpenChestScript>();
 
 	public void rightClickBlock()
 	{
-		// TODO: open chest
+		openChestScript.openChest();
 	}
 }

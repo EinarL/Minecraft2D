@@ -25,7 +25,7 @@ public class OpenFurnaceScript : MonoBehaviour
 
 	private List<FurnaceLogic> furnaces = new List<FurnaceLogic>();
 
-	private static IDataService dataService = JsonDataService.Instance;
+	private IDataService dataService = JsonDataService.Instance;
 
 	// Start is called before the first frame update
 	void Start()

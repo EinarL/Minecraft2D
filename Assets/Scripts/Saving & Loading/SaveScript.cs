@@ -12,6 +12,7 @@ public class SaveScript : MonoBehaviour
 {
 
 	private OpenFurnaceScript openFurnaceScript;
+	private OpenChestScript openChestScript;
 	private HealthbarScript healthbarScript;
 	private HungerbarScript hungerbarScript;
 	private DayProcessScript dayProcessScript;
@@ -23,6 +24,7 @@ public class SaveScript : MonoBehaviour
 	void Start()
     {
 		openFurnaceScript = GameObject.Find("Canvas").transform.Find("InventoryParent").GetComponent<OpenFurnaceScript>();
+		openChestScript = GameObject.Find("Canvas").transform.Find("InventoryParent").GetComponent<OpenChestScript>();
 		healthbarScript = GameObject.Find("Canvas").transform.Find("Healthbar").GetComponent<HealthbarScript>();
 		hungerbarScript = GameObject.Find("Canvas").transform.Find("Hungerbar").GetComponent<HungerbarScript>();
 		dayProcessScript = GameObject.Find("CM vcam").transform.Find("SunAndMoonTexture").GetComponent<DayProcessScript>();
@@ -43,6 +45,7 @@ public class SaveScript : MonoBehaviour
 	public void save()
 	{
 		InventoryScript.saveInventory(); // save inventory
+		openChestScript.saveChests();
 		openFurnaceScript.saveFurnaces(); // save furnaces
 		armorScript.saveArmor(); // save which armor you have on
 

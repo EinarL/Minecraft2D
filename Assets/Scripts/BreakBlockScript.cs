@@ -28,7 +28,7 @@ public class BreakBlockScript : MonoBehaviour
 	private Transform head; // steve's head
 	private Transform torso;
 
-	private HashSet<string> highestPriority = new HashSet<string>(){ "Furnace", "CraftingTable", "Torch", "TorchWall", "TorchLeft", "TorchRight", "Ladder", "LadderLeft", "LadderRight" }; // these blocks all have equal highest priority over other blocks
+	private HashSet<string> highestPriority = new HashSet<string>(){ "Chest", "Furnace", "CraftingTable", "Torch", "TorchWall", "TorchLeft", "TorchRight", "Ladder", "LadderLeft", "LadderRight" }; // these blocks all have equal highest priority over other blocks
 	private HashSet<string> lowestPriority = new HashSet<string>(){ "SnowBlockThin" };
 
 

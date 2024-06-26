@@ -174,7 +174,12 @@ public class PlayerControllerScript : MonoBehaviour
         }
         else if (!isInWater()) // if the player got out of the water
         {
-            toggleSwimmingPhysics(false);
+            if (!isWaterBelowPlayer()) toggleSwimmingPhysics(false);
+            else
+            {
+                isSwimming = true;
+				rb.AddForce(new Vector2(0, -5));
+			}
 			fellFrom = transform.position.y;
 		}
         else // if the player is swimming
@@ -185,6 +190,7 @@ public class PlayerControllerScript : MonoBehaviour
         checkIfRunning();
         lookTowardsMouse();
 	}
+
 
 
     private void toggleSwimmingPhysics(bool on = true)
@@ -310,6 +316,18 @@ public class PlayerControllerScript : MonoBehaviour
 		int count = Physics2D.OverlapCircle(groundCheck.position, 0.01f, contactFilter, results);
 	    isSwimming = count > 0;
         return isSwimming;
+	}
+
+	private bool isWaterBelowPlayer()
+	{
+		Collider2D[] results = new Collider2D[1];
+
+		ContactFilter2D contactFilter = new ContactFilter2D();
+		contactFilter.layerMask = LayerMask.GetMask("Water");
+		contactFilter.useLayerMask = true;
+
+		int count = Physics2D.OverlapCircle(new Vector2(groundCheck.position.x, groundCheck.position.y - 0.5f), 0.01f, contactFilter, results);
+		return count > 0;
 	}
 
 	/**
