@@ -93,6 +93,7 @@ public static class BlockBehaviourData
 			{ "Glass", new DropNothing() },
 			{ "Ice", new DropNothing() },
 			{ "Tombstone", "Tombstone" },
+			{ "Chest", "Chest"},
 			{ "TorchWall", new TorchDrop() },
 			{ "TorchRight", new TorchDrop() },
 			{ "TorchLeft", new TorchDrop() },
@@ -206,6 +207,7 @@ public static class BlockBehaviourData
 		if (dropBehaviour == null) return new ItemDropBehaviour();
 		// blocks like tombstones and chests need their block positions passed in so we need to do a special case here
 		if (dropBehaviour.Equals("Tombstone")) return new TombstoneDrop(blockPos);
+		if (dropBehaviour.Equals("Chest")) return new ChestDrop(blockPos);
 		return dropBehaviour as ItemDropBehaviour;
 	}
 

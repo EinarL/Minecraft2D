@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 public class OpenChestScript : MonoBehaviour
 {
@@ -71,6 +72,7 @@ public class OpenChestScript : MonoBehaviour
 				{
 					chestSlots[i].updateSlot(new InventorySlot()); // add the items to the chest
 				}
+				saveChests();
 			}
 		}
 	}
@@ -116,6 +118,10 @@ public class OpenChestScript : MonoBehaviour
 		}
 	}
 
+	public void removeChest(float x, float y)
+	{
+		chests.RemoveAll(chest => chest.x == x && chest.y == y);
+	}
 
 	private Vector2 getRoundedMousePos()
 	{

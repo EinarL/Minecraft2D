@@ -146,6 +146,45 @@ public class JsonDataService : IDataService
 		}
 	}
 
+	public void removeChestData(float xPos, float yPos)
+	{
+		string path = Application.persistentDataPath + folderPath + "chests.json";
+		// if directory doesnt exist, the create it
+		if (!Directory.Exists(Application.persistentDataPath + folderPath))
+		{
+			Directory.CreateDirectory(Application.persistentDataPath + folderPath);
+		}
+		try
+		{
+			if (File.Exists(path))
+			{
+				List<Chest> dataContent = loadData<List<Chest>>("chests.json");
+
+				List<Chest> replacementData = new List<Chest>();
+				bool removed = false;
+				foreach (Chest chest in dataContent)
+				{
+					if (!(chest.x == xPos && chest.y == yPos)) // if this is not the tombstone we want to remove
+					{
+						replacementData.Add(chest);
+					}
+					else removed = true;
+				}
+				if (!removed) Debug.LogError("didnt func the chest to remove");
+				File.WriteAllText(path, JsonConvert.SerializeObject(replacementData));
+			}
+			else
+			{
+				Debug.LogError("chests.json file doesnt exist!");
+			}
+
+		}
+		catch (Exception e)
+		{
+			Debug.LogError($"Unable to edit data due to: {e.Message} {e.StackTrace}");
+		}
+	}
+
 	public T loadData<T>(string filename, bool global = false)
 	{
 		string path;
