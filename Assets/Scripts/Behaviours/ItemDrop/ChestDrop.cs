@@ -53,6 +53,15 @@ public class ChestDrop : ItemDropBehaviour
 			DroppedItemScript itemScript = itemInstance.GetComponent<DroppedItemScript>();
 			itemScript.tool = item.toolInstance;
 			itemScript.armor = item.armorInstance;
+
+			// Generate a random angle between 0 and 180 degrees
+			float randomAngle = Random.Range(0f, 180f);
+
+			// Convert the angle to a direction vector
+			Vector2 direction = new Vector2(Mathf.Cos(randomAngle * Mathf.Deg2Rad), Mathf.Sin(randomAngle * Mathf.Deg2Rad));
+
+			// Apply the force to the item instance
+			itemInstance.GetComponent<Rigidbody2D>().AddForce(direction * Random.Range(3f,5f), ForceMode2D.Impulse);
 		}
 	}
 }

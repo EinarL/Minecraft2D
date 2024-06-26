@@ -95,6 +95,7 @@ GameObject:
   - component: {fileID: 7240743291764089392}
   - component: {fileID: -1488470632656384627}
   - component: {fileID: -4347543958987324741}
+  - component: {fileID: 9095653072600658676}
   m_Layer: 0
   m_Name: Chest
   m_TagString: Untagged
@@ -176,6 +177,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55f6639fcc9550e459f39a84e2ea739c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &9095653072600658676
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4839058183190948766}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: cfaf5970c1fa3b1459ef1f37fa4bfbe0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &5000168551466517759
 GameObject:
   m_ObjectHideFlags: 0

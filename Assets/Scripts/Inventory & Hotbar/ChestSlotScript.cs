@@ -22,6 +22,7 @@ public class ChestSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
     private TextMeshProUGUI amountText;
 	private int slotNumber;
     private OpenInventoryScript openInventoryScript;
+	private OpenChestScript openChestScript;
     public InventorySlot itemInSlot { get; private set; } = new InventorySlot();
     private DurabilityBar durabilityBarScript;
     private bool hasRightClicked = false; // has the cursor right clicked to place an item in this slot
@@ -37,14 +38,13 @@ public class ChestSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
         slotNumber = int.Parse(gameObjectName);
 
         openInventoryScript = transform.parent.parent.parent.parent.GetComponent<OpenInventoryScript>();
+		openChestScript = openInventoryScript.GetComponent<OpenChestScript>();
     }
 
 	/**
      * updates what is in the slot 
-     * 
-     * DurabilityItem tool: the tool/armor that is in this slot. this is null if there is no tool nor armor in the slot.
      */
-	public void updateSlot(InventorySlot newItem = null)
+	public void updateSlot(InventorySlot newItem = null, bool updateChestScript = true)
     {
         if(itemImage == null) Start();
 
@@ -103,7 +103,8 @@ public class ChestSlotScript : MonoBehaviour, IPointerEnterHandler, IPointerExit
             durabilityBarScript = null;
 
             Destroy(transform.Find("DurabilityBarBackground(Clone)").gameObject);
-        }   
+        }
+		if(updateChestScript) openChestScript.updateOpenedChestSlot(slotNumber, itemInSlot.copy());
 	}
 
     public void updateDurabilityBar(ToolInstance tool)

@@ -181,4 +181,9 @@ public class InventorySlot
         itemName = "";
         isFood = false;
     }
+
+    public InventorySlot copy()
+    {
+        return new InventorySlot(itemName, toolInstance, armorInstance, amount);
+    }
 }

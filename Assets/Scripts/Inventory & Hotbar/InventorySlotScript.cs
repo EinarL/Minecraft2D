@@ -22,6 +22,7 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
     private TextMeshProUGUI amountText;
 	private int slotNumber;
     private OpenInventoryScript openInventoryScript;
+    private OpenChestScript openChestScript;
     private InventorySlot itemInSlot = new InventorySlot();
     private DurabilityBar durabilityBarScript;
     private bool hasRightClicked = false; // has the cursor right clicked to place an item in this slot
@@ -37,19 +38,23 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
         slotNumber = int.Parse(gameObjectName);
 
         openInventoryScript = transform.parent.parent.parent.parent.GetComponent<OpenInventoryScript>();
-    }
+		openChestScript = openInventoryScript.GetComponent<OpenChestScript>();
+	}
 
-	/**
+    /**
      * updates what is in the slot 
      * 
      * DurabilityItem tool: the tool/armor that is in this slot. this is null if there is no tool nor armor in the slot.
      */
-	public void updateSlot(DurabilityItem toolOrArmor)
+    public void updateSlot(DurabilityItem toolOrArmor = null, InventorySlot replacementItem = null)
     {
         if(itemImage == null) Start();
 
-        InventorySlot itemsToPutInSlot = InventoryScript.getItemsInSlot(slotNumber);
-        itemInSlot = new InventorySlot(itemsToPutInSlot.itemName, itemsToPutInSlot.toolInstance, itemsToPutInSlot.armorInstance, itemsToPutInSlot.amount);
+        InventorySlot itemsToPutInSlot;
+        if (replacementItem == null) itemsToPutInSlot = InventoryScript.getItemsInSlot(slotNumber);
+        else itemsToPutInSlot = replacementItem;
+
+		itemInSlot = new InventorySlot(itemsToPutInSlot.itemName, itemsToPutInSlot.toolInstance, itemsToPutInSlot.armorInstance, itemsToPutInSlot.amount);
 		Sprite image = Resources.Load<Sprite>("Textures\\ItemTextures\\" + itemInSlot.itemName);
 
         if(image != null) // found item to display
@@ -66,7 +71,7 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
         {
             itemImage.SetActive(false);
         }
-
+        if (toolOrArmor == null) toolOrArmor = itemInSlot.toolInstance == null ? itemInSlot.armorInstance : itemInSlot.toolInstance;
         // if there is a tool in this slot then add the durability bar, but only display it if durability < STARTING_DURABILITY
         if(toolOrArmor != null)
         {
@@ -127,6 +132,15 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
     public void leftClickSlot()
     {
         bool hasPickedUp = InventoryScript.getHasItemsPickedUp();
+        
+        // if holding shift && a chest is open, then put the items that the cursor is hovering over into the chest
+        if(Input.GetKey(KeyCode.LeftShift) && openChestScript.isOpen() && !itemInSlot.isEmpty())
+        {
+            int amountLeft = openChestScript.addToOpenedChest(new InventorySlot(itemInSlot.itemName, itemInSlot.toolInstance, itemInSlot.armorInstance, itemInSlot.amount));
+			InventoryScript.removeFromInventory(slotNumber, itemInSlot.amount - amountLeft); // remove items from inventory
+            return;
+        }
+
 
         if(!hasPickedUp && itemImage.activeSelf) // if the player hasnt picked up anything && there is an item in this slot
 		{
