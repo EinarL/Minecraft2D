@@ -1,9 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using static Unity.Collections.AllocatorManager;
 
 /**
  * has a hashtable for every single placeable block in the game
@@ -163,7 +161,8 @@ public static class BlockHashtable
 			{ 59, getBlockWithName("LadderLeft")},
 			{ 60, getBlockWithName("LadderRight")},
 			{ 61, getBlockWithName("Water")},
-			{ 62, getBlockWithName("Ice")}
+			{ 62, getBlockWithName("Ice")},
+			{ 63, getBlockWithName("Chest")}
 		};
 
 		// contains behaviours for blocks that need special functionality upon placing the block, e.g. torches need to be rotated to be placed on right/left wall
@@ -188,6 +187,7 @@ public static class BlockHashtable
 			{"DoorSpruceTopRight", 0},
 			{"Ladder", 0},
 			{"Torch", 0},
+			{"Chest", 0},
 			{"Dirt", 1}, // 1 is dirt
 			{"Gravel", 1},
 			{"SaplingOak", 1}, // 3 is grass

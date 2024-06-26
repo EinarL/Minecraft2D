@@ -1,13 +1,7 @@
-using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Unity.Mathematics;
-using Unity.VisualScripting;
-using Unity.VisualScripting.FullSerializer;
-using UnityEditor.PackageManager;
 using UnityEngine;
-using static UnityEngine.RuleTile.TilingRuleOutput;
+
 
 /**
  * this static class holds data that is neccessary to know when spawning in chunks

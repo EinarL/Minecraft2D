@@ -33,5 +33,3 @@ store chunks in region files, about 300 chunks or so in a region.
 ! have knockback on player when entities attack
 
 breaking bed removes the spawnpoint
-
-! implement spawn protection by not having mobs in the chunks where the player respawns at

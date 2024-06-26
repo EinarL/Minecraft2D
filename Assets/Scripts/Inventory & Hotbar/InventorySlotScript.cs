@@ -33,7 +33,7 @@ public class InventorySlotScript : MonoBehaviour, IPointerEnterHandler, IPointer
 		hoverTexture = transform.Find("HoverTexture").GetComponent<Image>();
 		amountText = itemImage.transform.Find("Amount").GetComponent<TextMeshProUGUI>();
 		string gameObjectName = gameObject.name;
-		gameObjectName = gameObjectName.Replace("InventorySlot", "").Trim(); // remove InventorySlot from name
+		gameObjectName = gameObjectName.Replace("InventorySlot", "").Replace("ChestSlot", "").Trim(); // remove InventorySlot from name
         slotNumber = int.Parse(gameObjectName);
 
         openInventoryScript = transform.parent.parent.parent.parent.GetComponent<OpenInventoryScript>();

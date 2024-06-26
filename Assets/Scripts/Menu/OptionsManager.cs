@@ -35,7 +35,7 @@ public class OptionsManager
 
 	public void setOptions()
 	{
-		options = JsonDataService.Instance.loadData<int[]>("options.json", true);
+		if(JsonDataService.Instance.exists("options.json", true)) options = JsonDataService.Instance.loadData<int[]>("options.json", true);
 	}
 
 	public void initializeMusicVolume(AudioSource musicAudioSource)

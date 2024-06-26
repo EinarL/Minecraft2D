@@ -401,7 +401,30 @@ public static class CraftingRecipes
 		new object[]{ "IronIngot", new object[] {
 			new object[] { "IronIngot", new Vector2(-1, 1) },
 			new object[] { "IronIngot", new Vector2(1, 1) },
-		}, new InventorySlot("WaterBucket", 1) // TODO: change to normal bucket
+		}, new InventorySlot("Bucket", 1)
+		},
+
+		// chest
+		new object[]{ "PlankOak", new object[] {
+			new object[] { "PlankOak", new Vector2(1, 0) },
+			new object[] { "PlankOak", new Vector2(2, 0) },
+			new object[] { "PlankOak", new Vector2(0, 1) },
+			new object[] { "PlankOak", new Vector2(2, 1) },
+			new object[] { "PlankOak", new Vector2(0, 2) },
+			new object[] { "PlankOak", new Vector2(1, 2) },
+			new object[] { "PlankOak", new Vector2(2, 2) }
+		}, new InventorySlot("Chest", 1)
+		},
+
+		new object[]{ "PlankSpruce", new object[] {
+			new object[] { "PlankSpruce", new Vector2(1, 0) },
+			new object[] { "PlankSpruce", new Vector2(2, 0) },
+			new object[] { "PlankSpruce", new Vector2(0, 1) },
+			new object[] { "PlankSpruce", new Vector2(2, 1) },
+			new object[] { "PlankSpruce", new Vector2(0, 2) },
+			new object[] { "PlankSpruce", new Vector2(1, 2) },
+			new object[] { "PlankSpruce", new Vector2(2, 2) }
+		}, new InventorySlot("Chest", 1)
 		},
 	};
 

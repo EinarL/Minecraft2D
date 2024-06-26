@@ -475,7 +475,7 @@ public class spawnChunkScript : MonoBehaviour
 			{
 				for (int y = 0; y < chunk.GetLength(1); y++)
 				{
-					if ((41 <= chunk[x, y] && chunk[x, y] <= 56) || chunk[x, y] == 61 || chunk[x, y] == 62) // if its a door || water || ice
+					if ((41 <= chunk[x, y] && chunk[x, y] <= 56) || chunk[x, y] == 61 || chunk[x, y] == 62 || chunk[x, y] == 63) // if its a door || water || ice || chest
 					{
 						int blockID = chunk[x, y];
 						float xBlockPos = xPos + SpawningChunkData.blockSize * x;

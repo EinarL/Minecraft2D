@@ -1,13 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using static Unity.Collections.AllocatorManager;
-using static UnityEditor.PlayerSettings;
-using static UnityEngine.UI.Image;
-
 
 /**
  * 2D placing/breaking block mechanics:
@@ -202,11 +197,21 @@ public class PlaceBlockScript : MonoBehaviour
 			else // else place on BackBackground layer
 			{
 				block.layer = LayerMask.NameToLayer("BackBackground");
-
-				SpriteRenderer blockRenderer = block.GetComponent<SpriteRenderer>();
-				blockRenderer.color = new Color(170f / 255f, 170f / 255f, 170f / 255f); // dark tint
-				blockRenderer.sortingOrder = -10;
-
+                if (block.name.Equals("Chest")) // chests are made with multiple sprites so we need to do this
+                {
+                    SpriteRenderer[] childSprites = block.GetComponentsInChildren<SpriteRenderer>();
+                    foreach(SpriteRenderer childSprite in childSprites)
+                    {
+						childSprite.color = new Color(170f / 255f, 170f / 255f, 170f / 255f); // dark tint
+						childSprite.sortingOrder -= 9;
+					}
+                }
+                else
+                {
+					SpriteRenderer blockRenderer = block.GetComponent<SpriteRenderer>();
+					blockRenderer.color = new Color(170f / 255f, 170f / 255f, 170f / 255f); // dark tint
+					blockRenderer.sortingOrder = -10;
+				}
 			}
 
 			// update the chunkData

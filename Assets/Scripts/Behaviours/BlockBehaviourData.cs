@@ -21,6 +21,7 @@ public static class BlockBehaviourData
 			{ "Gravel", new BreakDirt() },
 			{ "LogOak", new BreakWood() },
 			{ "LogSpruce", new BreakWood() },
+			{ "Chest", new BreakWood() },
 			{ "LeavesOak", new BreakLeaves() },
 			{ "LeavesSpruce", new BreakLeaves() },
 			{ "SaplingOak", new BreakInstantly() },
@@ -126,6 +127,7 @@ public static class BlockBehaviourData
 		{
 			{ "CraftingTable", new OpenCraftingTableBehaviour() },
 			{ "Furnace", new OpenFurnaceBehaviour()},
+			{ "Chest", new OpenChestBehaviour() },
 		};
 
 		// hashtable that maps block names to the corresponding step sound folder, default is dirt sound so its unneccesary to have those blocks here
@@ -141,6 +143,7 @@ public static class BlockBehaviourData
 			{ "PlankOak", new object[]{ "wood", 6 }},
 			{ "PlankSpruce", new object[]{ "wood", 6 }},
 			{ "CraftingTable", new object[] { "wood", 6 } },
+			{ "Chest", new object[] { "wood", 6 } },
 			{ "Sand", new object[]{ "sand", 5} },
 			{ "Wool", new object[] { "cloth", 4} },
 			{ "Furnace", new object[]{ "stone", 6 } },
