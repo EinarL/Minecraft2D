@@ -157,7 +157,7 @@ public abstract class Mob : Entity
 		sayAudioSource.Play();
 	}
 
-	private void makeHurtNoise()
+	protected virtual void makeHurtNoise()
 	{
 		var random = new System.Random();
 		int randIndex = random.Next(hurtSounds.Length);
