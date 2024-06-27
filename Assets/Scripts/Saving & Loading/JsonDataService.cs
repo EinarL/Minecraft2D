@@ -45,7 +45,7 @@ public class JsonDataService : IDataService
 		if(global) path = Application.persistentDataPath + "\\" + filename;
 		else path = Application.persistentDataPath + folderPath + filename;
 		// if directory doesnt exist, the create it
-		if (!Directory.Exists(Application.persistentDataPath + folderPath))
+		if (!global && !Directory.Exists(Application.persistentDataPath + folderPath))
 		{
 			Directory.CreateDirectory(Application.persistentDataPath + folderPath);
 		}

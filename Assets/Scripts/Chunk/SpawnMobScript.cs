@@ -8,11 +8,12 @@ public static class SpawnMobScript
 
 	private static float mobSpawnChance = 25f; // x% chance to spawn in each chunk
 	private static float mobCaveSpawnChance = 5f; // x% chance to spawn in each vertical line in a chunk (which is 10 per chunk)
-	private static string[] mobs = new string[] { "Zombie", "Spider", "Skeleton" };
+	private static string[] mobs = new string[] { "Zombie", "Spider", "Skeleton", "Creeper" };
 	private static Dictionary<string, int> mobMaxClusterSize = new Dictionary<string, int>(){ // {mob, how many of them can spawn in a cluster}
 		{"Zombie", 3},
 		{"Spider", 2},
 		{"Skeleton", 2},
+		{"Creeper", 2}
 	};
 	public static bool spawnProtection = false; // true if we dont spawn mobs above ground, so the player doesnt instantly die after he respawns
 
@@ -59,7 +60,7 @@ public static class SpawnMobScript
 	// based on an x position in the world, it will find the corresponding index for the place in the verticalLineHeights array and return the height
 	private static float getYValueBasedOnX(float x, float[] verticalLineHeights)
 	{
-		return verticalLineHeights[Mathf.Abs(Mathf.FloorToInt(x)) % SpawningChunkData.blocksInChunk] + 1; // + 1 to spawn the animal above the block
+		return verticalLineHeights[Mathf.Abs(Mathf.FloorToInt(x)) % SpawningChunkData.blocksInChunk] + 2; // + 2 to spawn the animal above the block
 	}
 
 	public static string[] getMobs()
